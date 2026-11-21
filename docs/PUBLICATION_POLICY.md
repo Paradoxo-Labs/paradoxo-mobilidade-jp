@@ -54,6 +54,10 @@ Elas devem ser tratadas como:
 
 ## Como tratar dados reais
 
+### Exceção documental: estudo de rede integrada de 21/11/2026
+
+O diretório `docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21` preserva o pacote de estudo recebido, incluindo geometrias propostas, cartografia de referência, resultados históricos e respostas de roteamento necessárias à reprodução offline. Esses arquivos formam uma base documental congelada, com procedência registrada em `docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md`. A exceção é restrita ao pacote importado; não autoriza versionar novas coletas, caches de execução ou exportações indiscriminadamente. As atribuições e condições das fontes externas continuam aplicáveis à publicação.
+
 Dados reais coletados de fontes públicas podem ser documentados, mas os arquivos gerados localmente devem ficar fora do Git por padrão.
 
 Se for necessário publicar amostras, usar:

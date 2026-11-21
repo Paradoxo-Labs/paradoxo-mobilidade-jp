@@ -18,6 +18,8 @@
 
 ## Proposta BRS/BHLS
 
+O estudo paralelo de 21/11/2026 já foi incorporado em `docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21`. Consultar primeiro `docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md`: há catálogo, geometrias e mapa disponíveis. As tarefas abaixo devem aproveitar esses insumos, conciliando os dois estudos antes de tratar a rede como unificada.
+
 11. Criar tabela inicial de corredores.
 12. Criar tabela inicial de terminais.
 13. Criar tabela de serviços propostos.

@@ -44,6 +44,8 @@ Reorganizar a rede de transporte coletivo de João Pessoa com:
 
 ## Principais elementos
 
+Os elementos abaixo pertencem ao conceito inicial. Desde 21/11/2026 há também um estudo complementar com 23 linhas, 39 traçados e classes BRS/T/TRV/I/R/L/M. Ver `docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md` para diferenças e limites. Não equiparar automaticamente códigos entre estudos. O prompt importado é referência documental, sem autoridade global sobre o repositório.
+
 - Terminal Metropolitano;
 - Terminal Oitizeiro;
 - Terminal Cristo;

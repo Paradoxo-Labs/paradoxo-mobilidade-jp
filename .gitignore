@@ -1,0 +1,6 @@
+# Artefatos locais do estudo complementar (preservar os dados fornecidos no pacote).
+docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21/mapa/node_modules/
+docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21/mapa/check.svg
+docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21/mapa/verificar-*.svg
+__pycache__/
+*.pyc

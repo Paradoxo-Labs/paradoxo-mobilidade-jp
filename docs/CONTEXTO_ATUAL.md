@@ -63,6 +63,12 @@ O repositório possui estrutura preparada para:
 
 ## Próxima etapa técnica
 
+### Estudo complementar incorporado em 21/11/2026
+
+O pacote `mobilidade-jp-projeto-codex.zip` foi incorporado ao eixo da proposta em `docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21`. Contém 23 linhas propostas, 39 traçados de referência, mapa offline, scripts de geração e referências históricas da rede observada.
+
+O [registro de integração](proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md) reúne inventário, diferenças em relação ao conceito inicial e pendências. O estudo complementar não substitui automaticamente a arquitetura inicial, nem demonstra cobertura integral ou viabilidade operacional. Seus dados históricos não substituem uma nova coleta da SEMOB-JP. O mapa já pode ser consultado, enquanto o coletor, a API e o frontend continuam pendentes.
+
 Mover o coletor local existente para:
 
 apps/collector

@@ -2,6 +2,8 @@
 
 ## Objetivo
 
+> Este documento registra o conceito inicial. O [estudo complementar incorporado em 21/11/2026](INTEGRACAO_REDE_INTEGRADA.md) contém um catálogo próprio de 23 linhas e cartografia mais detalhada. A conciliação entre códigos, funções e traçados está pendente.
+
 Desenvolver uma proposta de reorganização completa da rede de transporte coletivo de João Pessoa baseada em:
 
 - corredores BRS/BHLS;

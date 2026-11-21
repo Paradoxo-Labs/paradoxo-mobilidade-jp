@@ -1,0 +1,58 @@
+rodovia 4.97 5.2
+shopping_ponto br230_norte 1152 Avenida Vereador Gumercindo Barbosa Dunda, Avenida Governador Flávio Ribeiro Coutinho, , Rodovia Governador Pedro Gondim
+br230_norte bessa 3818 Rodovia Governador Pedro Gondim, Rua Hortência Helena Brito, Rodovia BR-230, Rua Presidente Washington Luiz, Rua Renato de Souza Maciel
+rodovia-volta 10.91 11.5
+bessa br230_norte_back 3664 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Presidente Nilo Peçanha, Rua José Rubenildo da Silva, Rodovia Governador Pedro Gondim
+br230_norte_back shopping_ponto 7241 Rodovia Governador Pedro Gondim, Rodovia Governador Antônio Mariz, , Rua Edgar Sales de Miranda Henriques, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+por-dentro 6.95 9.1
+shopping_ponto leocadio 2532 Avenida Vereador Gumercindo Barbosa Dunda, Rua Maria Rosa Padilha, Rua Edgar Sales de Miranda Henriques, Rua Francisco Leocádio Ribeiro Coutinho
+leocadio campos_sales 2130 Rua Francisco Leocádio Ribeiro Coutinho, Rua Moacir Rocha de Mendonça, Rua Fernando Honorato Pereira, Avenida Bacharel José de Oliveira Curchatuz, Rua Philadelpho Pinto de Carvalho, Rua Paulo Roberto de Souza Acioly, Avenida Campos Sales
+campos_sales bessa 2288 Avenida Campos Sales, Avenida Presidente Afonso Pena, Rua Hortêncio Osterne Carneiro, Avenida Artur Monteiro Paiva, Rua Presidente Washington Luiz, Rua Renato de Souza Maciel
+por-dentro-volta 6.2 8.5
+bessa campos_sales 1845 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Avenida Presidente Afonso Pena, Rua Hortêncio Osterne Carneiro, Rua José Simões de Araújo, Avenida Campos Sales
+campos_sales leocadio_back 2025 Avenida Campos Sales, Rua Themístocles da Costa Brito, Rua Severino Nicolau de Mello, Avenida Bacharel José de Oliveira Curchatuz, Rua Deputado Antônio Pádua Carvalho, Rua João Alfredo Coelho Fonseca, Rua Francisco Leocádio Ribeiro Coutinho
+leocadio_back shopping_ponto 2333 Rua Francisco Leocádio Ribeiro Coutinho, Avenida Bacharel José de Oliveira Curchatuz, Rua Mirian Barreto Rabelo, Rua Suzi Lacerda Pereira, Avenida Governador Flávio Ribeiro Coutinho, Rua Waldemir Braga, Avenida Vereador Gumercindo Barbosa Dunda
+ires 17.95 20.8
+bessa br230_norte_back 3664 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Presidente Nilo Peçanha, Rua José Rubenildo da Silva, Rodovia Governador Pedro Gondim
+br230_norte_back shopping_ponto 7241 Rodovia Governador Pedro Gondim, Rodovia Governador Antônio Mariz, , Rua Edgar Sales de Miranda Henriques, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+shopping_ponto retao_oeste 333 Avenida Vereador Gumercindo Barbosa Dunda, Avenida Governador Flávio Ribeiro Coutinho
+retao_oeste ipes 1012 Avenida Governador Flávio Ribeiro Coutinho, Avenida Presidente Tancredo Neves
+ipes mandacaru 1645 Avenida Presidente Tancredo Neves, Rua Coelho Paiva, Rua João Brito de Lima Moura, Avenida Presidente Tancredo Neves 
+mandacaru padreze_bairro 766 Avenida Presidente Tancredo Neves , Rua Mardokeu Nacre
+padreze_bairro roger 580 Rua Mardokeu Nacre, Avenida Ayrton Senna da Silva, Rua Maria da Silva Ramalho
+roger metro 2711 Rua Maria da Silva Ramalho, Rua Conceição Cabral, Rua Dezenove de Março, Avenida Ayrton Senna da Silva, Rua Cordeiro Sênior, Rua Elpídio Alves Cruz, Avenida Cândido Pessoa, Rua 5 de Agosto, Avenida Sanhauá
+ires-volta 15.05 18.7
+metro roger 5115 Avenida Sanhauá, Rua Desembargador Trindade, Avenida Barão do Triunfo, Rua Maciel Pinheiro, Rua Padre Antônio Ferreira, Praça Deputado Antônio de Pádua F. de Oliveira, Avenida Gouvêa Nóbrega, Avenida Gouveia Nóbrega, Rua Elpídio Alves Cruz, Rua Cordeiro Sênior, Avenida Ayrton Senna da Silva, Rua Dezenove de Março, Rua Monsenhor José Coutinho, Rua Conceição Cabral, Rua Maria da Silva Ramalho
+roger padreze_bairro 580 Rua Maria da Silva Ramalho, Avenida Ayrton Senna da Silva, Rua Mardokeu Nacre
+padreze_bairro mandacaru_back 887 Rua Mardokeu Nacre, Avenida Fagundes Varela, Avenida Presidente Tancredo Neves, Avenida Presidente Tancredo Neves 
+mandacaru_back ipes_back 1557 Avenida Presidente Tancredo Neves, Rua Sérgio Meira
+ipes_back retao_leste 956 Avenida Presidente Tancredo Neves, Avenida Governador Flávio Ribeiro Coutinho
+retao_leste shopping_ponto 988 Avenida Governador Flávio Ribeiro Coutinho, Rua Manoel Arruda Cavalcanti, Rua Ernestina Monteiro Pordeus, Rua Candelária, Rua Waldemir Braga, Rua Débora da Silva Braga, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+shopping_ponto br230_norte 1152 Avenida Vereador Gumercindo Barbosa Dunda, Avenida Governador Flávio Ribeiro Coutinho, , Rodovia Governador Pedro Gondim
+br230_norte bessa 3818 Rodovia Governador Pedro Gondim, Rua Hortência Helena Brito, Rodovia BR-230, Rua Presidente Washington Luiz, Rua Renato de Souza Maciel
+R-242-teste 12.96 22.3
+cristo agua_fria 3933 Acesso ao Almeidão, , Rua Universitário Rogério Benevides, Rua Desportista Napoleão Duré, Rua Presidente Ranieri Mazilli, Avenida Diógenes Chianca, Rua Isaura Silveira Lira
+agua_fria jardim_sp 801 Rua Isaura Silveira Lira, Rua José Firmino Ferreira, Rua Prefeito Francisco de Assis Neves Nóbrega, Rua Pedro Alves de Andrade, Rua Joaquim Borba Filho
+jardim_sp edmilson 861 Rua Joaquim Borba Filho, Rua Lourenço Vieira de Souza, Rua Eliseu do Rêgo Lima, Rua Edmílson Leite da Silva
+edmilson colibris 2069 Rua Edmílson Leite da Silva, Rua José Targino de Castro, Rua Josefa Pontes César, Rua Ciro Trocolli, Rua Paulo Roberto Moreira da Cunha, Avenida Hilton Souto Maior, Rua Empresário Manoel de Brito, Rua Fernando Torres
+colibris colibris_acesso 319 Rua Fernando Torres, Rua Sólon Machado, Avenida Benício de Oliveira Lima
+colibris_acesso jose_americo 779 Avenida Benício de Oliveira Lima, Rotatória, Avenida Hilton Souto Maior, Rua Rosa Paula Barbosa
+jose_americo geni 483 Rua Rosa Paula Barbosa, Rua Jaime Gomes Barros, Rua Funcionária Pública Geni Ferreira da Silva
+geni jose_estevao 460 Rua Funcionária Pública Geni Ferreira da Silva, Rua José Estevão da Silva
+jose_estevao cristo 3254 Rua José Estevão da Silva, Rua Candida Formiga de Sousa, Rua Paulo Gomes de Almeida, Rua João Climaco Monteiro da Franca, Rua Praia de Mucuripe, Rua Doutor Manoel Lopes de Carvalho, Rua João Miguel de Souza, Rua Motorista Aldovandro Amâncio Pereira, Rua Manoel Rufino da Silva, Estádio Almeidão, Acesso ao Almeidão
+geisel-teste 7.64 10.4
+val geisel_ivi 3530 Terminal de Integração do Valentina, Rua Mariângela Lucena Peixoto, Rua José de Oliveira Batista, Rua Flodoaldo Peixoto Filho, Rua Doutor Cícero Leite, Rua Adalgisa Carneiro Cavalcanti, 
+geisel_ivi geisel 2178 , Rua Adalgisa Carneiro Cavalcanti, Rua Humberto da Silva Paiva, Rua Empresário Abelardo Targino da Fonseca, Avenida Presidente Juscelino Kubitschek
+geisel cristo 1935 Avenida Presidente Juscelino Kubitschek, Avenida Valdemar Naziazeno, Estádio Almeidão, Acesso ao Almeidão
+geisel-teste-volta 8.45 10.8
+cristo geisel 2455 Acesso ao Almeidão, , Estádio Almeidão, Avenida Valdemar Naziazeno, Avenida Presidente Juscelino Kubitschek
+geisel geisel_ivi 2166 Avenida Presidente Juscelino Kubitschek, , Rua Empresário Abelardo Targino da Fonseca, Rua Adalgisa Carneiro Cavalcanti
+geisel_ivi val 3825 , Rua Adalgisa Carneiro Cavalcanti, Rua Doutor Cícero Leite, Rua Flodoaldo Peixoto Filho, Rua Francisco Barbosa Sobrinho, Rua Mariângela Lucena Peixoto, Terminal de Integração do Valentina
+vale-teste 5.74 9.2
+cristo rangel 3036 Acesso ao Almeidão, Rua Antônio Teotônio, Rua Fernando Cunha Lima, Rua Sueli Pereira da Cunha, Rua Antônio Pádua Vasconcelos, Rua Antônio Alves da Cunha, Rua Professora Luiza Fernandes Vieira, Rua Presidente Carlos Luz, Rua Horácio Trajano de Oliveira, Rua Heronides Meira de Vasconcelos, Avenida 2 de Fevereiro, Rua Souza Rangel
+rangel vale_murilo 2284 Avenida 2 de Fevereiro, Rua Elias Cavalcanti de Albuquerque, Rua José Borges Coutinho, Travessa Murilo Buarque
+vale_murilo vale_palmeiras 420 Travessa Murilo Buarque, Rua Antônio Gomes da Silva
+vale-teste-volta 7.31 10.4
+vale_palmeiras vale_murilo 420 Rua Antônio Gomes da Silva, Travessa Murilo Buarque
+vale_murilo rangel_back 2756 Travessa Murilo Buarque, Rua José Borges Coutinho, Rua Elias Cavalcanti de Albuquerque, Rua Romeu Rangel, Avenida 2 de Fevereiro, Rua Souza Rangel
+rangel_back cristo 4135 Avenida 2 de Fevereiro, Rua Elias Cavalcanti de Albuquerque, Rua Vicente Costa Filho, Rua Júlia Ribeiro da Silva, Rua Antônia Gomes da Silveira, Rua Presidente Carlos Luz, Rua Presidente Ranieri Mazilli, Rua Professor Fenelon Câmara, Rua Fenelon Câmara, , Acesso ao Almeidão

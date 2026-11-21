@@ -1,0 +1,359 @@
+<section id="rede-termin-mgb" aria-labelledby="mgb-title">
+  <header class="mgb-head">
+    <h2 id="mgb-title">Rede proposta de João Pessoa</h2>
+    <p class="text-small text-muted">Traçados pela malha viária</p>
+  </header>
+  <div class="mgb-control">
+    <label for="mgb-line">Exibir no mapa</label>
+    <select class="form-select" id="mgb-line">
+      <option value="all" selected>Todas as linhas</option>
+      <option value="brs">Corredores BRS</option>
+      <option value="cristo">Terminal Cristo</option>
+      <option value="valentina">NTI Valentina</option>
+      <option value="recorte">Mangabeira · recorte local</option>
+      <option value="paratibe">I-332 · Comparar em Paratibe</option>
+      <option value="parque-do-sol">I-332 · Comparar no Parque do Sol</option>
+    </select>
+  </div>
+  <div class="mgb-map">
+    <svg class="mgb-drawing" role="img" aria-label="Mapa da rede proposta de transporte público de João Pessoa"></svg>
+  </div>
+  <div class="mgb-legend text-small" aria-label="Cores por linha"></div>
+  <div class="mgb-info" aria-live="polite">
+    <p class="mgb-route"></p>
+    <p class="mgb-note text-small text-muted"></p>
+  </div>
+  <p class="mgb-credit text-small text-muted">Base: Filipeia, IBGE e © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. Percursos de referência calculados com OSRM.</p>
+</section>
+
+<style>
+  #rede-termin-mgb { width: 100%; color: var(--foreground); display: grid; row-gap: calc(var(--font-size-base, 14px) * .62); }
+  #rede-termin-mgb h2, #rede-termin-mgb p { margin: 0; }
+  #rede-termin-mgb .mgb-control { display: flex; flex-wrap: wrap; align-items: center; gap: .45em .8em; }
+  #rede-termin-mgb .mgb-control select { width: auto; min-width: 0; max-width: 100%; }
+  #rede-termin-mgb .mgb-map { overflow: hidden; background: color-mix(in srgb, var(--viz-series-1) 8%, var(--background)); }
+  #rede-termin-mgb .mgb-drawing { display: block; width: 100%; height: clamp(465px, 79vw, 540px); }
+  #rede-termin-mgb .mgb-legend { display: flex; flex-wrap: wrap; gap: .25em 1em; }
+  #rede-termin-mgb .mgb-legend > span { display: inline-flex; gap: .4em; align-items: center; white-space: nowrap; }
+  #rede-termin-mgb .mgb-swatch { width: 1.45em; border-top: 3px solid var(--route-color); }
+  #rede-termin-mgb .mgb-swatch.mgb-before { border-top-style: dashed; }
+  #rede-termin-mgb .mgb-stop-key { width: .7em; height: .7em; border: 1px solid var(--foreground); border-radius: 50%; }
+  #rede-termin-mgb .mgb-info { display: grid; gap: .22em; }
+  #rede-termin-mgb .mgb-info strong { font-weight: 500; }
+  #rede-termin-mgb .mgb-info strong + span { margin-inline-start: .3em; }
+  #rede-termin-mgb .mgb-credit a { color: inherit; }
+  #rede-termin-mgb .mgb-bg { fill: var(--background); stroke: var(--border); stroke-width: .85; }
+  #rede-termin-mgb .mgb-neighborhood { fill: color-mix(in srgb, var(--background) 95%, var(--foreground)); stroke: var(--border); stroke-width: .75; }
+  #rede-termin-mgb .mgb-neighborhood.home { fill: color-mix(in srgb, var(--viz-series-1) 9%, var(--background)); }
+  #rede-termin-mgb .mgb-river { fill: none; stroke: color-mix(in srgb, var(--viz-series-1) 28%, var(--background)); stroke-width: .9; }
+  #rede-termin-mgb .mgb-road { fill: none; stroke: color-mix(in srgb, var(--foreground) 25%, var(--background)); stroke-width: 1.1; }
+  #rede-termin-mgb .mgb-path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  #rede-termin-mgb .mgb-label { fill: var(--foreground); stroke: var(--background); stroke-width: 3; paint-order: stroke; stroke-linejoin: round; font-family: inherit; font-weight: 500; }
+  #rede-termin-mgb .mgb-label.secondary { fill: var(--muted-foreground); font-weight: 400; }
+</style>
+
+<script type="application/json" id="mgb-geodados">__MGB_DATA__</script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+(() => {
+  const root = document.getElementById('rede-termin-mgb');
+  const map = root.querySelector('.mgb-map');
+  const graphic = root.querySelector('.mgb-drawing');
+  const selector = root.querySelector('#mgb-line');
+  const detail = root.querySelector('.mgb-route');
+  const note = root.querySelector('.mgb-note');
+  const legend = root.querySelector('.mgb-legend');
+  const data = JSON.parse(document.getElementById('mgb-geodados').textContent);
+  const {routes, places, base, comparisons} = data;
+  const styles = {
+    'BRS-100': 'oklch(from var(--foreground) calc(.49 + l * .23) .18 238)',
+    'BRS-200': 'oklch(from var(--foreground) calc(.43 + l * .25) .18 14)',
+    'BRS-300': 'oklch(from var(--foreground) calc(.37 + l * .24) .13 255)',
+    'BRS-500': 'oklch(from var(--foreground) calc(.58 + l * .19) .13 76)',
+    'BRS-501': 'oklch(from var(--foreground) calc(.53 + l * .22) .13 103)',
+    'BRS-800': 'oklch(from var(--foreground) calc(.47 + l * .23) .10 208)',
+    'T-410': 'var(--muted-foreground)',
+    'T-610': 'oklch(from var(--foreground) calc(.53 + l * .22) .20 281)',
+    'TRV-321': 'color-mix(in oklch, var(--purple) 72%, var(--blue))',
+    'TRV-322': 'oklch(from var(--foreground) calc(.51 + l * .23) .20 27)',
+    'TRV-721': 'oklch(from var(--foreground) calc(.43 + l * .25) .12 168)',
+    'I-331': 'oklch(from var(--foreground) calc(.52 + l * .24) .20 260)',
+    'I-332': 'oklch(from var(--foreground) calc(.56 + l * .23) .16 145)',
+    'I-333': 'oklch(from var(--foreground) calc(.48 + l * .24) .18 311)',
+    'I-334': 'oklch(from var(--foreground) calc(.60 + l * .19) .15 72)',
+    'I-731': 'oklch(from var(--foreground) calc(.45 + l * .22) .15 120)',
+    'R-241': 'oklch(from var(--foreground) calc(.49 + l * .24) .17 333)',
+    'R-242': 'oklch(from var(--foreground) calc(.58 + l * .20) .14 46)',
+    'R-343': 'oklch(from var(--foreground) calc(.55 + l * .23) .13 195)',
+    'L-251': 'oklch(from var(--foreground) calc(.57 + l * .20) .17 316)',
+    'L-351': 'oklch(from var(--foreground) calc(.53 + l * .24) .20 350)',
+    'L-751': 'oklch(from var(--foreground) calc(.61 + l * .19) .13 218)',
+    'M-961': 'oklch(from var(--foreground) calc(.43 + l * .24) .10 49)',
+  };
+  const overview = ['hub', 'metro', 'bessa', 'cristo', 'oitizeiro', 'val', 'aeroporto', 'universidade', 'shopping', 'jacuma', 'praia_sol', 'barra', 'epitacio', 'mandacaru', 'perimetral', 'penha'];
+  const groups = {
+    brs: {codes: routes.filter(item => item.type === 'brs').map(item => item.code), labels: ['hub', 'metro', 'bessa', 'cristo', 'oitizeiro', 'aeroporto', 'cruz', 'jaguaribe', 'ruy', 'epitacio', 'universidade', 'shopping']},
+    cristo: {codes: ['BRS-200', 'BRS-800', 'TRV-322', 'I-731', 'R-241', 'R-242', 'L-251'], labels: ['cristo', 'hub', 'metro', 'jose_americo', 'colibris', 'agua_fria', 'jardim_sp', 'rangel', 'vale_palmeiras', 'geisel', 'convencoes']},
+    valentina: {codes: ['I-331', 'I-332', 'I-333', 'I-731', 'TRV-721', 'L-751'], labels: ['val', 'hub', 'oitizeiro', 'cristo', 'geisel', 'val1', 'val2', 'planalto', 'paratibe', 'sibipiruna', 'mucu', 'parque', 'perimetral', 'barra', 'praia_sol']},
+    recorte: {codes: ['TRV-322', 'I-331', 'I-332', 'I-333', 'I-334', 'R-343', 'L-351'], labels: ['hub', 'cristo', 'val', 'universidade', 'coqueiral', 'josefa', 'trauminha', 'corujinha', 'verde', 'convencoes', 'estacao', 'penha', 'portal', 'parque']},
+  };
+  const viewport = { width: 0, height: 0 };
+  const svg = window.d3.select(graphic);
+
+  selector.querySelector('[value="all"]').textContent = `Todas as ${routes.length} linhas`;
+  for (const route of routes) {
+    const option = document.createElement('option');
+    option.value = route.code;
+    option.textContent = `${route.code} · ${route.name}`;
+    selector.append(option);
+  }
+  function describe(route, visible, comparison) {
+    const name = document.createElement('strong');
+    const itinerary = document.createElement('span');
+    if (comparison) {
+      name.textContent = comparison.name;
+      itinerary.textContent = 'I-332 no sentido NTI Valentina';
+      note.textContent = 'Os círculos indicam paradas atuais usadas para conferir a cobertura.';
+    } else if (!route) {
+      name.textContent = `${visible.length} linhas no mapa`;
+      itinerary.textContent = 'Trechos compartilhados aparecem em paralelo.';
+      note.textContent = 'Trajetos pela malha viária com pontos de referência do projeto. Operação e paradas a validar para ônibus.';
+    } else {
+      name.textContent = route.code;
+      itinerary.textContent = route.itinerary;
+      note.textContent = route.note || 'Traçado de referência. Operação e paradas a validar para ônibus.';
+    }
+    detail.replaceChildren(name, itinerary);
+    legend.replaceChildren();
+    if (comparison) {
+      for (const [title, color, cls] of [
+        ['Traçado anterior', 'var(--muted-foreground)', 'mgb-swatch mgb-before'],
+        ['Proposta atualizada', styles['I-332'], 'mgb-swatch'],
+        ['Parada de referência', null, 'mgb-stop-key'],
+      ]) {
+        const label = document.createElement('span');
+        const swatch = document.createElement('i');
+        swatch.className = cls;
+        swatch.setAttribute('aria-hidden', 'true');
+        if (color) swatch.style.setProperty('--route-color', color);
+        label.append(swatch, title);
+        legend.append(label);
+      }
+      return;
+    }
+    for (const item of visible) {
+      const label = document.createElement('span');
+      const swatch = document.createElement('i');
+      swatch.className = 'mgb-swatch';
+      swatch.setAttribute('aria-hidden', 'true');
+      swatch.style.setProperty('--route-color', styles[item.code]);
+      label.append(swatch, item.code);
+      legend.append(label);
+    }
+  }
+
+  function frame(positions, width, height, comparison) {
+    const extent = positions ? [window.d3.extent(positions, d => d[0]), window.d3.extent(positions, d => d[1])] : [[-34.957, -34.784], [-7.289, -7.063]];
+    const padding = comparison ? .003 : positions ? .009 : 0;
+    const bounds = [[extent[0][0] - padding, extent[1][0] - padding], [extent[0][1] + padding, extent[1][1] + padding]];
+    const inner = [[24, 29], [width - 24, height - 27]];
+    return window.d3.geoMercator().fitExtent(inner, {type:'MultiPoint', coordinates: bounds});
+  }
+
+  function scale(group, project, width, height, route) {
+    const length = route && route.points.length < 4 ? .5 : route ? 1 : 2;
+    const center = project.invert([width * .5, height * .5]);
+    const degrees = length / (111.32 * Math.cos(center[1] * Math.PI / 180));
+    const pixels = project([center[0] + degrees, center[1]])[0] - project(center)[0];
+    const y = height - 13;
+    group.append('path').attr('d', `M 12 ${y - 4} V ${y} H ${12 + pixels} V ${y - 4}`).attr('fill', 'none').attr('stroke', 'var(--foreground)');
+    group.append('text').attr('class', 'mgb-label secondary').attr('x', 12).attr('y', y - 8).attr('font-size', 11).text(`${String(length).replace('.', ',')} km`);
+    group.append('text').attr('class', 'mgb-label').attr('x', width - 17).attr('y', 15).attr('font-size', 11).attr('text-anchor', 'middle').text('N');
+    group.append('path').attr('d', `M ${width - 17} 19 l -4 9 h 8 z`).attr('fill','var(--foreground)');
+  }
+
+  function drawLabels(group, identifiers, project, width, height, selected) {
+    const taken = [];
+    for (const id of identifiers) {
+      const place = places[id];
+      const [x, y] = project(place.position);
+      const label = selected ? place.label : place.short || place.label;
+      const hub = id === 'hub';
+      const font = hub ? 13 : 11.5;
+      const radius = hub ? 6 : place.terminal ? 4.3 : 2.4;
+      if (x < 0 || x > width || y < 0 || y > height) continue;
+      group.append('circle').attr('cx', x).attr('cy', y).attr('r', radius)
+        .attr('fill', hub ? 'var(--foreground)' : 'var(--background)')
+        .attr('stroke', hub ? 'var(--background)' : 'var(--foreground)').attr('stroke-width', hub ? 2.2 : 1.15);
+      if (hub) group.append('circle').attr('cx', x).attr('cy', y).attr('r', 1.8).attr('fill', 'var(--background)');
+      const ink = group.append('text').attr('class', 'mgb-label').attr('font-size', font).text(label);
+      const measured = ink.node().getComputedTextLength();
+      const w = Math.max(measured, label.length * font * .44) + 4;
+      const offsets = [[9, -7], [9, 14], [-9 - w, -7], [-9 - w, 14], [8, -20], [-8 - w, -20], [8, 27], [-8 - w, 27]];
+      const position = offsets.map(([dx, dy]) => [x + dx, y + dy]).find(([lx, ly]) => {
+        const box = [lx - 2, ly - font, lx + w, ly + 3];
+        return box[0] > 4 && box[1] > 3 && box[2] < width - 3 && box[3] < height - 3 && !taken.some(other => box[0] < other[2] + 4 && box[2] > other[0] - 4 && box[1] < other[3] + 4 && box[3] > other[1] - 4);
+      });
+      if (!position) { ink.remove(); continue; }
+      const [lx, ly] = position;
+      ink.attr('x', lx).attr('y', ly);
+      taken.push([lx - 2, ly - font, lx + w, ly + 3]);
+    }
+  }
+
+  function parallelTraces(traces, tolerance) {
+    const cellSize = 8;
+    const index = new Map();
+    const cell = (x, y) => `${x},${y}`;
+    for (const trace of traces) {
+      for (let i = 1; i < trace.points.length; i++) {
+        const [x, y] = trace.points[i - 1];
+        const [endX, endY] = trace.points[i];
+        const length = Math.hypot(endX - x, endY - y);
+        if (!length) continue;
+        const segment = {x, y, dx: (endX - x) / length, dy: (endY - y) / length, length, trace};
+        for (let col = Math.floor((Math.min(x, endX) - tolerance) / cellSize); col <= Math.floor((Math.max(x, endX) + tolerance) / cellSize); col++) {
+          for (let row = Math.floor((Math.min(y, endY) - tolerance) / cellSize); row <= Math.floor((Math.max(y, endY) + tolerance) / cellSize); row++) {
+            const key = cell(col, row);
+            if (!index.has(key)) index.set(key, []);
+            index.get(key).push(segment);
+          }
+        }
+      }
+    }
+
+    return traces.map(trace => {
+      const samples = [trace.points[0]];
+      for (let i = 1; i < trace.points.length; i++) {
+        const [x, y] = trace.points[i - 1];
+        const [endX, endY] = trace.points[i];
+        const parts = Math.ceil(Math.hypot(endX - x, endY - y) / 1.65);
+        for (let part = 1; part <= parts; part++) {
+          samples.push([x + (endX - x) * part / parts, y + (endY - y) * part / parts]);
+        }
+      }
+      const shifts = samples.map(([x, y], i) => {
+        const before = samples[Math.max(i - 1, 0)];
+        const after = samples[Math.min(i + 1, samples.length - 1)];
+        const span = Math.hypot(after[0] - before[0], after[1] - before[1]);
+        if (!span) return [0, 0];
+        const tx = (after[0] - before[0]) / span;
+        const ty = (after[1] - before[1]) / span;
+        const matches = new Map();
+        const nearby = index.get(cell(Math.floor(x / cellSize), Math.floor(y / cellSize))) || [];
+        for (const segment of nearby) {
+          if (segment.trace.order === trace.order || Math.abs(tx * segment.dx + ty * segment.dy) < .89) continue;
+          const along = (x - segment.x) * segment.dx + (y - segment.y) * segment.dy;
+          // A nearby endpoint by itself is insufficient to establish a shared corridor.
+          if (along < -.25 || along > segment.length + .25) continue;
+          const footX = segment.x + along * segment.dx;
+          const footY = segment.y + along * segment.dy;
+          const distance = Math.hypot(footX - x, footY - y);
+          if (distance > tolerance) continue;
+          const previous = matches.get(segment.trace.order);
+          const weight = distance + (segment.trace.reverse ? .045 : 0);
+          if (!previous || weight < previous.weight) matches.set(segment.trace.order, {segment, footX, footY, weight});
+        }
+        if (!matches.size) return [0, 0];
+        const order = [...matches.keys(), trace.order].sort((a, b) => a - b);
+        const reference = matches.get(order[0]);
+        const direction = (reference ? reference.segment.trace : trace).reverse ? -1 : 1;
+        const nx = -(reference?.segment.dy ?? ty) * direction;
+        const ny = (reference?.segment.dx ?? tx) * direction;
+        const lateral = reference ? (reference.footX - x) * nx + (reference.footY - y) * ny : 0;
+        const shift = (order.indexOf(trace.order) - (order.length - 1) / 2) * 3.05 + lateral;
+        return [nx * shift, ny * shift];
+      });
+      // Ease the separation in and out at intersections and at the ends of shared stretches.
+      const points = samples.map(([x, y], i) => {
+        let dx = 0;
+        let dy = 0;
+        let total = 0;
+        for (let j = Math.max(0, i - 4); j <= Math.min(shifts.length - 1, i + 4); j++) {
+          const weight = 5 - Math.abs(j - i);
+          dx += shifts[j][0] * weight;
+          dy += shifts[j][1] * weight;
+          total += weight;
+        }
+        return [x + dx / total, y + dy / total];
+      });
+      return {...trace, points};
+    });
+  }
+
+  function draw() {
+    const {width, height} = viewport;
+    if (width < 100 || height < 100) return;
+    const selected = routes.find(route => route.code === selector.value);
+    const comparison = comparisons[selector.value];
+    const group = groups[selector.value];
+    const visible = selected ? [selected] : group ? routes.filter(route => group.codes.includes(route.code)) : routes;
+    const positions = comparison ? [...comparison.before, ...comparison.after] : visible.flatMap(route => route.traces.flat());
+    const projection = frame(positions, width, height, comparison);
+    const path = window.d3.geoPath(projection).digits(2);
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+    svg.selectAll('*').remove();
+    svg.append('desc').text(comparison ? `Comparação da I-332 em ${comparison.name}, com paradas atuais de referência.` : selected?.itinerary || `${visible.length} linhas propostas com traçados pela malha viária.`);
+    const layers = [['mgb-bg', base.land], ['mgb-neighborhood', base.neighborhoods], ['mgb-river', base.rivers], ['mgb-road', base.roads]];
+    for (const [className, features] of layers) {
+      svg.append('g').selectAll('path').data(features).join('path')
+        .attr('class', feature => `${className}${feature.properties?.home ? ' home' : ''}`).attr('d', path);
+    }
+    const line = window.d3.line().digits(2).curve(window.d3.curveLinear);
+    if (comparison) {
+      const paths = parallelTraces([comparison.before, comparison.after].map((trace, order) => ({order, reverse: false, points: trace.map(projection)})), 1.15);
+      const comparedLines = svg.append('g').attr('class', 'mgb-comparison');
+      const colors = ['var(--muted-foreground)', styles['I-332']];
+      for (const trace of paths) {
+        comparedLines.append('path').attr('class', 'mgb-path')
+          .attr('d', line(trace.points)).attr('stroke', colors[trace.order])
+          .attr('stroke-width', trace.order ? 3.6 : 2.6).attr('stroke-dasharray', trace.order ? null : '5 4');
+      }
+      for (const position of comparison.stops) {
+        const [x, y] = projection(position);
+        comparedLines.append('circle').attr('class', 'mgb-reference-stop').attr('cx', x).attr('cy', y).attr('r', 3)
+          .attr('fill', 'var(--background)').attr('stroke', 'var(--foreground)').attr('stroke-width', 1.2);
+      }
+      drawLabels(svg.append('g'), comparison.points, projection, width, height, false);
+      scale(svg.append('g'), projection, width, height, {points: []});
+      return;
+    }
+    const routesGroup = svg.append('g').attr('class', 'mgb-routes');
+    for (const route of visible) {
+      routesGroup.append('g').attr('data-code', route.code).append('title').text(`${route.code} · ${route.name}`);
+    }
+    const traces = visible.flatMap((route, order) => route.traces.map((path, i) => ({route, order, reverse: i > 0, points: path.map(projection)})));
+    const pxPerDegree = projection.scale() * Math.PI / 180;
+    const tolerance = Math.max(.26, pxPerDegree * 27 / 110000);
+    const arrangements = (visible.length > 1 ? parallelTraces(traces, tolerance) : traces)
+      .map(trace => ({...trace, shape: line(trace.points)}));
+    const casing = svg.insert('g', '.mgb-routes').attr('aria-hidden', 'true');
+    casing.selectAll('path').data(arrangements).join('path')
+      .attr('class', 'mgb-path').attr('d', trace => trace.shape)
+      .attr('stroke', 'var(--background)').attr('stroke-width', selected ? 5.4 : 3.25).attr('opacity', .88);
+    for (const trace of arrangements) {
+      const route = routesGroup.select(`[data-code="${trace.route.code}"]`);
+      route.append('path').attr('class', 'mgb-path')
+        .attr('d', trace.shape).attr('stroke', styles[trace.route.code]).attr('stroke-width', selected ? 3.35 : 2.25);
+    }
+    const labels = selected ? [selected.points[0], selected.points.at(-1), ...selected.points.slice(1, -1)] : group?.labels || overview;
+    drawLabels(svg.append('g'), [...new Set(labels)], projection, width, height, selected);
+    scale(svg.append('g'), projection, width, height, selected);
+  }
+
+  function updateSelection() {
+    const selected = routes.find(route => route.code === selector.value);
+    const group = groups[selector.value];
+    const visible = selected ? [selected] : group ? routes.filter(route => group.codes.includes(route.code)) : routes;
+    describe(selected, visible, comparisons[selector.value]);
+    draw();
+  }
+  selector.addEventListener('change', updateSelection);
+  new ResizeObserver(() => {
+    viewport.width = graphic.clientWidth || map.clientWidth;
+    viewport.height = graphic.clientHeight;
+    draw();
+  }).observe(graphic);
+  updateSelection();
+})();
+</script>

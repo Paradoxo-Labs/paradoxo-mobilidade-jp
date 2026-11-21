@@ -36,6 +36,8 @@ Construir uma base técnica para:
 
 Projeto em fase inicial.
 
+A proposta conta também com um [estudo complementar de rede integrada, revisão de 21/11/2026](docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md), com 23 linhas propostas, 39 traçados de referência e mapa interativo offline. O estudo amplia o material disponível para análise; a codificação e os traçados ainda precisam ser conciliados com o conceito inicial.
+
 A estrutura base do repositório já está criada e preparada para:
 
 - coletor local em Python/Streamlit;

@@ -1,0 +1,94 @@
+TRV-321 17.83 km []
+hub mariz 1125 Avenida Hilton Souto Maior | Avenida Governador Antônio da Silva Mariz | 
+mariz portal_arterial 666  | Rua Interna 4 | Avenida Governador Antônio da Silva Mariz
+portal_arterial altiplano_arterial 2632 Avenida Governador Antônio da Silva Mariz | Avenida João Cyrilo da Silva | Rua Bartolomeu Luís Troccoli | Rua Zuly Lacerda | Rua Waldemar de Albuquerque Aranha
+altiplano_arterial cabo_atlantico 2307 Rua Waldemar de Albuquerque Aranha | Avenida João Cyrilo da Silva | Rua Severino Garcia Galvão | Avenida Monsenhor Odilon Coutinho | Avenida Marcionila da Conceição | Avenida Índio Arabutan | Avenida Cabo Branco
+cabo_atlantico tambau_beira 1779 Avenida Cabo Branco | Rua Adolfo Loureiro Franca | Avenida Marcionila da Conceição | Avenida Nossa Senhora dos Navegantes | Rua José Augusto Trindade | Avenida Almirante Tamandaré
+tambau_beira manaira_beira 1554 Avenida Almirante Tamandaré | Avenida João Maurício
+manaira_beira retao_orla 1381 Avenida João Maurício | Rua Juvenal Mário da Silva | Rua Severino Pereira de Araújo | Avenida Governador Flávio Ribeiro Coutinho
+retao_orla shopping 683 Avenida Governador Flávio Ribeiro Coutinho | Rua Waldemir Braga | Avenida Vereador Gumercindo Barbosa Dunda
+shopping leocadio 2532 Avenida Vereador Gumercindo Barbosa Dunda | Rua Maria Rosa Padilha | Rua Edgar Sales de Miranda Henriques | Rua Francisco Leocádio Ribeiro Coutinho
+leocadio bessa 3174 Rua Francisco Leocádio Ribeiro Coutinho | Rua Moacir Rocha de Mendonça | Rua Fernando Honorato Pereira | Avenida Bacharel José de Oliveira Curchatuz | Rua Philadelpho Pinto de Carvalho | Rua Paulo Roberto de Souza Acioly | Rua Presidente Washington Luiz | Rua Renato de Souza Maciel
+T-610 11.88 km [('roger', 23, 'Rua Maria da Silva Ramalho')]
+bessa shopping 4831 Rua Renato de Souza Maciel | Rua Presidente Washington Luiz | Rua Tertuliano Castro | Avenida Tertuliano Castro | Avenida Campos Sales | Rua Doutor Gildemar Pereira de Macedo | Rua Doutor Francisco de Assis Câmara Dantas | Rua Philadelpho Pinto de Carvalho | Avenida Bacharel José de Oliveira Curchatuz | Rua Mirian Barreto Rabelo | Rua Suzi Lacerda Pereira | Rua Francisca Bezerra Dias | Rua Maria Rosa Padilha | Avenida Vereador Gumercindo Barbosa Dunda
+shopping retao_oeste 333 Avenida Vereador Gumercindo Barbosa Dunda | Avenida Governador Flávio Ribeiro Coutinho
+retao_oeste ipes 1012 Avenida Governador Flávio Ribeiro Coutinho | Avenida Presidente Tancredo Neves
+ipes mandacaru 1645 Avenida Presidente Tancredo Neves | Rua Coelho Paiva | Rua João Brito de Lima Moura | Avenida Presidente Tancredo Neves 
+mandacaru padreze_bairro 766 Avenida Presidente Tancredo Neves  | Rua Mardokeu Nacre
+padreze_bairro roger 580 Rua Mardokeu Nacre | Avenida Ayrton Senna da Silva | Rua Maria da Silva Ramalho
+roger metro 2711 Rua Maria da Silva Ramalho | Rua Conceição Cabral | Rua Dezenove de Março | Avenida Ayrton Senna da Silva | Rua Cordeiro Sênior | Rua Elpídio Alves Cruz | Avenida Cândido Pessoa | Rua 5 de Agosto | Avenida Sanhauá
+BRS-800 34.27 km []
+aeroporto oitizeiro 9900 Acesso a Área de Embarque e Desembarque do Aeroporto Intercnacional Castro Pinto | Aeroporto Castro Pinto | Avenida Marechal Rondon | Rodovia Governador Mário Covas | Rodovia Governador Antônio Mariz |  | Avenida Cruz das Armas
+oitizeiro cristo 5028 Avenida Cruz das Armas | Rua Professor Aníbal Moura Souza | Rua Manoel Guerra | Rua Professor Ernesto da Silveira | BR-101 |  | Rodovia Governador Antônio Mariz | Marginal Rodovia Governador Antônio Mariz | Viaduto Eduardo Campos | Estádio Almeidão | Acesso ao Almeidão
+cristo universidade_public 6449 Acesso ao Almeidão |  | Rua Universitário Rogério Benevides | Rua Desportista Napoleão Duré | Rua Presidente Ranieri Mazilli | Avenida Diógenes Chianca | Rodovia Governador Antônio Mariz | Rua Joaquim Borba Filho | Rua José Firmino Ferreira | Rua Empresário João Rodrigues Alves | Rua Tabelião Estanislau Eloy | Via UFPB
+universidade_public shopping 7918 Via UFPB | Rua Tabelião Estanislau Eloy | Avenida Dom Pedro II |  | Rodovia Governador Antônio Mariz | Rodovia Governador Pedro Gondim | Rua Edgar Sales de Miranda Henriques | Rua Maria Rosa Padilha | Avenida Vereador Gumercindo Barbosa Dunda
+shopping br230_norte 1152 Avenida Vereador Gumercindo Barbosa Dunda | Avenida Governador Flávio Ribeiro Coutinho |  | Rodovia Governador Pedro Gondim
+br230_norte bessa 3818 Rodovia Governador Pedro Gondim | Rua Hortência Helena Brito | Rodovia BR-230 | Rua Presidente Washington Luiz | Rua Renato de Souza Maciel
+I-731 7.37 km []
+val geisel 5430 Terminal de Integração do Valentina | Rua Mariângela Lucena Peixoto | Rua José de Oliveira Batista | Rua Flodoaldo Peixoto Filho | Rua Doutor Cícero Leite | Rua Adalgisa Carneiro Cavalcanti | Rua Humberto da Silva Paiva | Rua Empresário Abelardo Targino da Fonseca |  | Avenida Presidente Juscelino Kubitschek
+geisel cristo 1935 Avenida Presidente Juscelino Kubitschek | Avenida Valdemar Naziazeno | Estádio Almeidão | Acesso ao Almeidão
+TRV-321-volta 20.84 km []
+bessa leocadio_back 3382 Rua Renato de Souza Maciel | Rua Presidente Washington Luiz | Rua Tertuliano Castro | Avenida Tertuliano Castro | Avenida Campos Sales | Rua Doutor Gildemar Pereira de Macedo | Rua Doutor Francisco de Assis Câmara Dantas | Rua Philadelpho Pinto de Carvalho | Avenida Bacharel José de Oliveira Curchatuz | Rua Deputado Antônio Pádua Carvalho | Rua João Alfredo Coelho Fonseca | Rua Francisco Leocádio Ribeiro Coutinho
+leocadio_back shopping 2112 Rua Francisco Leocádio Ribeiro Coutinho | Avenida Bacharel José de Oliveira Curchatuz | Rua Mirian Barreto Rabelo | Rua Suzi Lacerda Pereira | Rua Francisca Bezerra Dias | Rua Maria Rosa Padilha | Avenida Vereador Gumercindo Barbosa Dunda
+shopping retao_orla_back 745 Avenida Vereador Gumercindo Barbosa Dunda | Avenida Governador Flávio Ribeiro Coutinho
+retao_orla_back manaira_beira_back 1354 Avenida Governador Flávio Ribeiro Coutinho | Avenida Governador Argemiro de Figueiredo | Avenida João Araujo | Avenida João Mauricio
+manaira_beira_back tambau_beira_back 3319 Avenida João Mauricio | Avenida Governador Flávio Ribeiro Coutinho | Rua Doutor Seixas Maia | Rua Euzely Fabrício de Souza | Avenida General Edson Ramalho | Avenida Professora Maria Sales | Avenida Nego | Avenida Antônio Lira | Rua José Augusto Trindade | Avenida Almirante Tamandaré
+tambau_beira_back cabo_atlantico_back 1186 Avenida Almirante Tamandaré | Rua Helena Meira Lima | Avenida Antônio Lira | Avenida Índio Arabutan | Avenida Cabo Branco
+cabo_atlantico_back altiplano_arterial 3638 Avenida Cabo Branco | Avenida Buarque | Rua Doutor Frutuoso Dantas | Avenida Marcionila da Conceição | Avenida Cairu | Rua Paulino Pinto | Avenida Ministro José Américo de Almeida | Avenida João Cyrilo da Silva | Rua Bartolomeu Luís Troccoli | Rua Zuly Lacerda | Rua Waldemar de Albuquerque Aranha
+altiplano_arterial portal_arterial 2143 Rua Waldemar de Albuquerque Aranha | Avenida João Cyrilo da Silva | Avenida Governador Antônio da Silva Mariz
+portal_arterial mariz 785 Avenida Governador Antônio da Silva Mariz | 
+mariz hub 2174  | Rua Interna 4 | Avenida Governador Antônio da Silva Mariz | Avenida Hilton Souto Maior | Avenida dos Escoteiros | Rua Empresário Waldemar Pereira do Egito
+T-610-volta 15.05 km [('roger', 23, 'Rua Maria da Silva Ramalho')]
+metro roger 5115 Avenida Sanhauá | Rua Desembargador Trindade | Avenida Barão do Triunfo | Rua Maciel Pinheiro | Rua Padre Antônio Ferreira | Praça Deputado Antônio de Pádua F. de Oliveira | Avenida Gouvêa Nóbrega | Avenida Gouveia Nóbrega | Rua Elpídio Alves Cruz | Rua Cordeiro Sênior | Avenida Ayrton Senna da Silva | Rua Dezenove de Março | Rua Monsenhor José Coutinho | Rua Conceição Cabral | Rua Maria da Silva Ramalho
+roger padreze_bairro 580 Rua Maria da Silva Ramalho | Avenida Ayrton Senna da Silva | Rua Mardokeu Nacre
+padreze_bairro mandacaru_back 899 Rua Mardokeu Nacre | Avenida Fagundes Varela | Avenida Presidente Tancredo Neves
+mandacaru_back ipes_back 1510 Avenida Presidente Tancredo Neves | Rua Sérgio Meira
+ipes_back shopping 1978 Avenida Presidente Tancredo Neves | Avenida Governador Flávio Ribeiro Coutinho | Rua Manoel Arruda Cavalcanti | Rua Ernestina Monteiro Pordeus | Rua Candelária | Rua Waldemir Braga | Rua Débora da Silva Braga | Rua Maria Rosa Padilha | Avenida Vereador Gumercindo Barbosa Dunda
+shopping br230_norte 1152 Avenida Vereador Gumercindo Barbosa Dunda | Avenida Governador Flávio Ribeiro Coutinho |  | Rodovia Governador Pedro Gondim
+br230_norte bessa 3818 Rodovia Governador Pedro Gondim | Rua Hortência Helena Brito | Rodovia BR-230 | Rua Presidente Washington Luiz | Rua Renato de Souza Maciel
+BRS-800-volta 35.03 km []
+bessa shopping 4831 Rua Renato de Souza Maciel | Rua Presidente Washington Luiz | Rua Tertuliano Castro | Avenida Tertuliano Castro | Avenida Campos Sales | Rua Doutor Gildemar Pereira de Macedo | Rua Doutor Francisco de Assis Câmara Dantas | Rua Philadelpho Pinto de Carvalho | Avenida Bacharel José de Oliveira Curchatuz | Rua Mirian Barreto Rabelo | Rua Suzi Lacerda Pereira | Rua Francisca Bezerra Dias | Rua Maria Rosa Padilha | Avenida Vereador Gumercindo Barbosa Dunda
+shopping br230_shopping_sul 3306 Avenida Vereador Gumercindo Barbosa Dunda | Avenida Governador Flávio Ribeiro Coutinho | Avenida Presidente Tancredo Neves | Rua José Peregrino Montenegro | Rodovia Governador Pedro Gondim | Rodovia Governador Antônio Mariz
+br230_shopping_sul universidade_public 6157 Rodovia Governador Antônio Mariz |  | Avenida Dom Pedro II | Via Expressa Padre Zé | Via UFPB
+universidade_public cristo 7794 Via UFPB | Rua Tabelião Estanislau Eloy | Avenida Dom Pedro II |  | Rodovia Governador Antônio Mariz | Marginal Rodovia Governador Antônio Mariz | Marginal da Rodovia Governador Antônio Mariz | Viaduto Eduardo Campos | Acesso ao Almeidão
+cristo oitizeiro_back 4252 Acesso ao Almeidão |  | Estádio Almeidão | Avenida Engenheiro Agrônomo Álvaro Ferreira | Rodovia Governador Antônio Mariz | Avenida Cruz das Armas | Rua Professor Aníbal Moura Souza | Rua Manoel Guerra | Rua Professor Ernesto da Silveira
+oitizeiro_back aeroporto 8686 Avenida Cruz das Armas |  | Rodovia Governador Mário Covas | Avenida Marechal Rondon | Acesso a Área de Embarque e Desembarque do Aeroporto Intercnacional Castro Pinto
+I-731-volta 8.17 km []
+cristo geisel 2455 Acesso ao Almeidão |  | Estádio Almeidão | Avenida Valdemar Naziazeno | Avenida Presidente Juscelino Kubitschek
+geisel val 5714 Avenida Presidente Juscelino Kubitschek |  | Rua Empresário Abelardo Targino da Fonseca | Rua Adalgisa Carneiro Cavalcanti | Rua Doutor Cícero Leite | Rua Flodoaldo Peixoto Filho | Rua Francisco Barbosa Sobrinho | Rua Mariângela Lucena Peixoto | Terminal de Integração do Valentina
+R-343 30.8 km [('hu_public', 30, ''), ('anatolia', 22, 'Rua das Imburanas')]
+hub hilton_penha 669 Avenida Hilton Souto Maior
+hilton_penha seixas_public 3123 Avenida Hilton Souto Maior | Avenida Panorâmica | Retorno PB-008 | Rua Comerciante José Gomes dos Santos | Rua Maceió | Rua dos Pescadores | Rua dos Mariscos
+seixas_public farol_public 2835 Rua dos Mariscos | Avenida das Falésias | Rua Comerciante José Gomes dos Santos | Avenida Panorâmica
+farol_public portal_arterial 3108 Avenida Panorâmica | Avenida João Cyrilo da Silva | Avenida Governador Antônio da Silva Mariz
+portal_arterial amaral 2545 Avenida Governador Antônio da Silva Mariz | Avenida João Cyrilo da Silva | Rua Antônio Francisco do Amaral
+amaral ponte 1818 Rua Antônio Francisco do Amaral | Rua Professor Emílio de Araújo Chaves | Rua Severino Ennês Atayde | Rua Severina Ennes de Athayde | Rua Sebastião O de Carvalho | 
+ponte hu_public 1201  | Rua Tab Estanislau Eloy | Via UFPB
+hu_public padre 2234  | Via UFPB | Rua Tab Estanislau Eloy | Rua José Dionísio da Silva | Via Expressa Padre Zé
+padre borba 2871 Via Expressa Padre Zé | Rua Tabelião Estanislau Eloy | Rua Empresário João Rodrigues Alves | Avenida Diógenes Chianca | Rua Joaquim Borba Filho
+borba anatolia 1301 Rua Joaquim Borba Filho | Rua Farmacêutico Antônio Leopoldo Batista | Rua Lindolfo Gonçalves Chaves | Rua dos Ipês | Rua das Imburanas
+anatolia aurelio 657 Rua das Imburanas | Rua Desembargador Aurélio Menezes de Albuquerque
+aurelio alfredo_inicio 922 Rua Desembargador Aurélio Menezes de Albuquerque | Rua Comerciante Marcos Johanes da Costa | Rua Manoel Roberto do Nascimento | Rua Pastor Frank Dyer | Rua Comerciante Alfredo Ferreira da Rocha
+alfredo_inicio alfredo_meio 1596 Rua Comerciante Alfredo Ferreira da Rocha
+alfredo_meio anizio 836 Rua Comerciante Alfredo Ferreira da Rocha | Rua Anísio de Azevedo Lima
+anizio josefa_sul 384 Rua Anísio de Azevedo Lima | Rua Josefa Taveira
+josefa_sul corujinha 496 Rua Josefa Taveira | Avenida Rodopiano Ferreira Nóbrega
+corujinha trauminha 600 Avenida Rodopiano Ferreira Nóbrega | Rua Francisco Porfírio Ribeiro | Rua Benvenuto Gonçalves da Costa
+trauminha detran 2717 Rua Benvenuto Gonçalves da Costa | Rua Severino Macena Dantas | Rua Prefeito Luiz Alberto Moreira Coutinho | Avenida Hilton Souto Maior | Rua Desportista João Apóstolo de Souza | Rua Márcia Carneiro Morais de Oliveira
+detran hub 883 Rua Márcia Carneiro Morais de Oliveira | Avenida Hilton Souto Maior
+R-242 12.96 km []
+cristo agua_fria 3933 Acesso ao Almeidão |  | Rua Universitário Rogério Benevides | Rua Desportista Napoleão Duré | Rua Presidente Ranieri Mazilli | Avenida Diógenes Chianca | Rua Isaura Silveira Lira
+agua_fria jardim_sp 801 Rua Isaura Silveira Lira | Rua José Firmino Ferreira | Rua Prefeito Francisco de Assis Neves Nóbrega | Rua Pedro Alves de Andrade | Rua Joaquim Borba Filho
+jardim_sp edmilson 861 Rua Joaquim Borba Filho | Rua Lourenço Vieira de Souza | Rua Eliseu do Rêgo Lima | Rua Edmílson Leite da Silva
+edmilson colibris 2069 Rua Edmílson Leite da Silva | Rua José Targino de Castro | Rua Josefa Pontes César | Rua Ciro Trocolli | Rua Paulo Roberto Moreira da Cunha | Avenida Hilton Souto Maior | Rua Empresário Manoel de Brito | Rua Fernando Torres
+colibris colibris_acesso 319 Rua Fernando Torres | Rua Sólon Machado | Avenida Benício de Oliveira Lima
+colibris_acesso jose_americo 779 Avenida Benício de Oliveira Lima | Rotatória | Avenida Hilton Souto Maior | Rua Rosa Paula Barbosa
+jose_americo geni 483 Rua Rosa Paula Barbosa | Rua Jaime Gomes Barros | Rua Funcionária Pública Geni Ferreira da Silva
+geni jose_estevao 460 Rua Funcionária Pública Geni Ferreira da Silva | Rua José Estevão da Silva
+jose_estevao cristo 3254 Rua José Estevão da Silva | Rua Candida Formiga de Sousa | Rua Paulo Gomes de Almeida | Rua João Climaco Monteiro da Franca | Rua Praia de Mucuripe | Rua Doutor Manoel Lopes de Carvalho | Rua João Miguel de Souza | Rua Motorista Aldovandro Amâncio Pereira | Rua Manoel Rufino da Silva | Estádio Almeidão | Acesso ao Almeidão
+L-251 8.86 km []
+cristo rangel 3036 Acesso ao Almeidão | Rua Antônio Teotônio | Rua Fernando Cunha Lima | Rua Sueli Pereira da Cunha | Rua Antônio Pádua Vasconcelos | Rua Antônio Alves da Cunha | Rua Professora Luiza Fernandes Vieira | Rua Presidente Carlos Luz | Rua Horácio Trajano de Oliveira | Rua Heronides Meira de Vasconcelos | Avenida 2 de Fevereiro | Rua Souza Rangel
+rangel vale_murilo 2284 Avenida 2 de Fevereiro | Rua Elias Cavalcanti de Albuquerque | Rua José Borges Coutinho | Travessa Murilo Buarque
+vale_murilo vale_palmeiras 420 Travessa Murilo Buarque | Rua Antônio Gomes da Silva
+vale_palmeiras vale_sul 542 Rua Antônio Gomes da Silva
+vale_sul cristo 2580 Rua Antônio Gomes da Silva | Rua Antônio Teotônio |  | Estádio Almeidão | Avenida Valdemar Galdino Naziazeno | Acesso ao Almeidão

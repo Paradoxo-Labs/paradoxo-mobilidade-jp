@@ -13,6 +13,8 @@
 
 ## Etapa 2 — Validação com rede atual
 
+Já existe um [estudo complementar](INTEGRACAO_REDE_INTEGRADA.md) com mapa, 23 linhas propostas, 39 traçados e comparativos históricos. Esses materiais são insumos para as etapas abaixo; não representam validação completa da rede atual nem conclusão do mapa operacional.
+
 - [ ] Coletar todas as linhas atuais.
 - [ ] Coletar itinerários atuais.
 - [ ] Coletar horários atuais.
@@ -24,6 +26,10 @@
 
 ## Etapa 3 — Refinamento das linhas propostas
 
+- [x] Incorporar o estudo paralelo de rede integrada, revisão de 21/11/2026, preservando seus arquivos e procedência.
+- [ ] Conciliar a codificação inicial com as classes BRS/T/TRV/I/R/L/M do estudo complementar.
+- [ ] Revisar divergências sobre Valentina, Terminal UFPB, corredor 0, Via Oeste e extensão a Cabedelo.
+- [ ] Refazer a auditoria de cobertura com as 23 linhas do catálogo importado.
 - [ ] Revisar todas as linhas sugeridas.
 - [ ] Confirmar se cada linha sugerida deve existir.
 - [ ] Definir função operacional de cada linha.

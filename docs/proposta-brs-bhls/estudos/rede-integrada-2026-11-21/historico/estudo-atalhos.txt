@@ -1,0 +1,55 @@
+direto 4.97 5.2
+shopping_ponto bessa 4970 Avenida Vereador Gumercindo Barbosa Dunda, Avenida Governador Flávio Ribeiro Coutinho, , Rodovia Governador Pedro Gondim, Rua Hortência Helena Brito, Rodovia BR-230, Rua Presidente Washington Luiz, Rua Renato de Souza Maciel
+direto-volta 5.05 6.7
+bessa shopping_ponto 5052 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Tertuliano Castro, Avenida Campos Sales, Rua Doutor Gildemar Pereira de Macedo, Rua Doutor Francisco de Assis Câmara Dantas, Rua Philadelpho Pinto de Carvalho, Avenida Bacharel José de Oliveira Curchatuz, Rua Mirian Barreto Rabelo, Rua Suzi Lacerda Pereira, Avenida Governador Flávio Ribeiro Coutinho, Rua Waldemir Braga, Avenida Vereador Gumercindo Barbosa Dunda
+por-dentro 5.71 7.8
+shopping_ponto leocadio 2532 Avenida Vereador Gumercindo Barbosa Dunda, Rua Maria Rosa Padilha, Rua Edgar Sales de Miranda Henriques, Rua Francisco Leocádio Ribeiro Coutinho
+leocadio bessa 3174 Rua Francisco Leocádio Ribeiro Coutinho, Rua Moacir Rocha de Mendonça, Rua Fernando Honorato Pereira, Avenida Bacharel José de Oliveira Curchatuz, Rua Philadelpho Pinto de Carvalho, Rua Paulo Roberto de Souza Acioly, Rua Presidente Washington Luiz, Rua Renato de Souza Maciel
+por-dentro-volta 5.71 8.0
+bessa leocadio_back 3382 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Tertuliano Castro, Avenida Campos Sales, Rua Doutor Gildemar Pereira de Macedo, Rua Doutor Francisco de Assis Câmara Dantas, Rua Philadelpho Pinto de Carvalho, Avenida Bacharel José de Oliveira Curchatuz, Rua Deputado Antônio Pádua Carvalho, Rua João Alfredo Coelho Fonseca, Rua Francisco Leocádio Ribeiro Coutinho
+leocadio_back shopping_ponto 2333 Rua Francisco Leocádio Ribeiro Coutinho, Avenida Bacharel José de Oliveira Curchatuz, Rua Mirian Barreto Rabelo, Rua Suzi Lacerda Pereira, Avenida Governador Flávio Ribeiro Coutinho, Rua Waldemir Braga, Avenida Vereador Gumercindo Barbosa Dunda
+pela-lateral-volta 11.1 14.6
+bessa jorgeruben 5815 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Tertuliano Castro, Avenida Campos Sales, Rua Doutor Gildemar Pereira de Macedo, Rua Doutor Francisco de Assis Câmara Dantas, Rua Philadelpho Pinto de Carvalho, Avenida Bacharel José de Oliveira Curchatuz, Rua Mirian Barreto Rabelo, Rua Suzi Lacerda Pereira, Rua Francisca Bezerra Dias, Rua Maria Rosa Padilha, Rua Edgar Sales de Miranda Henriques, Rua Diomar Maia Sales Pontes
+jorgeruben edgar 4512 Rua Diomar Maia Sales Pontes, , Rua Francisco Leocádio Ribeiro Coutinho, Avenida Bacharel José de Oliveira Curchatuz, Rua Mirian Barreto Rabelo, Rua Suzi Lacerda Pereira, Avenida Governador Flávio Ribeiro Coutinho, Rodovia Governador Pedro Gondim, Rua Edgar Sales de Miranda Henriques
+edgar shopping_ponto 776 Rua Edgar Sales de Miranda Henriques, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+por-rodovia-volta 10.66 11.8
+bessa br230_norte_back 3664 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Presidente Nilo Peçanha, Rua José Rubenildo da Silva, Rodovia Governador Pedro Gondim
+br230_norte_back retao_leste 6143 Rodovia Governador Pedro Gondim, Rodovia Governador Antônio Mariz, , Avenida Governador Flávio Ribeiro Coutinho
+retao_leste shopping_ponto 855 Avenida Governador Flávio Ribeiro Coutinho, Rua Manoel Arruda Cavalcanti, Rua Ernestina Monteiro Pordeus, Rua Candelária, Rua Waldemir Braga, Avenida Vereador Gumercindo Barbosa Dunda
+brs-simples 34.27 41.9
+aeroporto oitizeiro 9900 Acesso a Área de Embarque e Desembarque do Aeroporto Intercnacional Castro Pinto, Aeroporto Castro Pinto, Avenida Marechal Rondon, Rodovia Governador Mário Covas, Rodovia Governador Antônio Mariz, , Avenida Cruz das Armas
+oitizeiro cristo 5028 Avenida Cruz das Armas, Rua Professor Aníbal Moura Souza, Rua Manoel Guerra, Rua Professor Ernesto da Silveira, BR-101, , Rodovia Governador Antônio Mariz, Marginal Rodovia Governador Antônio Mariz, Viaduto Eduardo Campos, Estádio Almeidão, Acesso ao Almeidão
+cristo universidade_public 6449 Acesso ao Almeidão, , Rua Universitário Rogério Benevides, Rua Desportista Napoleão Duré, Rua Presidente Ranieri Mazilli, Avenida Diógenes Chianca, Rodovia Governador Antônio Mariz, Rua Joaquim Borba Filho, Rua José Firmino Ferreira, Rua Empresário João Rodrigues Alves, Rua Tabelião Estanislau Eloy, Via UFPB
+universidade_public shopping_ponto 7918 Via UFPB, Rua Tabelião Estanislau Eloy, Avenida Dom Pedro II, , Rodovia Governador Antônio Mariz, Rodovia Governador Pedro Gondim, Rua Edgar Sales de Miranda Henriques, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+shopping_ponto bessa 4970 Avenida Vereador Gumercindo Barbosa Dunda, Avenida Governador Flávio Ribeiro Coutinho, , Rodovia Governador Pedro Gondim, Rua Hortência Helena Brito, Rodovia BR-230, Rua Presidente Washington Luiz, Rua Renato de Souza Maciel
+brs-simples-volta 32.69 42.8
+bessa shopping_ponto 4831 Rua Renato de Souza Maciel, Rua Presidente Washington Luiz, Rua Tertuliano Castro, Avenida Tertuliano Castro, Avenida Campos Sales, Rua Doutor Gildemar Pereira de Macedo, Rua Doutor Francisco de Assis Câmara Dantas, Rua Philadelpho Pinto de Carvalho, Avenida Bacharel José de Oliveira Curchatuz, Rua Mirian Barreto Rabelo, Rua Suzi Lacerda Pereira, Rua Francisca Bezerra Dias, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+shopping_ponto universidade_public 7126 Avenida Vereador Gumercindo Barbosa Dunda, Rua Manoel Arruda Cavalcanti, Rua Escritor Sebastião de Azevedo Bastos, Rua Manoel Bezerra Cavalcanti, Rua Santos Coelho Neto, Avenida Maria Rosa Sales, Rua Maria Rosa Sales, Avenida Senador Ruy Carneiro, Rua Vereador Alberto Falcão Barroca, Rua Catulo da Paixão Cearense, Rua Antônio Rabelo Júnior, Rua Tito Silva, Avenida Presidente Castelo Branco, Avenida Doutor Apolônio da Nóbrega, Via UFPB
+universidade_public cristo 7794 Via UFPB, Rua Tabelião Estanislau Eloy, Avenida Dom Pedro II, , Rodovia Governador Antônio Mariz, Marginal Rodovia Governador Antônio Mariz, Marginal da Rodovia Governador Antônio Mariz, Viaduto Eduardo Campos, Acesso ao Almeidão
+cristo oitizeiro_back 4252 Acesso ao Almeidão, , Estádio Almeidão, Avenida Engenheiro Agrônomo Álvaro Ferreira, Rodovia Governador Antônio Mariz, Avenida Cruz das Armas, Rua Professor Aníbal Moura Souza, Rua Manoel Guerra, Rua Professor Ernesto da Silveira
+oitizeiro_back aeroporto 8686 Avenida Cruz das Armas, , Rodovia Governador Mário Covas, Avenida Marechal Rondon, Acesso a Área de Embarque e Desembarque do Aeroporto Intercnacional Castro Pinto
+brs-campus 16.87 24.6
+cristo hilton_cristo 830 Acesso ao Almeidão, , Rua Universitário Rogério Benevides, Rua Odilia T. Sabadelli
+hilton_cristo br230 3394 , Rua Odilia T. Sabadelli, Rua Desportista Napoleão Duré, Rua Presidente Ranieri Mazilli, Avenida Diógenes Chianca, Rodovia Governador Antônio Mariz
+br230 ct_public 1665 Rodovia Governador Antônio Mariz, , Rua Joaquim Borba Filho, Rua José Firmino Ferreira, Avenida Diógenes Chianca, Rua Empresário João Rodrigues Alves, Girador UFPB - Centro de Tecnologia
+ct_public campus_via 1050 Girador UFPB - Centro de Tecnologia, Rua Tabelião Estanislau Eloy, Girador UFPB - CCHLA
+campus_via universidade_public 1395 Girador UFPB - CCHLA, Via Expressa Padre Zé, Via UFPB
+universidade_public shopping_ponto 8534 Via UFPB, Rua Tabelião Estanislau Eloy, Avenida Dom Pedro II, , Rodovia Governador Antônio Mariz, Rodovia Governador Pedro Gondim, Rua Edgar Sales de Miranda Henriques, Rua Maria Rosa Padilha, Avenida Vereador Gumercindo Barbosa Dunda
+brs-campus-volta 16.97 24.0
+shopping_ponto universidade_public 7126 Avenida Vereador Gumercindo Barbosa Dunda, Rua Manoel Arruda Cavalcanti, Rua Escritor Sebastião de Azevedo Bastos, Rua Manoel Bezerra Cavalcanti, Rua Santos Coelho Neto, Avenida Maria Rosa Sales, Rua Maria Rosa Sales, Avenida Senador Ruy Carneiro, Rua Vereador Alberto Falcão Barroca, Rua Catulo da Paixão Cearense, Rua Antônio Rabelo Júnior, Rua Tito Silva, Avenida Presidente Castelo Branco, Avenida Doutor Apolônio da Nóbrega, Via UFPB
+universidade_public campus_via 1610 Via UFPB, Rua Tabelião Estanislau Eloy, Girador UFPB - CCHLA
+campus_via ct_public 996 Girador UFPB - CCHLA, Rua Tabelião Estanislau Eloy, Girador UFPB - Centro de Tecnologia
+ct_public br230_back 4108 Girador UFPB - Centro de Tecnologia, Rua Tabelião Estanislau Eloy, Avenida Dom Pedro II, , Rodovia Governador Antônio Mariz
+br230_back cristo 3125 Rodovia Governador Antônio Mariz, Marginal Rodovia Governador Antônio Mariz, Marginal da Rodovia Governador Antônio Mariz, Viaduto Eduardo Campos, , Acesso ao Almeidão
+l251-circuito 8.86 14.3
+cristo rangel 3036 Acesso ao Almeidão, Rua Antônio Teotônio, Rua Fernando Cunha Lima, Rua Sueli Pereira da Cunha, Rua Antônio Pádua Vasconcelos, Rua Antônio Alves da Cunha, Rua Professora Luiza Fernandes Vieira, Rua Presidente Carlos Luz, Rua Horácio Trajano de Oliveira, Rua Heronides Meira de Vasconcelos, Avenida 2 de Fevereiro, Rua Souza Rangel
+rangel vale_murilo 2284 Avenida 2 de Fevereiro, Rua Elias Cavalcanti de Albuquerque, Rua José Borges Coutinho, Travessa Murilo Buarque
+vale_murilo vale_palmeiras 420 Travessa Murilo Buarque, Rua Antônio Gomes da Silva
+vale_palmeiras vale_sul 547 Rua Antônio Gomes da Silva
+vale_sul cristo 2575 Rua Antônio Gomes da Silva, Rua Antônio Teotônio, , Estádio Almeidão, Avenida Valdemar Galdino Naziazeno, Acesso ao Almeidão
+geisel-curto 7.37 9.0
+val geisel 5430 Terminal de Integração do Valentina, Rua Mariângela Lucena Peixoto, Rua José de Oliveira Batista, Rua Flodoaldo Peixoto Filho, Rua Doutor Cícero Leite, Rua Adalgisa Carneiro Cavalcanti, Rua Humberto da Silva Paiva, Rua Empresário Abelardo Targino da Fonseca, , Avenida Presidente Juscelino Kubitschek
+geisel cristo 1935 Avenida Presidente Juscelino Kubitschek, Avenida Valdemar Naziazeno, Estádio Almeidão, Acesso ao Almeidão
+geisel-curto-volta 8.17 9.5
+cristo geisel 2455 Acesso ao Almeidão, , Estádio Almeidão, Avenida Valdemar Naziazeno, Avenida Presidente Juscelino Kubitschek
+geisel val 5714 Avenida Presidente Juscelino Kubitschek, , Rua Empresário Abelardo Targino da Fonseca, Rua Adalgisa Carneiro Cavalcanti, Rua Doutor Cícero Leite, Rua Flodoaldo Peixoto Filho, Rua Francisco Barbosa Sobrinho, Rua Mariângela Lucena Peixoto, Terminal de Integração do Valentina
