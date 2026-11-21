@@ -47,3 +47,13 @@ O mapa observado é vetorial, sem mapa detalhado de ruas. A referência históri
 - Confirmados abertura pela fonte SEMOB, 85 linhas no painel, consulta de horários e aviso de geometria ausente, sem exceções JavaScript. O corpo enviado pelo formulário foi verificado como `{"codes":[]}`, sem iniciar uma segunda coleta integral para esse teste de contrato.
 - Na verificação final do fallback, todas as requisições externas foram explicitamente interceptadas pelo teste. Os testes anteriores de troca de fundo chegaram a carregar tiles; não foram usados como comprovação de funcionamento offline.
 - Arquivos do estudo original foram preservados. Provedores, identidade e licenças estão registrados em [INTERFACE_E_MAPAS.md](INTERFACE_E_MAPAS.md).
+
+## Traçados por padrões observados — 21/11/2026
+
+- Gerados 39 sentidos/circuitos para os mesmos 23 serviços, por grafo dirigido de vias públicas, preferência de concentração SEMOB e bloqueio de circulação interna da UFPB. A revisão ativa é versionada separadamente do pacote original.
+- Testes de dados verificam a posição da Estação Cidade Universitária, a exclusão do interior do campus (com exceções explícitas para vias públicas de contorno), o deslocamento de Oitizeiro e a cópia exata dos trechos da 0301 na Lagoa/TIV em todos os 14 sentidos radiais.
+- Passaram 8 testes do planejador, além dos 16 testes da aplicação/coletor, dentro do Docker. Incluem preservação dos serviços/sentidos, extensões, referências, comparativos, sentido dirigido e preferência de ruas observadas.
+- No Chromium: API servindo a revisão correta, 39 traçados, marcadores de Cidade Universitária/Lagoa/Oitizeiro, sequência de vias por sentido, opção Circuito, comparação atualizada e telas de 320/390/1440 pixels, sem exceções JavaScript. Tiles externos bloqueados durante essa verificação.
+- Auditoria antes/depois pelo mesmo método: 69,6% → 83,0% da extensão em ruas com referência na rede observada, ponderada por extensão. Aumento em 35 sentidos; quatro não melhoraram esse indicador. Isso não mede demanda nem prova viabilidade de operação.
+- Entradas e saídas internas dos futuros terminais, restrições de conversão e gabarito de ônibus continuam pendentes. As referências de Oitizeiro adotam a área junto ao viaduto indicada pelo usuário, sem tratar o ponto aproximado como plataforma aprovada.
+- Fontes, método, tabela por serviço e encaixes de referência estão em [revisao-atual/README.md](proposta-brs-bhls/revisao-atual/README.md).

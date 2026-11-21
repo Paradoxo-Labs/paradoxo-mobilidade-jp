@@ -22,3 +22,12 @@
 - Fundos OpenStreetMap e Esri referenciados no Atlas de Distritos da Paraíba, com fallback Filipeia/IBGE e configuração em `apps/web/map-sources.json`.
 - Painel coleta sempre todo o catálogo e inicia pela base oficial quando disponível. Executada coleta de 85 linhas, 149 traçados e seis lacunas de geometria publicadas pela fonte.
 - Passaram 16 testes de backend e verificação de navegador em 320/390/1440 pixels, incluindo contrato da coleta integral e fallback offline.
+
+## 21/11/2026 — Revisão de todas as linhas por padrões da rede atual
+
+- Mantidos 23 serviços e 39 sentidos, com geometria recalculada por grafo dirigido OSM e preferência por concentração das linhas SEMOB.
+- Integração na Estação Cidade Universitária, com referências por sentido, sem Via UFPB ou atalhos internos do campus. Giradores públicos de contorno preservados.
+- Terminal Metropolitano no TIV atual; sete serviços radiais usam os trechos da 0301 na Lagoa e nos acessos de entrada/saída.
+- Oitizeiro deslocado para a área junto ao viaduto/BR-230, conforme confirmação do usuário sobre a imagem. Entrada operacional pendente de planta.
+- Gerador/auditoria em `apps/planner` e `docs/proposta-brs-bhls/revisao-atual`; arquivo original intacto. API e mapa apontam para a revisão ativa; detalhes mostram a sequência de vias.
+- 24 testes de backend/planejamento e verificação de navegador; fontes e resultados documentados na revisão ativa.

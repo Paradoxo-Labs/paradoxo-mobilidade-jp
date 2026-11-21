@@ -20,6 +20,8 @@ Coletor SEMOB, página da rede atual e mapa da proposta estão implementados. Ro
 4. Acrescentar comparação das duas redes ao atlas local.
 5. Refinar linhas, paradas, frequências, frota e fases de implantação.
 
+A revisão de todos os 39 sentidos já usa ruas públicas e concentração observada, com Cidade Universitária, TIV/Lagoa e Oitizeiro corrigidos. A próxima validação deve priorizar circulação interna dos novos terminais (incluindo acesso exato de Oitizeiro), restrições de conversão, gabarito e as referências ajustadas em até 100 m. Consultar `docs/proposta-brs-bhls/revisao-atual/README.md`.
+
 ## Plataforma
 
 1. Validar o uso local antes de migrar para API Laravel, PostgreSQL/PostGIS e frontend Next.js.

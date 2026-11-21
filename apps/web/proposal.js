@@ -1,4 +1,4 @@
-/* Visualização nativa do catálogo proposto; os arquivos de origem permanecem intactos. */
+/* Visualização da revisão ativa; o estudo importado permanece preservado como histórico. */
 (() => {
   const classes = {
     brs: {name: 'BRS', color: '#c71020'}, troncal: {name: 'Troncal', color: '#294e80'},
@@ -41,13 +41,13 @@
     const line = data.catalog.linhas.find(line => line.code === selected);
     $('proposal-map-title').textContent = line ? `${line.code} / ${line.name}` : 'Conexões propostas';
     const directionSelect = $('proposal-direction'); directionSelect.replaceChildren(new Option('Todos os sentidos', 'all'));
-    for (const entry of line?.sentidos || []) directionSelect.add(new Option(entry.sentido === 'circular' ? 'Circular' : entry.sentido === 'ida' ? 'Ida' : 'Volta', entry.sentido));
+    for (const entry of line?.sentidos || []) directionSelect.add(new Option(['circuito', 'circular'].includes(entry.sentido) ? 'Circuito' : entry.sentido === 'ida' ? 'Ida' : 'Volta', entry.sentido));
     directionSelect.value = direction; directionSelect.disabled = !line;
     map.render(features(), {selected: Boolean(line), color: feature => classes[feature.properties.classe]?.color || '#c71020'});
     renderPoints(line); legend(); detail(line);
   }
   function renderPoints(line) {
-    const names = {hub: 'Mangabeira', metro: 'Varadouro', bessa: 'Bessa', oitizeiro: 'Oitizeiro', cristo: 'Cristo', val: 'Valentina', universidade: 'UFPB'};
+    const names = {hub: 'Mangabeira', metro: 'Varadouro / TIV', bessa: 'Bessa', oitizeiro: 'Oitizeiro / BR-230', cristo: 'Cristo', val: 'Valentina', universidade: 'Est. Cidade Universitária', lagoa: 'Lagoa'};
     const markers = $('proposal-terminals').checked ? Object.entries(names).filter(([key]) => data.catalog.lugares[key]).map(([key, short]) => ({...data.catalog.lugares[key], terminal: true, short, label: data.catalog.lugares[key].label + ' · integração proposta'})) : [];
     if (line && $('proposal-points').checked) {
       const keys = new Set(line.sentidos.filter(s => direction === 'all' || s.sentido === direction).flatMap(s => s.waypoints));
@@ -72,8 +72,16 @@
       const item = element('div', undefined, 'path-summary');
       const km = new Intl.NumberFormat('pt-BR', {maximumFractionDigits: 2}).format(entry.distancia_km);
       item.append(element('strong', `${entry.sentido.toUpperCase()} / ${km} km`), element('span', `${entry.waypoints.length} referências de roteamento`)); paths.append(item);
+      if (entry.observed_streets_percent !== undefined) item.append(element('span', `${entry.observed_streets_percent.toLocaleString('pt-BR')}% do traçado em ruas com referência na rede observada`));
+      if (entry.central_pattern) item.append(element('p', 'Varadouro: acesso do TIV e passagem pela Lagoa conforme o padrão SEMOB da 0301, neste sentido.', 'muted'));
+      if (entry.street_sequence?.length) {
+        const streets = element('details', undefined, 'itinerary');
+        streets.append(element('summary', 'Ver sequência de vias da revisão'));
+        const list = element('ol'); entry.street_sequence.forEach(street => list.append(element('li', street)));
+        streets.append(list); item.append(streets);
+      }
     }
-    paths.append(element('p', 'Extensões calculadas pelo roteador. Referências não equivalem a paradas de embarque. Traçados sujeitos à validação para ônibus.', 'muted'));
+    paths.append(element('p', 'Extensões aproximadas. Priorização por ruas públicas e concentração de linhas observadas; isso não mede demanda ou frequência. Referências não equivalem a paradas. Conversões, gabarito e acessos de novos terminais ainda exigem validação.', 'muted'));
     grid.append(itinerary, paths); root.append(grid);
   }
   window.loadProposal = async () => {

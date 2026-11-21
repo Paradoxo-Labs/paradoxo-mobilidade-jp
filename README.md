@@ -66,6 +66,8 @@ Abra [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 O painel coleta sempre o catálogo completo. A execução de 21/11/2026 consultou 85 linhas e recebeu 149 traçados; seis linhas retornaram GeoJSON vazio e estão sinalizadas. Os dados coletados permanecem fora do Git. A interface inicia pela base SEMOB quando houver coleta local disponível.
 
+A [proposta ativa](docs/proposta-brs-bhls/revisao-atual/README.md) foi recalculada para priorizar os padrões da rede observada: integração na Estação Cidade Universitária, acessos do TIV Varadouro com passagem pela Lagoa, Oitizeiro junto ao viaduto/BR-230 e sequência de vias por sentido. O estudo original permanece preservado para comparação.
+
 Para iniciar uma coleta pequena pela CLI:
 
 ```sh

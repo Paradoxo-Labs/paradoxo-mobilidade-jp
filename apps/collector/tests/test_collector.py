@@ -173,6 +173,7 @@ class HTTPTests(unittest.TestCase):
         self.assertIn(b'lang="pt-BR"', self.get("/"))
         self.assertIn(b'23', self.get("/proposta-original"))
         proposal = json.loads(self.get("/api/proposal"))
+        self.assertEqual(proposal["catalog"]["revision"], "rede-observada-2026-11-21")
         self.assertEqual(len(proposal["catalog"]["linhas"]), 23)
         self.assertEqual(len(proposal["geojson"]["features"]), 39)
         self.assertEqual(set(proposal["comparisons"]), {"paratibe", "parque-do-sol"})

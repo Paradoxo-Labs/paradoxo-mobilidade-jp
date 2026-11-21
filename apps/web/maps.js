@@ -11,7 +11,7 @@ window.TransitMap = class {
     this.map.getPane('localBase').style.zIndex = 350;
     this.map.getPane('localBase').style.pointerEvents = 'none';
     this.map.setView([-7.14, -34.86], 12);
-    this.map.attributionControl.addAttribution('Filipeia · IBGE');
+    this.map.attributionControl.addAttribution('Filipeia · IBGE · © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>');
     L.control.scale({imperial: false, position: 'bottomleft'}).addTo(this.map);
     L.control.zoom({position: 'bottomright'}).addTo(this.map);
     this.routes = L.featureGroup().addTo(this.map);

@@ -8,11 +8,13 @@ A navegação foi reorganizada em cabeçalho horizontal. Os mapas têm painel de
 
 ## Proposta nativa
 
-A página da proposta deixou de embutir o HTML antigo em iframe. Ela consome `/api/proposal`, com os dados preservados da revisão de 21/11/2026: `dados/catalogo.json`, `linhas-por-sentido.geojson`, `waypoints-roteamento.json` e `comparativos-i332.json`.
+A página da proposta deixou de embutir o HTML antigo em iframe. Ela consome `/api/proposal`, atualmente apontando para `docs/proposta-brs-bhls/revisao-atual`, com catálogo, geometrias, referências e comparativos recalculados por ruas públicas e padrões observados. O estudo importado de 21/11/2026 permanece intacto como histórico.
 
 São 23 serviços e 39 geometrias por sentido, com busca por código/trecho, filtro de classe, seleção de sentido, integrações propostas, referências de roteamento e tela cheia. Os comparativos Paratibe/Parque do Sol mostram revisões da I-332, não uma validação da rede observada. Distâncias são referências do roteador e waypoints não equivalem a paradas de embarque.
 
 O mapa de origem continua disponível em `/proposta-original`; `/proposta` leva à nova página integrada. Os arquivos originais do estudo não foram modificados.
+
+A revisão ativa usa a Estação Cidade Universitária, preserva os acessos do TIV/Lagoa e desloca a referência de Oitizeiro para o viaduto/BR-230. Os detalhes de cada serviço mostram a sequência de vias e o percentual de extensão em ruas com referência observada. Método, diferenças e limites estão em [revisao-atual/README.md](proposta-brs-bhls/revisao-atual/README.md).
 
 ## Referência do Atlas de Distritos
 

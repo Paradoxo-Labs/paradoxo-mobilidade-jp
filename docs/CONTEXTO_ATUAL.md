@@ -82,3 +82,7 @@ Próxima etapa: revisar variantes/pendências da coleta completa e criar a compa
 A coleta completa foi executada em 21/11/2026: 85 linhas consultadas, 149 traçados recebidos e seis linhas sem geometria publicada no endpoint. A próxima etapa de dados passa a ser revisar essas lacunas e manter as coletas atualizadas.
 
 A interface agora segue a identidade do site Paradoxo, com logotipo oficial, Syne, Space Mono e cores institucionais. Os dois mapas são nativos em Leaflet; a proposta não usa mais iframe. Fontes de ruas, topografia e satélite foram referenciadas no Atlas de Distritos da Paraíba, preservando fallback vetorial local. Ver [interface e mapas](INTERFACE_E_MAPAS.md).
+
+## Revisão dos traçados propostos
+
+A proposta ativa passa a ser `docs/proposta-brs-bhls/revisao-atual`, com todos os 39 sentidos recalculados por ruas públicas e preferência por concentração de linhas observadas. A integração da UFPB foi corrigida para a Estação Cidade Universitária, sem Via UFPB/atalhos internos. O Terminal Metropolitano utiliza o espaço atual do TIV, com trechos centrais da 0301 e passagem pela Lagoa. Oitizeiro foi deslocado para a área junto ao viaduto/BR-230 indicada pelo usuário. A circulação interna dos novos terminais e restrições de conversão/gabarito continuam pendentes de validação. Ver [revisão ativa e auditoria](proposta-brs-bhls/revisao-atual/README.md).

@@ -54,6 +54,10 @@ Elas devem ser tratadas como:
 
 ## Como tratar dados reais
 
+### Resultados derivados da proposta ativa
+
+`docs/proposta-brs-bhls/revisao-atual` contém os resultados curados e versionados da proposta: catálogo, geometrias, referências, comparativos e auditoria. São insumos da aplicação, não exportações avulsas de execução. Sua inclusão no Git preserva a versão exata exibida pelo atlas e a rastreabilidade das decisões. As entradas brutas SEMOB/OSM ficam em `data/`, fora do Git; seus hashes e fontes constam na auditoria. A malha derivada mantém atribuição aos colaboradores do OpenStreetMap e referência à ODbL.
+
 ### Exceção documental: estudo de rede integrada de 21/11/2026
 
 O diretório `docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21` preserva o pacote de estudo recebido, incluindo geometrias propostas, cartografia de referência, resultados históricos e respostas de roteamento necessárias à reprodução offline. Esses arquivos formam uma base documental congelada, com procedência registrada em `docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md`. A exceção é restrita ao pacote importado; não autoriza versionar novas coletas, caches de execução ou exportações indiscriminadamente. As atribuições e condições das fontes externas continuam aplicáveis à publicação.

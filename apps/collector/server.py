@@ -12,6 +12,7 @@ from collector import DATA, ROOT, collect, export_csv, export_geojson, load_snap
 from semob import CODE
 
 STUDY = ROOT / "docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21"
+PROPOSAL = ROOT / "docs/proposta-brs-bhls/revisao-atual"
 WEB = ROOT / "apps/web"
 
 
@@ -112,7 +113,8 @@ class Handler(BaseHTTPRequestHandler):
         elif url.path == "/api/base":
             self.json(read_json(STUDY / "dados/base-cartografica.json"))
         elif url.path == "/api/proposal":
-            self.json({"catalog": read_json(STUDY / "dados/catalogo.json"), "geojson": read_json(STUDY / "dados/linhas-por-sentido.geojson"), "waypoints": read_json(STUDY / "dados/waypoints-roteamento.json"), "comparisons": read_json(STUDY / "dados/comparativos-i332.json")})
+            audit = read_json(PROPOSAL / "auditoria.json")
+            self.json({"catalog": read_json(PROPOSAL / "catalogo.json"), "geojson": read_json(PROPOSAL / "linhas-por-sentido.geojson"), "waypoints": read_json(PROPOSAL / "waypoints-roteamento.json"), "comparisons": read_json(PROPOSAL / "comparativos-i332.json"), "review": {"revision": audit["revision"], "method": audit["method"], "station_reference": audit["station_reference"], "oitizeiro_reference": audit["oitizeiro_reference"], "limits": audit["limits"]}})
         elif url.path == "/api/map-sources":
             self.json(read_json(WEB / "map-sources.json"))
         elif url.path == "/proposta":

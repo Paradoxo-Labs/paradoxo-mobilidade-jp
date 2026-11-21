@@ -111,7 +111,7 @@ Integração regional com municípios vizinhos.
 
 ### Terminal Metropolitano
 
-Local: Varadouro / antigo TIV.
+Local: mesmo espaço do atual Terminal de Integração do Varadouro (TIV), preservando rotas de entrada e saída e passagem pela Lagoa conforme os padrões observados. Não pressupõe deslocar as linhas para o terreno da rodoviária.
 
 Função:
 
@@ -122,6 +122,8 @@ Função:
 - rodoviário urbano.
 
 ### Terminal Oitizeiro
+
+Local de referência atualizado: área junto ao viaduto/BR-230, próxima ao novo mercado, conforme confirmação do usuário. A entrada operacional e as plataformas ainda precisam da planta do terminal. A antiga referência na feira foi substituída na [revisão ativa](revisao-atual/README.md).
 
 Função: portal oeste.
 
