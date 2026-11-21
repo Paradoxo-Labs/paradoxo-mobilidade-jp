@@ -13,7 +13,13 @@ Coletar, organizar e visualizar os dados públicos disponíveis sobre:
 - sentidos de viagem;
 - exportações para análise.
 
-## Fonte principal
+## Consulta local disponível
+
+Execute `bash scripts/run-dashboard.sh` e abra `http://127.0.0.1:8000`. A aba Rede atual permite alternar entre a referência histórica Bus4/EMS (111 códigos, 296 traçados/variantes e 3.047 paradas) e a base coletada da SEMOB, com busca, seleção de sentido e detalhes disponíveis.
+
+A aba Coletor SEMOB executa a coleta paginada de linhas, itinerários, horários e GeoJSON. Dados de execução ficam fora do Git e preservam as datas de coleta e atualização declarada pela fonte. Instruções completas: [coletor e servidor](../../apps/collector/README.md).
+
+## Fonte oficial de coleta
 
 A fonte inicial é o serviço público da SEMOB-JP de linhas de ônibus.
 

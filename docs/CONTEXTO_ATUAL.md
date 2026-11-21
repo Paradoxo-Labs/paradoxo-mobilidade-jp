@@ -1,6 +1,6 @@
 # Contexto Atual
 
-O Paradoxo Mobilidade JP está em fase inicial de estruturação.
+O Paradoxo Mobilidade JP possui uma primeira versão local funcional, implementada em 21/11/2026.
 
 O projeto começou a partir da necessidade de construir uma ferramenta local para trabalhar com dados reais das linhas de ônibus de João Pessoa, coletados a partir de fontes públicas da SEMOB-JP.
 
@@ -53,9 +53,9 @@ Importante: as linhas da proposta ainda não estão definidas de forma final. El
 
 O repositório possui estrutura preparada para:
 
-- coletor Python/Streamlit em apps/collector;
+- coletor SEMOB e servidor Python com biblioteca padrão em apps/collector;
 - futura API Laravel em apps/api;
-- futuro frontend Next.js em apps/web;
+- frontend local HTML/CSS/JavaScript com D3 em apps/web; Next.js permanece previsto para evolução;
 - documentação técnica em docs;
 - contextos para IA em ai;
 - dados locais em data;
@@ -67,18 +67,10 @@ O repositório possui estrutura preparada para:
 
 O pacote `mobilidade-jp-projeto-codex.zip` foi incorporado ao eixo da proposta em `docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21`. Contém 23 linhas propostas, 39 traçados de referência, mapa offline, scripts de geração e referências históricas da rede observada.
 
-O [registro de integração](proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md) reúne inventário, diferenças em relação ao conceito inicial e pendências. O estudo complementar não substitui automaticamente a arquitetura inicial, nem demonstra cobertura integral ou viabilidade operacional. Seus dados históricos não substituem uma nova coleta da SEMOB-JP. O mapa já pode ser consultado, enquanto o coletor, a API e o frontend continuam pendentes.
+O [registro de integração](proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md) reúne inventário, diferenças em relação ao conceito inicial e pendências. O estudo complementar não substitui automaticamente a arquitetura inicial, nem demonstra cobertura integral ou viabilidade operacional. Seus dados históricos não substituem uma nova coleta da SEMOB-JP.
 
-Mover o coletor local existente para:
+O coletor e o painel estão implementados. Executar `bash scripts/run-dashboard.sh` e abrir `http://127.0.0.1:8000`. Há navegação entre rede atual, proposta e coleta. A rede atual inicia com a referência histórica offline; a coleta oficial fica em base separada e acrescenta itinerários textuais, horários e geometrias da SEMOB.
 
-apps/collector
+O coletor percorre a listagem paginada, registra respostas originais, datas e pendências por campo. As exportações disponíveis são JSON completo, GeoJSON e catálogo CSV. Foram coletadas localmente as linhas 0002 e 0003 para validação; esses dados de execução não são versionados e não significam que o catálogo completo tenha sido coletado.
 
-Depois estabilizar:
-
-- coleta das linhas da SEMOB;
-- coleta de horários;
-- coleta de itinerários;
-- coleta do GeoJSON oficial;
-- exportação Excel;
-- exportação GeoJSON geral;
-- painel local.
+Próxima etapa: coletar o catálogo completo, revisar variantes/pendências e criar a comparação de cobertura entre as duas redes. Exportação Excel, Docker, API Laravel, PostGIS e migração do frontend para Next.js continuam pendentes. Detalhes em [apps/collector/README.md](../apps/collector/README.md).

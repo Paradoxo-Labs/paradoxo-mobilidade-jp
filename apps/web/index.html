@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#132c3a">
+  <title>Paradoxo · Mobilidade JP</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/vendor/d3.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="rail">
+    <a href="#atual" class="brand"><span class="brand-mark" aria-hidden="true">P<span>↗</span></span><span>PARADOXO<small>LABS / MOBILIDADE JP</small></span></a>
+    <p class="rail-label">ATLAS DA MOBILIDADE</p>
+    <nav aria-label="Navegação principal">
+      <a href="#atual" data-view="atual"><span aria-hidden="true">◎</span> Rede atual</a>
+      <a href="#proposta" data-view="proposta"><span aria-hidden="true">⌘</span> Rede proposta</a>
+      <a href="#coletor" data-view="coletor" aria-label="Coletor SEMOB"><span aria-hidden="true">↓</span> Coletor</a>
+    </nav>
+    <div class="rail-footer"><span class="local-tag">AMBIENTE LOCAL</span><p>João Pessoa · Paraíba<br>Dados públicos, novas possibilidades.</p><small>Uma iniciativa independente.<br>Proposta em estudo, sem caráter oficial.</small></div>
+  </aside>
+  <main>
+    <header class="page-header"><div><p class="eyebrow">PARADOXO MOBILIDADE JP</p><h1 id="page-title">Entender a rede de hoje.</h1><p id="page-description">Explore os trajetos, consulte as linhas e conheça as fontes.</p></div><span class="city-tag">JOÃO PESSOA / PB</span></header>
+    <div id="global-error" class="notice error" role="alert" hidden></div>
+
+    <section id="view-atual" aria-label="Rede atual observada">
+      <div class="stats" id="network-stats" aria-live="polite"><div><strong id="line-count">—</strong><span>códigos de linha na base</span></div><div><strong id="route-count">—</strong><span>traçados e variantes</span></div><div><strong id="stop-count">—</strong><span>paradas de referência</span></div><div class="stat-source"><span>ORIGEM DOS DADOS</span><strong id="source-label">Carregando base local…</strong><small id="source-date"></small></div></div>
+      <div id="network-notice" class="notice" aria-live="polite"></div>
+      <div class="workspace">
+        <aside class="line-panel">
+          <label for="source">Base em consulta</label>
+          <select id="source"><option value="historical">Referência histórica · Bus4/EMS</option><option value="semob">Coleta local · SEMOB-JP</option></select>
+          <label for="search">Encontrar uma linha</label>
+          <input id="search" type="search" placeholder="Código, nome ou rua coletada" autocomplete="off">
+          <div class="list-heading"><span id="results-count">Carregando linhas…</span><button id="show-all" class="text-button" type="button">Ver todas no mapa</button></div>
+          <div id="lines" class="line-list" aria-label="Linhas disponíveis"></div>
+        </aside>
+        <div class="map-panel">
+          <div class="map-toolbar"><div><span class="eyebrow">REDE OBSERVADA</span><h2 id="map-title">Visão geral dos trajetos</h2></div><button id="reset-map" class="secondary" type="button">Enquadrar mapa</button></div>
+          <div class="map-controls"><label for="direction">Sentido / variante</label><select id="direction" disabled><option value="all">Todos os traçados</option></select><label class="check"><input id="show-stops" type="checkbox"> Paradas de referência</label></div>
+          <div class="map-canvas"><svg id="network-map" role="img" aria-label="Mapa dos itinerários da rede observada"><title>Rede de ônibus</title></svg><div class="map-note">Base vetorial offline<br><span>Bairros, hidrografia e itinerários</span></div><div class="zoom-controls" aria-label="Controles do mapa"><button id="zoom-in" type="button" aria-label="Aproximar mapa">+</button><button id="zoom-out" type="button" aria-label="Afastar mapa">−</button></div></div>
+          <div class="map-footer"><span><i class="swatch"></i> <span id="map-legend">Traçados da base selecionada</span></span><small>Cartografia: Filipeia, IBGE · malha de referência: OpenStreetMap</small></div>
+        </div>
+      </div>
+      <section id="line-detail" class="details" aria-live="polite"><p class="empty-state">Selecione uma linha para consultar seus sentidos, itinerário e horários disponíveis.</p></section>
+    </section>
+
+    <section id="view-proposta" aria-label="Rede proposta" hidden>
+      <div class="stats"><div><strong>23</strong><span>linhas propostas</span></div><div><strong>39</strong><span>traçados de referência</span></div><div><strong>7</strong><span>classes de serviço</span></div><div class="stat-source"><span>REVISÃO DO ESTUDO</span><strong>21 de novembro de 2026</strong><small>Rede integrada · estudo complementar</small></div></div>
+      <div class="notice">Estudo conceitual independente. Traçados, terminais e serviços são hipóteses de planejamento; ainda dependem de validação de cobertura, demanda e operação. A conciliação com o conceito inicial está pendente.</div>
+      <div class="proposal-card"><div class="map-toolbar"><div><span class="eyebrow">CENÁRIO EM ESTUDO</span><h2>Uma rede mais conectada.</h2></div><a class="secondary" href="/proposta" target="_blank" rel="noopener">Abrir mapa completo</a></div><iframe id="proposal-map" title="Mapa interativo da rede integrada proposta, com filtros por linha e região" loading="lazy"></iframe></div>
+    </section>
+
+    <section id="view-coletor" aria-label="Coletor SEMOB" hidden>
+      <div class="collector-layout"><section class="card collector-form"><p class="eyebrow">FONTE OFICIAL / DADOS PÚBLICOS</p><h2>Trazer a rede para perto.</h2><p>Consulte o catálogo da SEMOB e salve itinerários, horários e geometrias para explorar aqui, mesmo sem internet depois da coleta.</p>
+        <form id="collect-form"><label for="codes">Códigos das linhas</label><input id="codes" name="codes" placeholder="Ex.: 0002, 0101, I004" value="0002"><small>Separe por vírgulas. Deixe vazio para coletar todo o catálogo; isso pode levar vários minutos.</small><button id="collect-button" class="primary" type="submit">Coletar dados da SEMOB</button></form>
+        <div id="job-status" class="job-status" aria-live="polite">Consultando estado da coleta…</div><progress id="job-progress" max="1" value="0" hidden></progress><p id="job-error" class="error-text" role="alert" hidden></p>
+      </section><section class="card"><p class="eyebrow">SUA BASE LOCAL</p><h2>Dados com procedência.</h2><p id="collection-summary">Ainda não há dados coletados da SEMOB.</p><p>As linhas atualizadas substituem suas versões anteriores. As demais ficam preservadas. Datas de coleta e de atualização declarada pela fonte aparecem separadamente.</p><div id="downloads" class="downloads" hidden><a class="secondary" href="/api/download?format=json">Baixar JSON completo</a><a class="secondary" href="/api/download?format=geojson">Baixar GeoJSON</a><a class="secondary" href="/api/download?format=csv">Baixar catálogo CSV</a><button id="open-official" class="primary" type="button">Consultar no mapa</button></div></section></div>
+      <section class="card methodology"><p class="eyebrow">COMO FUNCIONA</p><h2>Uma coleta, três camadas de informação.</h2><div class="method-grid"><div><h3>Catálogo e itinerários</h3><p>Percorre a listagem paginada e lê as ruas por sentido e variante, preservando os códigos publicados.</p></div><div><h3>Geometrias do mapa</h3><p>Consome o GeoJSON utilizado pelo mapa da SEMOB. Não reconstrói trajetos pelos nomes das ruas.</p></div><div><h3>Quadros de horários</h3><p>Registra os dias e partidas publicados. Um dia ausente não é interpretado como ausência de serviço.</p></div></div><p class="source-links">Fonte: <a href="https://servicos.semobjp.pb.gov.br/linhas-de-onibus/" target="_blank" rel="noopener">Serviço de linhas de ônibus da SEMOB-JP</a>. Respostas originais e relatório de cada execução são mantidos localmente.</p></section>
+    </section>
+    <footer class="page-footer"><span>PARADOXO LABS <span aria-hidden="true">/</span> MOBILIDADE JP</span><span>Conhecer o presente. Planejar as conexões.</span></footer>
+  </main>
+</body>
+</html>

@@ -34,13 +34,38 @@ Construir uma base técnica para:
 
 ## Status
 
-Projeto em fase inicial.
+Primeira versão local implementada: rede atual observada, mapa da proposta e coletor da SEMOB na mesma navegação.
 
 A proposta conta também com um [estudo complementar de rede integrada, revisão de 21/11/2026](docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md), com 23 linhas propostas, 39 traçados de referência e mapa interativo offline. O estudo amplia o material disponível para análise; a codificação e os traçados ainda precisam ser conciliados com o conceito inicial.
 
-A estrutura base do repositório já está criada e preparada para:
+A aplicação atual utiliza Python 3.10+ com biblioteca padrão no servidor/coletor e HTML/CSS/JavaScript com D3 no frontend. Não exige instalação de pacotes para rodar em Linux/Ubuntu/WSL.
 
-- coletor local em Python/Streamlit;
+## Rodar localmente
+
+```sh
+bash scripts/setup.sh
+bash scripts/run-dashboard.sh
+```
+
+Abra [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+- **Rede atual:** referência histórica offline de 111 códigos de linha, 296 traçados/variantes e 3.047 paradas; seleção de linha/sentido e consulta dos dados disponíveis.
+- **Rede proposta:** mapa interativo do estudo complementar, com 23 linhas e 39 traçados.
+- **Coletor SEMOB:** coleta de linhas, ruas por sentido, horários e GeoJSON, progresso e downloads. A base SEMOB é consultada separadamente da referência histórica.
+
+Para iniciar uma coleta pequena pela CLI:
+
+```sh
+bash scripts/collect-all.sh --line 0002
+```
+
+Sem `--line`, o coletor percorre todo o catálogo. As respostas e o conjunto processado ficam em `data/`, fora do Git. Uma nova instalação abre com a referência histórica; a coleta oficial depende de acesso à internet. Consulte [execução, armazenamento e limites](apps/collector/README.md).
+
+## Evolução prevista
+
+A estrutura mantém espaço para:
+
+- evolução do coletor local Python;
 - futura API Laravel;
 - futuro frontend Next.js;
 - Docker;
@@ -58,9 +83,9 @@ As linhas propostas ainda não devem ser interpretadas como desenho final de red
 
 ## Estrutura
 
-apps/collector  - Coletor atual em Python/Streamlit
+apps/collector  - Coletor SEMOB e servidor local Python
 apps/api        - Futuro backend Laravel
-apps/web        - Futuro frontend Next.js
+apps/web        - Frontend local HTML/CSS/JavaScript; Next.js previsto para evolução
 docker/         - Infraestrutura Docker
 data/           - Dados locais coletados/processados
 exports/        - Arquivos exportados
