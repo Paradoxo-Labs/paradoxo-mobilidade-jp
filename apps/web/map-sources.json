@@ -1,0 +1,32 @@
+{
+  "reference_project": "https://paraiba-distritos-eleitorais.dev-jailson.chatgpt.site",
+  "sources": [
+    {
+      "id": "local",
+      "label": "Local · sem internet",
+      "description": "Filipeia / IBGE · bairros e hidrografia",
+      "attribution": "Filipeia · IBGE"
+    },
+    {
+      "id": "streets",
+      "label": "Ruas · OpenStreetMap",
+      "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "attribution": "© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+      "maxZoom": 19
+    },
+    {
+      "id": "terrain",
+      "label": "Topografia · Esri",
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+      "attribution": "Esri · USGS · NOAA · © OpenStreetMap contributors",
+      "maxZoom": 19
+    },
+    {
+      "id": "satellite",
+      "label": "Satélite · Esri",
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      "attribution": "Esri · Maxar · Earthstar Geographics · GIS User Community",
+      "maxZoom": 18
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# Distribuição externa preservada com a formatação original do Leaflet.
+apps/web/vendor/leaflet/* -whitespace

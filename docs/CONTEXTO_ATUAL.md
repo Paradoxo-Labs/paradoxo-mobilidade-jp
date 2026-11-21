@@ -55,7 +55,7 @@ O repositório possui estrutura preparada para:
 
 - coletor SEMOB e servidor Python com biblioteca padrão em apps/collector;
 - futura API Laravel em apps/api;
-- frontend local HTML/CSS/JavaScript com D3 em apps/web; Next.js permanece previsto para evolução;
+- frontend local HTML/CSS/JavaScript com Leaflet em apps/web; Next.js permanece previsto para evolução;
 - documentação técnica em docs;
 - contextos para IA em ai;
 - dados locais em data;
@@ -75,4 +75,10 @@ O coletor percorre a listagem paginada, registra respostas originais, datas e pe
 
 O atlas também possui execução com Docker Compose: `docker compose up -d --build --wait`, com serviço único, verificação de saúde, publicação em localhost e dados persistidos em `./data`. Ver [Docker](../docker/README.md).
 
-Próxima etapa: coletar o catálogo completo, revisar variantes/pendências e criar a comparação de cobertura entre as duas redes. Exportação Excel, API Laravel, PostGIS e migração do frontend para Next.js continuam pendentes. Detalhes em [apps/collector/README.md](../apps/collector/README.md).
+Próxima etapa: revisar variantes/pendências da coleta completa e criar a comparação de cobertura entre as duas redes. Exportação Excel, API Laravel, PostGIS e migração do frontend para Next.js continuam pendentes. Detalhes em [apps/collector/README.md](../apps/collector/README.md).
+
+## Atualização da interface e coleta integral
+
+A coleta completa foi executada em 21/11/2026: 85 linhas consultadas, 149 traçados recebidos e seis linhas sem geometria publicada no endpoint. A próxima etapa de dados passa a ser revisar essas lacunas e manter as coletas atualizadas.
+
+A interface agora segue a identidade do site Paradoxo, com logotipo oficial, Syne, Space Mono e cores institucionais. Os dois mapas são nativos em Leaflet; a proposta não usa mais iframe. Fontes de ruas, topografia e satélite foram referenciadas no Atlas de Distritos da Paraíba, preservando fallback vetorial local. Ver [interface e mapas](INTERFACE_E_MAPAS.md).

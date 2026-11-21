@@ -34,7 +34,11 @@ def historical_network():
 def semob_network(snapshot):
     active = {item["code"] for item in snapshot["catalog"]}
     lines = [{**{k: v for k, v in line.items() if k != "geojson"}, "in_latest_catalog": line["code"] in active} for line in snapshot["lines"]]
-    return {"source": "semob", "label": "Coleta local · SEMOB-JP", "retrieved_at": snapshot["retrieved_at"], "lines": lines, "geojson": export_geojson(snapshot), "stops": {"type": "FeatureCollection", "features": []}, "catalog_count": len(snapshot["catalog"]), "last_run": snapshot["last_run"], "warnings": ["Cada linha mantém sua data de coleta. A data de atualização declarada pela SEMOB pode ser anterior.", "A coleção local pode cobrir apenas parte do catálogo. Campos com falha ficam identificados nos detalhes da linha."]}
+    missing = [line["code"] for line in snapshot["lines"] if not line["geojson"]["features"]]
+    warnings = ["Cada linha mantém sua data de coleta. A data de atualização declarada pela SEMOB pode ser anterior.", "Campos indisponíveis ficam identificados nos detalhes da linha."]
+    if missing:
+        warnings.append("Sem geometria disponível na coleta: " + ", ".join(missing) + ".")
+    return {"source": "semob", "label": "Coleta local · SEMOB-JP", "retrieved_at": snapshot["retrieved_at"], "lines": lines, "geojson": export_geojson(snapshot), "stops": {"type": "FeatureCollection", "features": []}, "catalog_count": len(snapshot["catalog"]), "last_run": snapshot["last_run"], "warnings": warnings}
 
 
 class AtlasServer(ThreadingHTTPServer):
@@ -82,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-cache")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
         if filename:
             self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
         self.end_headers()
@@ -104,9 +108,18 @@ class Handler(BaseHTTPRequestHandler):
             snapshot = load_snapshot(self.server.data_dir)
             with self.server.job_lock:
                 job = dict(self.server.job)
-            self.json({"job": job, "semob_available": bool(snapshot), "semob_lines": len(snapshot["lines"]) if snapshot else 0, "catalog_count": len(snapshot["catalog"]) if snapshot else 0, "retrieved_at": snapshot["retrieved_at"] if snapshot else None})
+            self.json({"job": job, "semob_available": bool(snapshot), "semob_lines": len(snapshot["lines"]) if snapshot else 0, "catalog_count": len(snapshot["catalog"]) if snapshot else 0, "geometry_count": sum(len(line["geojson"]["features"]) for line in snapshot["lines"]) if snapshot else 0, "pending_count": sum(len(line["errors"]) for line in snapshot["lines"]) if snapshot else 0, "retrieved_at": snapshot["retrieved_at"] if snapshot else None})
         elif url.path == "/api/base":
             self.json(read_json(STUDY / "dados/base-cartografica.json"))
+        elif url.path == "/api/proposal":
+            self.json({"catalog": read_json(STUDY / "dados/catalogo.json"), "geojson": read_json(STUDY / "dados/linhas-por-sentido.geojson"), "waypoints": read_json(STUDY / "dados/waypoints-roteamento.json"), "comparisons": read_json(STUDY / "dados/comparativos-i332.json")})
+        elif url.path == "/api/map-sources":
+            self.json(read_json(WEB / "map-sources.json"))
+        elif url.path == "/proposta":
+            self.send_response(302)
+            self.send_header("Location", "/#proposta")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
         elif url.path == "/api/network":
             source = params.get("source", ["historical"])[0]
             if source == "historical":
@@ -131,7 +144,12 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.json({"error": "Formato desconhecido"}, 400)
         else:
-            files = {"/": WEB / "index.html", "/app.js": WEB / "app.js", "/styles.css": WEB / "styles.css", "/vendor/d3.js": STUDY / "mapa/d3.js", "/proposta": STUDY / "mapa.html"}
+            files = {"/": WEB / "index.html", "/app.js": WEB / "app.js", "/maps.js": WEB / "maps.js", "/proposal.js": WEB / "proposal.js", "/styles.css": WEB / "styles.css", "/vendor/d3.js": STUDY / "mapa/d3.js", "/proposta-original": STUDY / "mapa.html"}
+            for asset in (WEB / "assets").iterdir():
+                if asset.is_file():
+                    files["/assets/" + asset.name] = asset
+            for name in ("leaflet.js", "leaflet.css"):
+                files["/vendor/leaflet/" + name] = WEB / "vendor/leaflet" / name
             path = files.get(url.path)
             if path:
                 self.send(path.read_bytes(), (mimetypes.guess_type(str(path))[0] or "application/octet-stream") + "; charset=utf-8")

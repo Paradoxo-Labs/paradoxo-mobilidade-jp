@@ -3,22 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#132c3a">
+  <meta name="theme-color" content="#111112">
   <title>Paradoxo · Mobilidade JP</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/vendor/d3.js" defer></script>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <script src="/vendor/leaflet/leaflet.js" defer></script>
+  <script src="/maps.js" defer></script>
   <script src="/app.js" defer></script>
+  <script src="/proposal.js" defer></script>
 </head>
 <body>
   <aside class="rail">
-    <a href="#atual" class="brand"><span class="brand-mark" aria-hidden="true">P<span>↗</span></span><span>PARADOXO<small>LABS / MOBILIDADE JP</small></span></a>
-    <p class="rail-label">ATLAS DA MOBILIDADE</p>
+    <a href="#atual" class="brand" aria-label="Paradoxo Labs · Mobilidade JP"><img src="/assets/paradoxo-logo.webp" alt="Paradoxo Labs" width="162" height="54"><span class="product-name">MOBILIDADE JP</span></a>
     <nav aria-label="Navegação principal">
       <a href="#atual" data-view="atual"><span aria-hidden="true">◎</span> Rede atual</a>
       <a href="#proposta" data-view="proposta"><span aria-hidden="true">⌘</span> Rede proposta</a>
       <a href="#coletor" data-view="coletor" aria-label="Coletor SEMOB"><span aria-hidden="true">↓</span> Coletor</a>
     </nav>
-    <div class="rail-footer"><span class="local-tag">AMBIENTE LOCAL</span><p>João Pessoa · Paraíba<br>Dados públicos, novas possibilidades.</p><small>Uma iniciativa independente.<br>Proposta em estudo, sem caráter oficial.</small></div>
+    <span class="local-tag">LAB / JOÃO PESSOA</span>
   </aside>
   <main>
     <header class="page-header"><div><p class="eyebrow">PARADOXO MOBILIDADE JP</p><h1 id="page-title">Entender a rede de hoje.</h1><p id="page-description">Explore os trajetos, consulte as linhas e conheça as fontes.</p></div><span class="city-tag">JOÃO PESSOA / PB</span></header>
@@ -38,8 +40,8 @@
         </aside>
         <div class="map-panel">
           <div class="map-toolbar"><div><span class="eyebrow">REDE OBSERVADA</span><h2 id="map-title">Visão geral dos trajetos</h2></div><button id="reset-map" class="secondary" type="button">Enquadrar mapa</button></div>
-          <div class="map-controls"><label for="direction">Sentido / variante</label><select id="direction" disabled><option value="all">Todos os traçados</option></select><label class="check"><input id="show-stops" type="checkbox"> Paradas de referência</label></div>
-          <div class="map-canvas"><svg id="network-map" role="img" aria-label="Mapa dos itinerários da rede observada"><title>Rede de ônibus</title></svg><div class="map-note">Base vetorial offline<br><span>Bairros, hidrografia e itinerários</span></div><div class="zoom-controls" aria-label="Controles do mapa"><button id="zoom-in" type="button" aria-label="Aproximar mapa">+</button><button id="zoom-out" type="button" aria-label="Afastar mapa">−</button></div></div>
+          <div class="map-controls"><label for="direction">Sentido / variante</label><select id="direction" disabled><option value="all">Todos os traçados</option></select><label for="current-base">Mapa base</label><select id="current-base" aria-label="Mapa base da rede atual"></select><label class="check"><input id="show-stops" type="checkbox"> Paradas de referência</label></div>
+          <div class="map-canvas"><div id="network-map" class="interactive-map" aria-label="Mapa dos itinerários da rede observada"></div><div class="map-note" id="current-map-note">Cartografia local · Filipeia / IBGE</div><div class="zoom-controls" aria-label="Controles do mapa"><button id="zoom-in" type="button" aria-label="Aproximar mapa">+</button><button id="zoom-out" type="button" aria-label="Afastar mapa">−</button></div></div>
           <div class="map-footer"><span><i class="swatch"></i> <span id="map-legend">Traçados da base selecionada</span></span><small>Cartografia: Filipeia, IBGE · malha de referência: OpenStreetMap</small></div>
         </div>
       </div>
@@ -49,12 +51,21 @@
     <section id="view-proposta" aria-label="Rede proposta" hidden>
       <div class="stats"><div><strong>23</strong><span>linhas propostas</span></div><div><strong>39</strong><span>traçados de referência</span></div><div><strong>7</strong><span>classes de serviço</span></div><div class="stat-source"><span>REVISÃO DO ESTUDO</span><strong>21 de novembro de 2026</strong><small>Rede integrada · estudo complementar</small></div></div>
       <div class="notice">Estudo conceitual independente. Traçados, terminais e serviços são hipóteses de planejamento; ainda dependem de validação de cobertura, demanda e operação. A conciliação com o conceito inicial está pendente.</div>
-      <div class="proposal-card"><div class="map-toolbar"><div><span class="eyebrow">CENÁRIO EM ESTUDO</span><h2>Uma rede mais conectada.</h2></div><a class="secondary" href="/proposta" target="_blank" rel="noopener">Abrir mapa completo</a></div><iframe id="proposal-map" title="Mapa interativo da rede integrada proposta, com filtros por linha e região" loading="lazy"></iframe></div>
+      <div class="workspace proposal-workspace">
+        <aside class="line-panel"><label for="proposal-search">Encontrar um serviço</label><input id="proposal-search" type="search" placeholder="Código, destino ou trecho"><label for="proposal-class">Classe de serviço</label><select id="proposal-class"><option value="all">Todas as classes</option></select><div class="list-heading"><span id="proposal-count">Carregando serviços…</span><button id="proposal-all" class="text-button" type="button">Ver toda a rede</button></div><div id="proposal-lines" class="line-list" aria-label="Serviços propostos"></div></aside>
+        <div class="map-panel"><div class="map-toolbar"><div><span class="eyebrow">REDE INTEGRADA / ESTUDO</span><h2 id="proposal-map-title">Conexões propostas</h2></div><div class="toolbar-actions"><button id="proposal-fit" class="secondary" type="button">Enquadrar</button><button id="proposal-fullscreen" class="secondary" type="button">Tela cheia</button></div></div>
+          <div class="map-controls"><label for="proposal-direction">Sentido</label><select id="proposal-direction" disabled><option value="all">Todos os sentidos</option></select><label for="proposal-base">Mapa base</label><select id="proposal-base" aria-label="Mapa base da proposta"></select><label class="check"><input type="checkbox" id="proposal-terminals" checked> Integrações</label><label class="check"><input type="checkbox" id="proposal-points"> Referências do percurso</label></div>
+          <div class="map-canvas" id="proposal-canvas"><div id="proposal-map" class="interactive-map" aria-label="Mapa interativo da rede proposta"></div><div class="map-note" id="proposal-map-note">Cartografia local · Filipeia / IBGE</div></div><div id="proposal-legend" class="map-footer class-legend"></div>
+        </div>
+      </div>
+      <section id="proposal-detail" class="details" aria-live="polite"><p class="empty-state">Escolha um serviço para explorar o itinerário, os sentidos e as conexões propostas.</p></section>
+      <section class="comparison-strip"><div><p class="eyebrow">HISTÓRICO DA I-332</p><h3>O que mudou no percurso?</h3></div><label for="proposal-comparison">Recorte</label><select id="proposal-comparison"><option value="">Sem comparação</option><option value="paratibe">Paratibe · antes e depois</option><option value="parque-do-sol">Parque do Sol · antes e depois</option></select><p>Compara revisões do estudo; não representa validação da operação atual.</p></section>
+      <p class="muted archive-link">O estudo original foi preservado para consulta: <a href="/proposta-original" target="_blank" rel="noopener">abrir mapa de origem</a>.</p>
     </section>
 
     <section id="view-coletor" aria-label="Coletor SEMOB" hidden>
       <div class="collector-layout"><section class="card collector-form"><p class="eyebrow">FONTE OFICIAL / DADOS PÚBLICOS</p><h2>Trazer a rede para perto.</h2><p>Consulte o catálogo da SEMOB e salve itinerários, horários e geometrias para explorar aqui, mesmo sem internet depois da coleta.</p>
-        <form id="collect-form"><label for="codes">Códigos das linhas</label><input id="codes" name="codes" placeholder="Ex.: 0002, 0101, I004" value="0002"><small>Separe por vírgulas. Deixe vazio para coletar todo o catálogo; isso pode levar vários minutos.</small><button id="collect-button" class="primary" type="submit">Coletar dados da SEMOB</button></form>
+        <form id="collect-form"><p class="collection-scope"><strong>Catálogo completo da SEMOB</strong><br>Todas as linhas publicadas, com os sentidos e variantes disponíveis. A coleta pode levar alguns minutos.</p><button id="collect-button" class="primary" type="submit">Coletar todas as rotas</button></form>
         <div id="job-status" class="job-status" aria-live="polite">Consultando estado da coleta…</div><progress id="job-progress" max="1" value="0" hidden></progress><p id="job-error" class="error-text" role="alert" hidden></p>
       </section><section class="card"><p class="eyebrow">SUA BASE LOCAL</p><h2>Dados com procedência.</h2><p id="collection-summary">Ainda não há dados coletados da SEMOB.</p><p>As linhas atualizadas substituem suas versões anteriores. As demais ficam preservadas. Datas de coleta e de atualização declarada pela fonte aparecem separadamente.</p><div id="downloads" class="downloads" hidden><a class="secondary" href="/api/download?format=json">Baixar JSON completo</a><a class="secondary" href="/api/download?format=geojson">Baixar GeoJSON</a><a class="secondary" href="/api/download?format=csv">Baixar catálogo CSV</a><button id="open-official" class="primary" type="button">Consultar no mapa</button></div></section></div>
       <section class="card methodology"><p class="eyebrow">COMO FUNCIONA</p><h2>Uma coleta, três camadas de informação.</h2><div class="method-grid"><div><h3>Catálogo e itinerários</h3><p>Percorre a listagem paginada e lê as ruas por sentido e variante, preservando os códigos publicados.</p></div><div><h3>Geometrias do mapa</h3><p>Consome o GeoJSON utilizado pelo mapa da SEMOB. Não reconstrói trajetos pelos nomes das ruas.</p></div><div><h3>Quadros de horários</h3><p>Registra os dias e partidas publicados. Um dia ausente não é interpretado como ausência de serviço.</p></div></div><p class="source-links">Fonte: <a href="https://servicos.semobjp.pb.gov.br/linhas-de-onibus/" target="_blank" rel="noopener">Serviço de linhas de ônibus da SEMOB-JP</a>. Respostas originais e relatório de cada execução são mantidos localmente.</p></section>

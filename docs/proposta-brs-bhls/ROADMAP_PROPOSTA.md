@@ -15,10 +15,11 @@
 
 Já existe um [estudo complementar](INTEGRACAO_REDE_INTEGRADA.md) com mapa, 23 linhas propostas, 39 traçados e comparativos históricos. Esses materiais são insumos para as etapas abaixo; não representam validação completa da rede atual nem conclusão do mapa operacional.
 
-- [ ] Coletar todas as linhas atuais.
-- [ ] Coletar itinerários atuais.
-- [ ] Coletar horários atuais.
-- [ ] Coletar GeoJSON oficial.
+- [x] Consultar todas as 85 linhas do catálogo SEMOB (21/11/2026).
+- [x] Coletar os itinerários textuais publicados.
+- [x] Coletar os quadros de horários publicados.
+- [x] Consultar o GeoJSON de todas as linhas: 149 traçados recebidos; seis endpoints sem geometria.
+- [ ] Investigar as lacunas de geometria das linhas 0116, 0120, 0604, 9901, I015 e T003.
 - [ ] Criar tabela linha atual -> nova função.
 - [ ] Identificar sobreposições.
 - [ ] Identificar vazios de cobertura.

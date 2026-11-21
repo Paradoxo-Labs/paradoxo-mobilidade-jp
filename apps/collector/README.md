@@ -15,11 +15,11 @@ Também pode executar com `docker compose up -d --build --wait`. O container ser
 
 ## Páginas
 
-- **Rede atual:** busca por código, nome e ruas coletadas; mapa vetorial offline com zoom, seleção de linha e sentido, paradas históricas opcionais, itinerários e horários disponíveis.
-- **Rede proposta:** mapa original de 23 linhas e 39 traçados incorporado na navegação. Preserva filtros e comparativos do estudo.
-- **Coletor SEMOB:** coleta em segundo plano, progresso, erros e downloads JSON, GeoJSON e catálogo CSV.
+- **Rede atual:** busca por código, nome e ruas coletadas; mapa Leaflet com zoom, fundos de ruas/topografia/satélite e fallback vetorial offline, seleção de linha e sentido, paradas históricas opcionais, itinerários e horários disponíveis.
+- **Rede proposta:** mapa nativo de 23 linhas e 39 traçados, filtros por classe/linha/sentido, integrações, referências, tela cheia e comparativos da I-332. O mapa original permanece acessível como arquivo histórico.
+- **Coletor SEMOB:** coleta do catálogo completo em segundo plano, progresso, erros e downloads JSON, GeoJSON e catálogo CSV.
 
-A primeira abertura usa os 296 itinerários/variantes e 3.047 paradas da referência Bus4/EMS de 02/11/2026. Isso permite consultar o mapa sem rede. Não há vínculo sequencial linha–parada nessa base. Para consultar a SEMOB, faça uma coleta e escolha **Coleta local · SEMOB-JP**. As bases não são misturadas automaticamente.
+A primeira abertura usa a base SEMOB quando existir uma coleta local; em uma instalação sem coletas, usa os 296 itinerários/variantes e 3.047 paradas da referência Bus4/EMS de 02/11/2026. O fundo local permite consultar os mapas sem rede. Não há vínculo sequencial linha–parada nessa base. A ação **Coletar todas as rotas** consulta todo o catálogo, sem filtro de código no painel. As bases não são misturadas automaticamente.
 
 ## Coleta pela linha de comando
 
@@ -53,7 +53,7 @@ As requisições são sequenciais, com intervalo mínimo de 300 ms, timeout de 2
 
 ## Limites desta versão
 
-O mapa da rede observada usa D3 e a cartografia vetorial já disponível no repositório, sem depender de tiles ou CDN. Não é um mapa de ruas detalhado. Leaflet é a tecnologia do mapa da SEMOB, mas não é requisito para consumir seu GeoJSON.
+Os dois mapas usam Leaflet 1.9.4 servido localmente. Ruas OpenStreetMap, topografia e satélite Esri são opções online, referenciadas no projeto Atlas de Distritos da Paraíba. O fundo vetorial Filipeia/IBGE funciona sem internet e é ativado quando os tiles falham. Não há pré-download de tiles. Identidade, fontes e atribuições estão registradas em `docs/INTERFACE_E_MAPAS.md`.
 
 Não há atualização automática, comparação unificada entre redes, dados ao vivo dos veículos, sequência oficial de paradas, frota, demanda ou auditoria operacional. Ausência de horários para um dia não implica ausência de serviço. A atualização declarada no GeoJSON pode ser antiga. A proposta continua conceitual e independente.
 

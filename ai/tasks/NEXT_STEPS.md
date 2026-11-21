@@ -6,7 +6,7 @@ Coletor SEMOB, página da rede atual e mapa da proposta estão implementados. Ro
 
 ## Rede atual
 
-1. Executar coleta de todo o catálogo em ambiente com acesso à SEMOB e revisar pendências por linha.
+1. Revisar a coleta completa de 85 linhas / 149 traçados e as seis linhas cujo endpoint GeoJSON retornou vazio. Atualizar periodicamente a base oficial.
 2. Auditar variantes, dias e observações dos horários contra as páginas originais.
 3. Comparar geometrias da SEMOB com a referência Bus4/EMS, sem assumir equivalência de códigos.
 4. Incorporar vínculo linha–parada e ordem de atendimento quando houver fonte confiável.

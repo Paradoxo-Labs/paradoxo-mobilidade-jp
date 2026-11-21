@@ -1,4 +1,4 @@
-/* Atlas local: dados e D3 são servidos pelo mesmo processo, sem CDN. */
+/* Atlas local: dados, fontes, identidade visual e Leaflet servidos sem CDN. */
 'use strict';
 const $ = id => document.getElementById(id);
 const state = {network: null, base: null, selected: null, direction: 'all', request: 0, loading: false, wasRunning: false};
@@ -30,9 +30,9 @@ async function api(url, options) {
   return data;
 }
 const pages = {
-  atual: ['Entender a rede de hoje.', 'Explore os trajetos, consulte as linhas e conheça as fontes.'],
-  proposta: ['Imaginar novas conexões.', 'Explore o estudo de uma rede integrada para João Pessoa.'],
-  coletor: ['Informação que vem da fonte.', 'Colete os dados públicos da SEMOB e construa sua base local.'],
+  atual: ['A cidade em movimento.', 'Explore os trajetos, consulte as linhas e conheça as fontes.'],
+  proposta: ['Uma rede. Novas conexões.', 'Explore o estudo de uma rede integrada para João Pessoa.'],
+  coletor: ['Dados para ir além.', 'Colete os dados públicos da SEMOB e construa sua base local.'],
 };
 function navigate() {
   const view = Object.prototype.hasOwnProperty.call(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'atual';
@@ -44,7 +44,7 @@ function navigate() {
   });
   [$('page-title').textContent, $('page-description').textContent] = pages[view];
   document.title = `${view === 'atual' ? 'Rede atual' : view === 'proposta' ? 'Rede proposta' : 'Coletor SEMOB'} · Mobilidade JP`;
-  if (view === 'proposta' && !$('proposal-map').getAttribute('src')) $('proposal-map').src = '/proposta';
+  if (view === 'proposta') window.loadProposal?.();
   if (view === 'atual') requestAnimationFrame(drawMap);
 }
 function featureCode(feature) { return String(feature.properties.line_code || feature.properties.CODIGO_LIN || ''); }
@@ -132,7 +132,7 @@ function updateDirections() {
   select.disabled = !state.selected || !lineFeatures().length;
   const line = state.network?.lines.find(item => item.code === state.selected);
   $('map-title').textContent = line ? `${line.code} · ${line.name}` : 'Visão geral dos trajetos';
-  $('map-legend').textContent = line ? 'Traçados selecionados · ida em verde, volta em laranja quando identificadas' : 'Traçados da base selecionada';
+  $('map-legend').textContent = line ? 'Ida em vermelho · volta em ocre, quando identificadas' : 'Traçados da base selecionada';
 }
 function renderDetail() {
   const root = $('line-detail'); root.replaceChildren();
@@ -176,41 +176,14 @@ function renderDetail() {
   grid.append(itineraries, schedules); root.append(grid);
 }
 
-const svg = d3.select('#network-map');
-const zoom = d3.zoom().scaleExtent([0.6, 35]).on('zoom', event => svg.select('.map-layers').attr('transform', event.transform));
-svg.call(zoom);
+let currentMap;
 function drawMap() {
-  const node = $('network-map');
-  if (!state.base || $('view-atual').hidden || !node.clientWidth) return;
-  const width = node.clientWidth, height = node.clientHeight || 505;
-  svg.attr('viewBox', `0 0 ${width} ${height}`);
-  svg.selectAll('.map-layers').remove();
-  const layers = svg.append('g').attr('class', 'map-layers');
+  if (!state.base || $('view-atual').hidden) return;
+  if (!currentMap) currentMap = new TransitMap('network-map', state.resources, $('current-base'), selectLine);
   const features = visibleFeatures();
-  const fit = {type: 'FeatureCollection', features: features.length ? features : state.network?.geojson.features.length ? state.network.geojson.features : state.base.neighborhoods};
-  const projection = d3.geoMercator().fitExtent([[38, 35], [width - 38, height - 50]], fit);
-  const path = d3.geoPath(projection);
-  const draw = (data, fill, stroke, strokeWidth, opacity = 1) => layers.append('g').attr('opacity', opacity).selectAll('path').data(data).join('path').attr('d', path).attr('fill', fill).attr('stroke', stroke).attr('stroke-width', strokeWidth).attr('vector-effect', 'non-scaling-stroke');
-  draw(state.base.land.filter(Boolean), '#f7f9f7', '#bbcdd1', .7);
-  draw(state.base.neighborhoods.filter(Boolean), '#eef3ef', '#d2ddd9', .55);
-  draw(state.base.rivers.filter(Boolean), '#d6e8ed', '#b6d4de', .6);
-  draw(state.base.roads.filter(Boolean), 'none', '#c5d0ce', 1.1);
-  if (state.selected) draw(state.network.geojson.features, 'none', '#aabac0', 1.1, .3);
-  const routes = draw(features, 'none', '#087f83', state.selected ? 3.2 : 1.5, state.selected ? 1 : .55);
-  routes.attr('stroke', (feature, index) => {
-    const p = feature.properties;
-    return String(p.ITINERARIO || '').toUpperCase().includes('VOLTA') || (!p.ITINERARIO && String(p.direction_code) === '1') ? '#c16d39' : '#087f83';
-  }).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').style('cursor', 'pointer').on('click', (event, feature) => { event.stopPropagation(); selectLine(featureCode(feature)); });
-  routes.append('title').text(feature => `${featureCode(feature)} · ${feature.properties.ITINERARIO || feature.properties.direction_name || feature.properties.route_name || ''}`);
-  if ($('show-stops').checked && state.network) {
-    layers.append('g').selectAll('circle').data(state.network.stops.features).join('circle').attr('cx', feature => projection(feature.geometry.coordinates)[0]).attr('cy', feature => projection(feature.geometry.coordinates)[1]).attr('r', 2).attr('fill', '#c17a39').attr('stroke', '#fff').attr('stroke-width', .5).attr('vector-effect', 'non-scaling-stroke').append('title').text(feature => `${feature.properties.stop_name} · ${feature.properties.address || ''}`);
-  }
-  if (state.selected && features.length) {
-    const geometry = features[0].geometry;
-    const positions = geometry.type === 'LineString' ? geometry.coordinates : geometry.coordinates.flat();
-    layers.append('g').selectAll('circle').data([positions[0], positions.at(-1)]).join('circle').attr('cx', point => projection(point)[0]).attr('cy', point => projection(point)[1]).attr('r', 5).attr('fill', '#132c3a').attr('stroke', 'white').attr('stroke-width', 2);
-  }
-  svg.call(zoom.transform, d3.zoomIdentity);
+  currentMap.render(features, {selected: Boolean(state.selected), color: feature => String(feature.properties.ITINERARIO || '').toUpperCase().includes('VOLTA') || String(feature.properties.direction_code) === '1' ? '#bc742b' : '#c71020'});
+  const stops = $('show-stops').checked && state.network ? state.network.stops.features.map(f => ({position: f.geometry.coordinates, label: `${f.properties.stop_name} · ${f.properties.address || ''}`})) : [];
+  currentMap.markers(stops);
 }
 
 async function updateStatus() {
@@ -221,12 +194,12 @@ async function updateStatus() {
     $('job-error').textContent = job.error || '';
     $('job-error').hidden = !job.error;
     $('collect-button').disabled = job.running;
-    $('collect-button').textContent = job.running ? 'Coleta em andamento…' : 'Coletar dados da SEMOB';
+    $('collect-button').textContent = job.running ? 'Coleta completa em andamento…' : 'Coletar todas as rotas';
     $('job-progress').hidden = !job.running;
     if (job.total) { $('job-progress').max = job.total; $('job-progress').value = job.done; }
     else $('job-progress').removeAttribute('value');
     $('downloads').hidden = !status.semob_available;
-    $('collection-summary').textContent = status.semob_available ? `${status.semob_lines} linhas com dados locais de um catálogo de ${status.catalog_count}. Última coleta: ${date(status.retrieved_at)}.` : 'Ainda não há dados coletados da SEMOB. A referência histórica permanece disponível na página da rede atual.';
+    $('collection-summary').textContent = status.semob_available ? `${status.semob_lines} linhas de um catálogo de ${status.catalog_count} · ${status.geometry_count} traçados · ${status.pending_count} pendências. Última coleta: ${date(status.retrieved_at)}.` : 'Ainda não há dados coletados da SEMOB. A referência histórica permanece disponível na página da rede atual.';
     if (state.wasRunning && !job.running && !job.error && status.semob_available) {
       $('source').value = 'semob';
       await loadNetwork('semob');
@@ -247,7 +220,7 @@ async function pollStatus() {
 }
 $('collect-form').addEventListener('submit', async event => {
   event.preventDefault(); error();
-  const codes = $('codes').value.split(/[\s,;]+/).map(code => code.trim()).filter(Boolean);
+  const codes = []; // O painel sempre coleta o catálogo completo, incluindo todos os sentidos disponíveis.
   $('collect-button').disabled = true;
   try {
     await api('/api/collect', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({codes})});
@@ -261,14 +234,12 @@ $('show-all').addEventListener('click', () => { state.selected = null; state.dir
 $('direction').addEventListener('change', () => { state.direction = $('direction').value; drawMap(); });
 $('show-stops').addEventListener('change', drawMap);
 $('reset-map').addEventListener('click', drawMap);
-$('zoom-in').addEventListener('click', () => svg.call(zoom.scaleBy, 1.5));
-$('zoom-out').addEventListener('click', () => svg.call(zoom.scaleBy, 1 / 1.5));
+$('zoom-in').addEventListener('click', () => currentMap?.map.zoomIn());
+$('zoom-out').addEventListener('click', () => currentMap?.map.zoomOut());
 $('open-official').addEventListener('click', () => { $('source').value = 'semob'; loadNetwork('semob'); location.hash = 'atual'; });
 window.addEventListener('hashchange', navigate);
-let resizeFrame;
-new ResizeObserver(() => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(drawMap); }).observe($('network-map'));
 navigate();
 (async () => {
-  try { state.base = await api('/api/base'); await loadNetwork('historical'); await pollStatus(); }
+  try { state.resources = await mapResources; state.base = state.resources.base; const status = await api('/api/status'); const source = status.semob_available ? 'semob' : 'historical'; $('source').value = source; await loadNetwork(source); await pollStatus(); }
   catch (exc) { error(`Não foi possível iniciar o atlas: ${exc.message}. Confira se o servidor local está em execução.`); }
 })();

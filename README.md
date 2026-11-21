@@ -38,7 +38,7 @@ Primeira versão local implementada: rede atual observada, mapa da proposta e co
 
 A proposta conta também com um [estudo complementar de rede integrada, revisão de 21/11/2026](docs/proposta-brs-bhls/INTEGRACAO_REDE_INTEGRADA.md), com 23 linhas propostas, 39 traçados de referência e mapa interativo offline. O estudo amplia o material disponível para análise; a codificação e os traçados ainda precisam ser conciliados com o conceito inicial.
 
-A aplicação atual utiliza Python 3.10+ com biblioteca padrão no servidor/coletor e HTML/CSS/JavaScript com D3 no frontend. Não exige instalação de pacotes para rodar em Linux/Ubuntu/WSL.
+A aplicação atual utiliza Python 3.10+ com biblioteca padrão no servidor/coletor e HTML/CSS/JavaScript com Leaflet no frontend. Não exige instalação de pacotes para rodar em Linux/Ubuntu/WSL.
 
 ## Rodar localmente
 
@@ -61,7 +61,10 @@ Abra [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 - **Rede atual:** referência histórica offline de 111 códigos de linha, 296 traçados/variantes e 3.047 paradas; seleção de linha/sentido e consulta dos dados disponíveis.
 - **Rede proposta:** mapa interativo do estudo complementar, com 23 linhas e 39 traçados.
+- **Interface Paradoxo:** identidade do site institucional, mapas nativos Leaflet, filtros por serviço e sentido, ruas OpenStreetMap, topografia/satélite Esri e fallback cartográfico local. [Identidade e fontes](docs/INTERFACE_E_MAPAS.md).
 - **Coletor SEMOB:** coleta de linhas, ruas por sentido, horários e GeoJSON, progresso e downloads. A base SEMOB é consultada separadamente da referência histórica.
+
+O painel coleta sempre o catálogo completo. A execução de 21/11/2026 consultou 85 linhas e recebeu 149 traçados; seis linhas retornaram GeoJSON vazio e estão sinalizadas. Os dados coletados permanecem fora do Git. A interface inicia pela base SEMOB quando houver coleta local disponível.
 
 Para iniciar uma coleta pequena pela CLI:
 

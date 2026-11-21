@@ -130,8 +130,10 @@ def parse_schedules(html):
 
 def parse_geojson(raw):
     data = json.loads(raw)
-    if not isinstance(data, dict) or data.get("type") != "FeatureCollection" or not isinstance(data.get("features"), list) or not data["features"]:
+    if not isinstance(data, dict) or data.get("type") != "FeatureCollection" or not isinstance(data.get("features"), list):
         raise ValueError("GeoJSON sem coleção de traçados")
+    if not data["features"]:
+        raise ValueError("SEMOB retornou GeoJSON vazio, sem traçado publicado")
     for feature in data["features"]:
         geometry = feature.get("geometry") or {}
         if feature.get("type") != "Feature" or geometry.get("type") not in {"LineString", "MultiLineString"}:

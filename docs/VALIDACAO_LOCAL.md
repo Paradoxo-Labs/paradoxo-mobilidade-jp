@@ -38,3 +38,12 @@ O mapa observado é vetorial, sem mapa detalhado de ruas. A referência históri
 - Executada coleta real da linha 0002 dentro do container, sem pendências. O catálogo consultado contém 85 códigos; a linha 0003 previamente coletada foi preservada.
 - O conjunto processado atualizado e as respostas brutas apareceram no `data/` do host. A recriação do serviço preservou as coletas anteriores.
 - Confirmados UID 1000, pasta de dados gravável e diretório da aplicação não gravável. O container permanece rodando; execução e encerramento estão documentados em [docker/README.md](../docker/README.md).
+
+## Redesign e coleta integral — 21/11/2026
+
+- Coleta de todas as 85 linhas do catálogo executada no Docker: 149 features de traçado, itinerários e horários recebidos. Seis endpoints GeoJSON retornaram vazio: 0116, 0120, 0604, 9901, I015 e T003. Essas pendências são de disponibilidade da geometria; a coleta percorreu todo o catálogo e preservou os demais campos.
+- Passaram 16 testes no container, incluindo coleta integral por padrão, API da proposta com 23 serviços/39 geometrias e configuração dos quatro fundos cartográficos.
+- Teste no Chromium com larguras de 320, 390 e 1440 pixels: identidade/logo/fontes locais, ausência de iframe, seleção de classes e sentidos, referências do percurso, comparação da I-332, troca de base e fallback local em falhas de tiles.
+- Confirmados abertura pela fonte SEMOB, 85 linhas no painel, consulta de horários e aviso de geometria ausente, sem exceções JavaScript. O corpo enviado pelo formulário foi verificado como `{"codes":[]}`, sem iniciar uma segunda coleta integral para esse teste de contrato.
+- Na verificação final do fallback, todas as requisições externas foram explicitamente interceptadas pelo teste. Os testes anteriores de troca de fundo chegaram a carregar tiles; não foram usados como comprovação de funcionamento offline.
+- Arquivos do estudo original foram preservados. Provedores, identidade e licenças estão registrados em [INTERFACE_E_MAPAS.md](INTERFACE_E_MAPAS.md).

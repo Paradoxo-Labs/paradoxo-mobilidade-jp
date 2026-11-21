@@ -110,6 +110,13 @@ class CollectionTests(unittest.TestCase):
         self.assertIn("0002,ROGER,", export_csv(first))
         self.assertEqual(load_snapshot(self.data), second)
 
+    def test_default_collection_covers_the_whole_catalog(self):
+        snapshot = self.collect()
+        self.assertEqual(snapshot["last_run"]["catalog_count"], 2)
+        self.assertEqual(snapshot["last_run"]["selected_count"], 2)
+        self.assertEqual(snapshot["last_run"]["updated_codes"], ["0002", "I004"])
+        self.assertTrue(all(line["itineraries"] and line["schedules"] and line["geojson"]["features"] for line in snapshot["lines"]))
+
     def test_partial_failure_is_visible_and_total_failure_preserves_snapshot(self):
         self.collect(["0002"])
         FakeClient.failures = {"horario/"}
@@ -164,7 +171,14 @@ class HTTPTests(unittest.TestCase):
 
     def test_offline_assets_and_historical_network(self):
         self.assertIn(b'lang="pt-BR"', self.get("/"))
-        self.assertIn(b'23', self.get("/proposta"))
+        self.assertIn(b'23', self.get("/proposta-original"))
+        proposal = json.loads(self.get("/api/proposal"))
+        self.assertEqual(len(proposal["catalog"]["linhas"]), 23)
+        self.assertEqual(len(proposal["geojson"]["features"]), 39)
+        self.assertEqual(set(proposal["comparisons"]), {"paratibe", "parque-do-sol"})
+        self.assertIn(b'Leaflet', self.get("/vendor/leaflet/leaflet.js"))
+        sources = json.loads(self.get("/api/map-sources"))
+        self.assertEqual({s["id"] for s in sources["sources"]}, {"local", "streets", "terrain", "satellite"})
         self.assertIn(b'd3', self.get("/vendor/d3.js"))
         network = json.loads(self.get("/api/network?source=historical"))
         self.assertEqual(len(network["lines"]), 111)
