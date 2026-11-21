@@ -23,4 +23,4 @@ Coletor SEMOB, página da rede atual e mapa da proposta estão implementados. Ro
 ## Plataforma
 
 1. Validar o uso local antes de migrar para API Laravel, PostgreSQL/PostGIS e frontend Next.js.
-2. Implementar Docker, CI/CD e deploy quando essa etapa for iniciada.
+2. Evoluir o Docker local já disponível e implementar CI/CD e deploy quando essa etapa for iniciada.

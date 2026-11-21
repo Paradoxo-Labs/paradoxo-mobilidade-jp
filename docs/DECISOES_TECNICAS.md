@@ -8,3 +8,10 @@
 - Base histórica e coleta oficial separadas. Preservar procedência por linha, data de coleta e atualização declarada pela fonte. Não interpretar horários ausentes como ausência de serviço.
 - Respostas brutas por execução, publicação atômica do conjunto processado e bloqueio de coleta concorrente na mesma pasta. Dados de execução fora do Git.
 - Servidor restrito a loopback, rotas de arquivos explícitas e início de coleta por JSON na mesma origem. Não é serviço preparado para exposição pública.
+
+## 21/11/2026 — Execução em Docker
+
+- Um serviço Compose `atlas` reúne o que já existe: servidor, frontend, coletor e mapas. Imagem Python 3.12 slim, sem instalação adicional de pacotes da aplicação.
+- Escuta interna configurável por `--host`, mantendo loopback como padrão fora do Docker. O Compose escuta em todas as interfaces internas e publica apenas em `127.0.0.1` do host.
+- `--public-port` permite validar Host/Origin mesmo quando `APP_PORT` difere da porta interna 8000; nenhuma origem externa é liberada.
+- Bind mount de `./data` preserva e compartilha as coletas locais. UID/GID ajustáveis, filesystem da aplicação somente leitura, `/tmp` temporário e healthcheck HTTP.

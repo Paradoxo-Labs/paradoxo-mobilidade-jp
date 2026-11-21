@@ -29,3 +29,12 @@ Playwright e as bibliotecas de apoio do navegador foram usados somente em diret�
 ## Limites verificados
 
 O mapa observado é vetorial, sem mapa detalhado de ruas. A referência histórica não tem vínculo sequencial entre linha e parada. Horários ausentes não comprovam ausência de serviço. O catálogo completo da SEMOB ainda precisa de coleta e revisão; a proposta ainda exige conciliação e validação operacional. Não houve publicação externa.
+
+## Docker — 21/11/2026
+
+- Validado `docker compose config --quiet`; imagem construída e serviço iniciado com `docker compose up -d --build --wait` no Docker Desktop com integração WSL.
+- Serviço `atlas` saudável e publicado em `127.0.0.1:8000`. Página principal, mapa da proposta, status, bases histórica/SEMOB e exportação GeoJSON responderam HTTP 200 pelo endereço do host.
+- Passaram os 15 testes dentro do container, incluindo teste de Host/Origin com porta pública diferente da interna.
+- Executada coleta real da linha 0002 dentro do container, sem pendências. O catálogo consultado contém 85 códigos; a linha 0003 previamente coletada foi preservada.
+- O conjunto processado atualizado e as respostas brutas apareceram no `data/` do host. A recriação do serviço preservou as coletas anteriores.
+- Confirmados UID 1000, pasta de dados gravável e diretório da aplicação não gravável. O container permanece rodando; execução e encerramento estão documentados em [docker/README.md](../docker/README.md).

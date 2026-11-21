@@ -11,6 +11,8 @@ bash scripts/run-dashboard.sh
 
 Abra [http://127.0.0.1:8000](http://127.0.0.1:8000). Para outra porta: `bash scripts/run-dashboard.sh --port 8080`. O servidor atende apenas em loopback. Encerre com Ctrl+C. Uma coleta em andamento é interrompida ao encerrar o processo; seu último conjunto publicado permanece preservado.
 
+Também pode executar com `docker compose up -d --build --wait`. O container serve as mesmas páginas e compartilha `./data` com o host. Detalhes em [Docker](../../docker/README.md). Dentro do container o servidor usa `--host 0.0.0.0`; o Compose publica somente em localhost e informa `--public-port` quando a porta publicada é diferente.
+
 ## Páginas
 
 - **Rede atual:** busca por código, nome e ruas coletadas; mapa vetorial offline com zoom, seleção de linha e sentido, paradas históricas opcionais, itinerários e horários disponíveis.

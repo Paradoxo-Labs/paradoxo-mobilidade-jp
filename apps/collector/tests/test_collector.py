@@ -215,6 +215,27 @@ class HTTPTests(unittest.TestCase):
             with self.server.job_lock:
                 self.server.job["running"] = False
 
+    def test_docker_published_port_keeps_same_origin_check(self):
+        previous = self.server.public_port
+        self.server.public_port = 18080
+        with self.server.job_lock:
+            self.server.job["running"] = True
+        try:
+            for host, origin, expected in [
+                ("localhost:18080", "http://localhost:18080", 409),
+                ("127.0.0.1:18080", "http://127.0.0.1:18080", 409),
+                ("localhost:18080", "http://localhost:8000", 403),
+                ("example.com:18080", "http://example.com:18080", 403),
+            ]:
+                request = Request(self.url + "/api/collect", data=b'{"codes":["0002"]}', headers={"Content-Type": "application/json", "Host": host, "Origin": origin})
+                with self.assertRaises(HTTPError) as context:
+                    urlopen(request, timeout=5)
+                self.assertEqual(context.exception.code, expected)
+        finally:
+            self.server.public_port = previous
+            with self.server.job_lock:
+                self.server.job["running"] = False
+
 
 if __name__ == "__main__":
     unittest.main()

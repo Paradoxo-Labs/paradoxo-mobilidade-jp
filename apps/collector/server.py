@@ -40,8 +40,9 @@ def semob_network(snapshot):
 class AtlasServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, data_dir=DATA):
+    def __init__(self, address, data_dir=DATA, public_port=None):
         super().__init__(address, Handler)
+        self.public_port = public_port if public_port is not None else self.server_port
         self.data_dir = Path(data_dir)
         self.job_lock = threading.Lock()
         self.job = {"running": False, "message": "Nenhuma coleta iniciada nesta sessão", "done": 0, "total": 0, "error": None}
@@ -140,7 +141,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         # Somente o painel servido pelo próprio processo pode iniciar uma coleta.
         host = self.headers.get("Host", "")
-        allowed = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+        allowed = {f"127.0.0.1:{self.server.public_port}", f"localhost:{self.server.public_port}"}
         origin = self.headers.get("Origin")
         if host not in allowed or (origin and origin != f"http://{host}") or self.headers.get_content_type() != "application/json":
             self.json({"error": "Solicitação deve partir do painel local com conteúdo JSON"}, 403)
@@ -167,14 +168,16 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description="Atlas local Paradoxo Mobilidade JP")
+    parser.add_argument("--host", choices=("127.0.0.1", "0.0.0.0"), default="127.0.0.1", help="Use 0.0.0.0 dentro do container")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--public-port", type=int, help="Porta publicada no host, quando diferente da porta interna do container")
     parser.add_argument("--data-dir", type=Path, default=DATA)
     args = parser.parse_args()
     try:
-        server = AtlasServer(("127.0.0.1", args.port), args.data_dir)
+        server = AtlasServer((args.host, args.port), args.data_dir, public_port=args.public_port)
     except OSError as exc:
         parser.exit(1, f"Não foi possível abrir a porta {args.port}: {exc}\n")
-    print(f"Paradoxo Mobilidade JP: http://127.0.0.1:{server.server_port}", flush=True)
+    print(f"Paradoxo Mobilidade JP: http://127.0.0.1:{server.public_port}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

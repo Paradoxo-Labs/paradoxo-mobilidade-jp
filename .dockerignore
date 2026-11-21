@@ -1,0 +1,14 @@
+.git
+.agents
+.codex
+.aws
+.env
+.env.*
+.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/*.svg
+data
+exports
+ai

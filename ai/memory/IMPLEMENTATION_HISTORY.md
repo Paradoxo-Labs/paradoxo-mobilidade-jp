@@ -8,3 +8,9 @@
 - Rede observada com referência histórica offline e fonte SEMOB separada, seleção de linha/sentido, itinerários, horários e exportações JSON/GeoJSON/CSV.
 - Coleta real de validação das linhas 0002 e 0003; catálogo consultado com 85 códigos. Respostas ficam fora do Git.
 - Scripts de configuração/execução e testes de parsers, preservação de dados, concorrência e rotas HTTP.
+
+## 21/11/2026 — Docker do atlas local
+
+- Adicionados Dockerfile Python 3.12, Docker Compose de serviço único `atlas`, exclusões do contexto de build e parâmetros de porta/UID/GID.
+- Dados compartilhados com `./data`, usuário sem privilégios, aplicação somente leitura e healthcheck. Servidor aceita bind interno e porta pública configuráveis, preservando a validação de origem.
+- Imagem construída e container saudável em `127.0.0.1:8000`. Passaram 15 testes no container, respostas HTTP do host e coleta real da linha 0002 sem pendências, persistida no host.

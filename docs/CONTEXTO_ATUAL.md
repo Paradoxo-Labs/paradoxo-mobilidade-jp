@@ -73,4 +73,6 @@ O coletor e o painel estão implementados. Executar `bash scripts/run-dashboard.
 
 O coletor percorre a listagem paginada, registra respostas originais, datas e pendências por campo. As exportações disponíveis são JSON completo, GeoJSON e catálogo CSV. Foram coletadas localmente as linhas 0002 e 0003 para validação; esses dados de execução não são versionados e não significam que o catálogo completo tenha sido coletado.
 
-Próxima etapa: coletar o catálogo completo, revisar variantes/pendências e criar a comparação de cobertura entre as duas redes. Exportação Excel, Docker, API Laravel, PostGIS e migração do frontend para Next.js continuam pendentes. Detalhes em [apps/collector/README.md](../apps/collector/README.md).
+O atlas também possui execução com Docker Compose: `docker compose up -d --build --wait`, com serviço único, verificação de saúde, publicação em localhost e dados persistidos em `./data`. Ver [Docker](../docker/README.md).
+
+Próxima etapa: coletar o catálogo completo, revisar variantes/pendências e criar a comparação de cobertura entre as duas redes. Exportação Excel, API Laravel, PostGIS e migração do frontend para Next.js continuam pendentes. Detalhes em [apps/collector/README.md](../apps/collector/README.md).

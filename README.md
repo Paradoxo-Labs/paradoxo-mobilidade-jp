@@ -42,6 +42,16 @@ A aplicação atual utiliza Python 3.10+ com biblioteca padrão no servidor/cole
 
 ## Rodar localmente
 
+Com Docker:
+
+```sh
+docker compose up -d --build --wait
+```
+
+Abra [http://127.0.0.1:8000](http://127.0.0.1:8000). As coletas persistem na pasta `data/`. Consulte [Docker, portas e persistência](docker/README.md).
+
+Ou diretamente com Python:
+
 ```sh
 bash scripts/setup.sh
 bash scripts/run-dashboard.sh
@@ -68,7 +78,7 @@ A estrutura mantém espaço para:
 - evolução do coletor local Python;
 - futura API Laravel;
 - futuro frontend Next.js;
-- Docker;
+- evolução da infraestrutura Docker já disponível para o atlas local;
 - dados geográficos;
 - documentação para humanos e agentes de IA;
 - proposta conceitual BRS/BHLS.
