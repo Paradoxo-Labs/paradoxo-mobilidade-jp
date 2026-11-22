@@ -48,13 +48,15 @@
   }
   function renderPoints(line) {
     const names = {alto_mateus: 'Alto do Mateus', hub: 'Mangabeira', metro: 'Varadouro / TIV', bessa: 'Bessa', oitizeiro: 'Oitizeiro / novo mercado', cristo: 'Cristo', val: 'Valentina', universidade: 'Est. Cidade Universitária', lagoa: 'Terminal da Lagoa'};
-    const markers = $('proposal-terminals').checked ? Object.entries(names).filter(([key]) => data.catalog.lugares[key]).map(([key, short]) => ({...data.catalog.lugares[key], terminal: true, short, label: data.catalog.lugares[key].label + ' · integração proposta'})) : [];
+    const markers = $('proposal-terminals').checked ? Object.entries(data.catalog.lugares).filter(([key, p]) => !p.archived && (p.kind === 'terminal' || p.kind === 'station' || p.kind === 'stop' || p.terminal || names[key])).map(([key, p]) => ({...p, short: p.short || names[key], label: p.label + ' · ' + (p.kind === 'station' ? 'estação' : p.kind === 'stop' ? 'parada' : 'integração proposta')})) : [];
     if (line && $('proposal-points').checked) {
-      const keys = new Set(line.sentidos.filter(s => direction === 'all' || s.sentido === direction).flatMap(s => s.waypoints));
+      const paths = line.sentidos.filter(s => direction === 'all' || s.sentido === direction);
+      const keys = new Set(paths.flatMap(s => [...(s.source === 'edicao-administrativa' ? [] : s.waypoints), ...(s.station_ids || [])]));
       for (const key of keys) {
         const position = data.waypoints[key];
         if (position) markers.push({position, label: data.catalog.lugares[key]?.label || key.replaceAll('_', ' ')});
       }
+      for (const control of paths.flatMap(s => s.control_points || [])) markers.push({position: control.position, label: control.label + ' · referência do percurso'});
     }
     map.markers(markers);
   }
@@ -71,7 +73,8 @@
     for (const entry of line.sentidos) {
       const item = element('div', undefined, 'path-summary');
       const km = new Intl.NumberFormat('pt-BR', {maximumFractionDigits: 2}).format(entry.distancia_km);
-      item.append(element('strong', `${entry.sentido.toUpperCase()} / ${km} km`), element('span', `${entry.waypoints.length} referências de roteamento`)); paths.append(item);
+      item.append(element('strong', `${entry.sentido.toUpperCase()} / ${km} km`), element('span', `${entry.source === 'edicao-administrativa' ? (entry.control_points?.length || 0) : entry.waypoints.length} referências de roteamento`)); paths.append(item);
+      if (entry.station_ids?.length) item.append(element('p', 'Estações: ' + entry.station_ids.map(key => data.catalog.lugares[key]?.label || key).join(' → ')));
       if (entry.observed_streets_percent !== undefined) item.append(element('span', `${entry.observed_streets_percent.toLocaleString('pt-BR')}% do traçado em ruas com referência na rede observada`));
       if (entry.central_pattern) item.append(element('p', 'Varadouro: acesso do TIV e passagem pela Lagoa conforme o padrão SEMOB da 0301, neste sentido.', 'muted'));
       if (entry.street_sequence?.length) {

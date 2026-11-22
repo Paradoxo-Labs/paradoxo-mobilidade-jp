@@ -1,4 +1,4 @@
-# Administração local — primeira versão
+# Administração local — rede, infraestrutura e publicação
 
 Painel em [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin). O atlas de consulta permanece em `/`, com rede atual e proposta publicada. O coletor foi movido para a área autenticada.
 
@@ -78,3 +78,41 @@ docker compose exec -T atlas python3 -m unittest discover -s apps/planner/tests 
 ```
 
 Testes de publicação e de primeiro acesso devem usar um banco temporário. Não crie contas de QA, publique linhas fictícias ou restaure versões para testar no banco principal do usuário.
+
+## Estações e terminais
+
+A tela **Estações e terminais** mantém um cadastro compartilhado, com tipos terminal, estação, parada ou referência territorial. Informe nome, observações, posição no terreno, conexão viária e acessos por chave de sentido (`ida`, `volta`, `circuito` ou chave da variante). Clique no mapa ou arraste o marcador correspondente; o terreno e o ponto usado no cálculo podem ocupar locais diferentes. As coordenadas do terreno e da conexão também podem ser digitadas.
+
+**Salvar referência em edição** persiste o cadastro administrativo, mas não altera o atlas. A publicação conjunta inclui o cadastro inteiro em edição. Há controle de revisão para impedir que duas abas sobrescrevam esse cadastro. Arquivar uma referência mantém seu registro; a publicação é bloqueada se a rede final ainda a usar como origem/destino, estação ou referência vinculada.
+
+No editor, **Estações neste sentido** associa estações/terminais ao percurso e permite ordenar os vínculos. Ao vincular, o acesso específico do sentido — ou a conexão viária, quando não houver acesso — vira uma referência permanente. A ordem de atendimento e a lista de referências de cálculo podem ser ajustadas independentemente. Mover o terminal no cadastro não recalcula a rota: confira seus vínculos e recalcule os percursos afetados. A revisão alerta para acessos a mais de 150 m do percurso e referências permanentes a mais de 80 m; esses alertas não substituem uma validação operacional.
+
+## Referências permanentes e seleção
+
+Cada sentido mantém até 100 referências com identificador, nome, posição e vínculo opcional com uma estação. Elas são salvas no rascunho e nas versões. Podem ser renomeadas, arrastadas no mapa e reordenadas pela lista ou pelas setas. Mover uma referência altera sua posição de controle; a geometria só muda depois de calcular e aplicar uma prévia. Arrastar uma referência vinculada a uma estação a transforma em passagem independente, sem mover a estação compartilhada.
+
+- **Guardar A, passagens e B:** acrescenta as referências do intervalo selecionado. Em circuitos, mantenha passagens intermediárias para distinguir o percurso de uma simples origem/destino coincidente.
+- **Importar referências do estudo:** substitui a lista de controles pelas referências de roteamento do percurso importado, sem mudar a geometria.
+- **Recalcular pelas referências:** recalcula o sentido inteiro na ordem da lista e apresenta prévia; trechos preservados continuam protegidos.
+- **Mostrar seleção e ↔:** enquadra no mapa todo o intervalo entre A e B.
+- **Reconectar A → B pelas ruas:** calcula o caminho sem passagens intermediárias, útil para remover uma ponta que faz ida e retorno. Não liga pontos por uma reta.
+- **Cortar antes de A / depois de B:** apresenta uma prévia de encurtamento do percurso. Bloqueios preservados e extensão mínima são conferidos no servidor antes de aplicar.
+
+Quando a rota passa mais de uma vez pela mesma coordenada, a seleção oferece os índices das passagens. Os campos **Índice A/B** permitem escolher a ocorrência exata; A deve preceder B na ordem do sentido. Os painéis têm rolagem própria para manter o mapa utilizável em percursos com muitas referências.
+
+## Gerenciamento das linhas
+
+**Arquivar / retirar** mantém rascunhos e versões. Para uma linha publicada, prepara a retirada: ela continua no atlas até ser selecionada na publicação conjunta. **Reativar** cancela essa intenção ou torna uma linha arquivada novamente disponível para edição/publicação. Linhas fora da composição atual podem ser abertas a partir da última versão salva.
+
+**Descartar rascunho** exige confirmação e revisão atual, preservando as versões salvas e a publicação. Alterações ainda sem versão salva são perdidas. Depois de restaurar uma publicação antiga, um rascunho pode apontar para uma base desatualizada: salve o conteúdo que deseja preservar em uma versão, descarte o rascunho e abra a linha novamente antes de recuperar a versão desejada no novo rascunho.
+
+## Publicação conjunta
+
+1. Salve uma versão de cada linha que deseja incluir.
+2. Abra **Publicação conjunta** e selecione os rascunhos, as retiradas preparadas e, se necessário, o cadastro compartilhado de estações em edição.
+3. Revise o mapa da composição final, versões, retiradas, referências alteradas e impedimentos. Novas estações e as linhas que as usam devem entrar no mesmo conjunto.
+4. Confirme as pendências e a publicação. Todas as alterações entram em uma única transação, incluindo as estações.
+
+A validação considera a composição final: impede códigos duplicados, referências ausentes/arquivadas, versões incompletas, rascunhos sem a versão atual salva e bases desatualizadas. É possível trocar códigos entre duas linhas na mesma publicação, desde que o resultado final não tenha duplicidade. A revisão perde validade se a publicação ativa, um rascunho selecionado, o estado de uma linha selecionada ou o cadastro de estações incluído mudar.
+
+**Publicações → Restaurar** recupera linhas e referências da publicação selecionada em uma nova publicação. Edições pendentes de estações são mantidas; se o cadastro estava sem alterações pendentes, acompanha a restauração. As tabelas novas são criadas automaticamente ao iniciar o serviço, preservando conta, rascunhos, versões e geometrias existentes. Publicações anteriores à migração recebem as referências da semente que já estava fixada no banco.

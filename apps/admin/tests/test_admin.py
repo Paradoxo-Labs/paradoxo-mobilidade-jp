@@ -154,6 +154,10 @@ class PreviewTests(unittest.TestCase):
         self.assertEqual(result['geometry']['coordinates'][-1],coords[-1])
         self.assertEqual(draft['payload']['features'][0]['geometry']['coordinates'],coords)
         with self.assertRaises(Problem):router.create({'points':[n.positions[4],n.positions[0]]})
+        direct=router.preview(draft,{'revision':1,'path_id':'path','from':1,'to':3,'via':[],'direct':True})
+        self.assertEqual(direct['geometry']['coordinates'][:2],coords[:2])
+        self.assertEqual(direct['geometry']['coordinates'][-1],coords[-1])
+        with self.assertRaises(Problem):router.preview(draft,{'revision':1,'path_id':'path','from':1,'to':3,'via':[]})
         feature['properties']['locked_sections']=[{'coordinates':coords[:3]}]
         with self.assertRaises(Problem):router.preview(draft,{'revision':1,'path_id':'path','from':1,'to':3,'via':[n.positions[3]]})
 

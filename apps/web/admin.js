@@ -274,7 +274,10 @@ function updateRouterStatus() {
   $$('[data-needs-router]').forEach((b) => (b.disabled = !S.router.ready));
 }
 function cleanup() {
-  for (const m of S.maps) {
+  const maps = S.maps;
+  S.maps = [];
+  for (const m of maps) {
+    m.off('moveend');
     if (S.screen === 'editor')
       S.view = { center: m.getCenter(), zoom: m.getZoom() };
     m.remove();
@@ -297,6 +300,7 @@ function placeOptions(value) {
   return (
     '<option value="">Escolher referência</option>' +
     Object.entries(S.overview.places)
+      .filter(([k, v]) => !v.archived || k === value)
       .sort((a, b) => a[1].label.localeCompare(b[1].label))
       .map(
         ([k, v]) =>
@@ -306,6 +310,16 @@ function placeOptions(value) {
   );
 }
 async function go(screen) {
+  if (S.screen === 'places' && S.placeDirty) {
+    if (
+      !(await confirmAction(
+        'Sair sem salvar a referência?',
+        'As mudanças deste formulário serão descartadas.',
+      ))
+    )
+      return;
+    S.placeDirty = false;
+  }
   const request = ++S.navRequest;
   S.routeRequest++;
   if (S.draft && S.dirty) await saveDraft();
@@ -317,11 +331,15 @@ async function go(screen) {
     b.classList.toggle(
       'active',
       b.dataset.nav ===
-        (screen === 'observed'
-          ? 'observed'
-          : screen === 'history'
-            ? 'history'
-            : 'list'),
+        (screen === 'places'
+          ? 'places'
+          : screen === 'batch'
+            ? 'batch'
+            : screen === 'observed'
+              ? 'observed'
+              : screen === 'history'
+                ? 'history'
+                : 'list'),
     ),
   );
   if (screen === 'list') {
@@ -329,6 +347,12 @@ async function go(screen) {
     if (request !== S.navRequest) return;
     S.overview = overview;
     renderList();
+  } else if (screen === 'places' || screen === 'batch') {
+    const overview = await api('overview');
+    if (request !== S.navRequest) return;
+    S.overview = overview;
+    if (screen === 'places') renderPlaces();
+    else renderBatch();
   } else if (screen === 'create') renderCreate();
   else if (screen === 'editor') renderEditor();
   else if (screen === 'compare') {
@@ -357,7 +381,7 @@ async function go(screen) {
   }
 }
 
-function renderList() {
+function renderLegacyList() {
   const published = S.overview.lines;
   const newDrafts = S.overview.drafts.filter(
     (d) => !published.some((l) => l.id === d.line_id),
@@ -546,7 +570,7 @@ function renderEditor() {
     (S.recovery
       ? `<div class="recovery"><strong>Há alterações recuperáveis neste navegador.</strong><p>O servidor tem revisão ${S.draft.revision}; a cópia local partiu da revisão ${S.recovery.revision}. Confira antes de recuperar.</p><div class="actions"><button data-action="recover">Recuperar como rascunho atual</button><button data-action="discard-recovery">Descartar cópia local</button></div></div>`
       : '') +
-    `<div class="editor">${editorFields()}<div class="editor-head"><div class="directions">${S.payload.features.map((v, i) => `<button data-path="${i}" aria-pressed="${i === S.path}">${esc(v.properties.label || v.properties.sentido)}</button>`).join('')}<button data-action="add-path">+ Sentido / variante</button></div><div class="actions"><button data-action="undo" ${S.undo.length ? '' : 'disabled'}>↶ Desfazer</button><button data-action="redo" ${S.redo.length ? '' : 'disabled'}>↷ Refazer</button><button data-nav="compare">Comparar</button><button data-action="focus">${S.focus ? 'Recolher' : 'Ampliar mapa'}</button></div></div><div class="editor-grid"><aside class="points"><h3>${ps.length ? 'Trecho em edição' : 'Construir percurso'}</h3><p class="muted">${ps.length ? 'Selecione início e fim na linha. Arraste as referências vermelhas para outra rua.' : 'Clique no mapa para adicionar passagens. Arraste e reordene as referências.'}</p><div class="stack" id="point-list"></div>${ps.length ? `<div class="pair"><span>Início / fim</span><span>${S.segment?.from ?? '—'} → ${S.segment?.to ?? '—'}</span></div><button data-mode="from">Selecionar início A</button><button data-mode="to">Selecionar fim B</button><button data-mode="via">+ Passagem no trecho</button>` : `<button data-mode="draw">+ Referência no mapa</button><button class="primary" data-action="calculate-new" data-needs-router>Calcular percurso</button><button data-action="clear-draw">Limpar referências</button>`}<p class="muted">Referências não equivalem a paradas.</p><button data-action="import-observed">Consultar rede SEMOB</button>${f.properties.sentido === 'volta' ? '<button data-action="from-ida" data-needs-router>Recalcular volta a partir da ida</button>' : ''}</aside><div class="mapcol"><div class="map-tools"><button data-mode="navigate" aria-pressed="${S.mode === 'navigate'}">Navegar</button><button data-mode="via" aria-pressed="${S.mode === 'via'}">Alterar trecho</button><button data-action="lock">Preservar seleção</button><select id="editor-base" aria-label="Mapa base"></select></div><div id="editor-map" class="map" aria-label="Editor de rotas por arrastar e soltar"></div></div><aside class="context"><div class="stack"><span class="eyebrow">PRÉVIA DO TRECHO</span><h3>${esc(f.properties.label || f.properties.sentido)}</h3><label>Nome do sentido / variante<input id="path-label" maxlength="160" value="${esc(f.properties.label || f.properties.sentido)}"></label><div id="preview-status" class="route-status">${S.preview ? `Antes: ${km(S.preview.old_km || 0)} km · alternativa: ${km(S.preview.new_km || S.preview.distance_km)} km` : 'Sem prévia pendente. O percurso exibido é o rascunho.'}</div><button class="primary" data-action="calculate" data-needs-router ${ps.length ? '' : 'hidden'}>Calcular alternativa</button><button data-action="apply" ${S.preview ? '' : 'disabled'}>Aplicar alternativa</button><button data-action="discard" ${S.preview ? '' : 'disabled'}>Descartar prévia</button>${S.preview ? `<p class="muted">${S.preview.snap_offsets_m ? 'Encaixes na via: ' + S.preview.snap_offsets_m.map((v) => v + ' m').join(' / ') : ''}</p><details><summary>Vias da alternativa</summary><ol>${S.preview.streets.map((s) => `<li>${esc(s)}</li>`).join('')}</ol></details>` : ''}</div><div class="stack"><span class="eyebrow">TRECHOS PRESERVADOS</span>${(f.properties.locked_sections || []).map((l, i) => `<div class="lock"><span>▣ ${esc(l.label || 'Trecho preservado')}</span><button data-unlock="${i}">Desbloquear trecho</button></div>`).join('') || '<p class="muted">Nenhum bloqueio neste sentido.</p>'}<p class="note">O cálculo não modifica os trechos preservados. Conversões e gabarito ainda exigem validação operacional.</p></div><div class="stack"><span class="eyebrow">MALHA VIÁRIA</span>${S.payload.line.routing_policy ? `<p class="muted">Regras viárias da referência ${esc(S.payload.line.routing_policy)} preservadas.</p>` : ''}<p id="router-status" class="muted"></p>${S.router.error ? '<button data-action="warm-router">Tentar preparar malha</button>' : ''}<button class="danger" data-action="delete-path">Remover este sentido</button></div></aside></div><div class="editor-foot"><span>${esc(f.properties.label || f.properties.sentido)} / ${km(f.properties.distancia_km)} km</span><span>Arraste → calcule → confira → aplique → salve</span><span>© OpenStreetMap contributors · Filipeia / IBGE</span></div></div>`;
+    `<div class="editor">${editorFields()}<div class="editor-head"><div class="directions">${S.payload.features.map((v, i) => `<button data-path="${i}" aria-pressed="${i === S.path}">${esc(v.properties.label || v.properties.sentido)}</button>`).join('')}<button data-action="add-path">+ Sentido / variante</button></div><div class="actions"><button data-action="undo" ${S.undo.length ? '' : 'disabled'}>↶ Desfazer</button><button data-action="redo" ${S.redo.length ? '' : 'disabled'}>↷ Refazer</button><button data-nav="compare">Comparar</button><button data-action="focus">${S.focus ? 'Recolher' : 'Ampliar mapa'}</button></div></div><div class="editor-grid"><aside class="points"><h3>${ps.length ? 'Trecho em edição' : 'Construir percurso'}</h3><p class="muted">${ps.length ? 'Selecione início e fim na linha. Arraste as referências vermelhas para outra rua.' : 'Clique no mapa para adicionar passagens. Arraste e reordene as referências.'}</p><div class="stack" id="point-list"></div>${ps.length ? `<div class="pair"><span>Início / fim</span><span>${S.segment?.from ?? '—'} → ${S.segment?.to ?? '—'}</span></div><button data-mode="from">Selecionar início A</button><button data-mode="to">Selecionar fim B</button><button data-mode="via">+ Passagem no trecho</button>` : `<button data-mode="draw">+ Referência no mapa</button><button class="primary" data-action="calculate-new" data-needs-router>Calcular percurso</button><button data-action="clear-draw">Limpar referências</button>`}<p class="muted">Referências não equivalem a paradas.</p>${editorExtensions()}<button data-action="import-observed">Consultar rede SEMOB</button>${f.properties.sentido === 'volta' ? '<button data-action="from-ida" data-needs-router>Recalcular volta a partir da ida</button>' : ''}</aside><div class="mapcol"><div class="map-tools"><button data-mode="navigate" aria-pressed="${S.mode === 'navigate'}">Navegar</button><button data-mode="via" aria-pressed="${S.mode === 'via'}">Alterar trecho</button><button data-action="lock">Preservar seleção</button><select id="editor-base" aria-label="Mapa base"></select></div><div id="editor-map" class="map" aria-label="Editor de rotas por arrastar e soltar"></div></div><aside class="context"><div class="stack"><span class="eyebrow">PRÉVIA DO TRECHO</span><h3>${esc(f.properties.label || f.properties.sentido)}</h3><label>Nome do sentido / variante<input id="path-label" maxlength="160" value="${esc(f.properties.label || f.properties.sentido)}"></label><div id="preview-status" class="route-status">${S.preview ? `Antes: ${km(S.preview.old_km || 0)} km · alternativa: ${km(S.preview.new_km || S.preview.distance_km)} km` : 'Sem prévia pendente. O percurso exibido é o rascunho.'}</div><button class="primary" data-action="calculate" data-needs-router ${ps.length ? '' : 'hidden'}>Calcular alternativa</button><button data-action="apply" ${S.preview ? '' : 'disabled'}>Aplicar alternativa</button><button data-action="discard" ${S.preview ? '' : 'disabled'}>Descartar prévia</button>${S.preview ? `<p class="muted">${S.preview.snap_offsets_m ? 'Encaixes na via: ' + S.preview.snap_offsets_m.map((v) => v + ' m').join(' / ') : ''}</p><details><summary>Vias da alternativa</summary><ol>${S.preview.streets.map((s) => `<li>${esc(s)}</li>`).join('')}</ol></details>` : ''}</div><div class="stack"><span class="eyebrow">TRECHOS PRESERVADOS</span>${(f.properties.locked_sections || []).map((l, i) => `<div class="lock"><span>▣ ${esc(l.label || 'Trecho preservado')}</span><button data-unlock="${i}">Desbloquear trecho</button></div>`).join('') || '<p class="muted">Nenhum bloqueio neste sentido.</p>'}<p class="note">O cálculo não modifica os trechos preservados. Conversões e gabarito ainda exigem validação operacional.</p></div><div class="stack"><span class="eyebrow">MALHA VIÁRIA</span>${S.payload.line.routing_policy ? `<p class="muted">Regras viárias da referência ${esc(S.payload.line.routing_policy)} preservadas.</p>` : ''}<p id="router-status" class="muted"></p>${S.router.error ? '<button data-action="warm-router">Tentar preparar malha</button>' : ''}<button class="danger" data-action="delete-path">Remover este sentido</button></div></aside></div><div class="editor-foot"><span>${esc(f.properties.label || f.properties.sentido)} / ${km(f.properties.distancia_km)} km</span><span>Arraste → calcule → confira → aplique → salve</span><span>© OpenStreetMap contributors · Filipeia / IBGE</span></div></div>`;
   $$('[data-field]').forEach((input) =>
     input.addEventListener('input', () => {
       mutate(() => (S.payload.line[input.dataset.field] = input.value));
@@ -565,6 +589,7 @@ function renderEditor() {
   $('#path-label').oninput = (e) =>
     mutate(() => (current().properties.label = e.target.value));
   drawPointList();
+  bindEditorExtensions();
   drawEditor();
   updateRouterStatus();
   saveStatus(
@@ -757,10 +782,10 @@ function drawEditor() {
     f = current();
   const map = makeMap('editor-map', [f], 'editor-base', !S.view);
   if (S.view) map.setView(S.view.center, S.view.zoom, { animate: false });
-  map.on(
-    'moveend',
-    () => (S.view = { center: map.getCenter(), zoom: map.getZoom() }),
-  );
+  map.on('moveend', () => {
+    if (S.screen === 'editor' && S.maps.includes(map))
+      S.view = { center: map.getCenter(), zoom: map.getZoom() };
+  });
   if (S.preview)
     L.geoJSON(geometryFeature(S.preview.geometry), {
       style: { color: '#c71020', weight: 5 },
@@ -834,10 +859,16 @@ function drawEditor() {
       refs.map((p) => [p[1], p[0]]),
       { padding: [40, 40], maxZoom: 16, animate: false },
     );
+  drawEditorExtensions(map);
   map.on('click', (e) => {
+    if (S.mode === 'permanent') {
+      addPermanent([e.latlng.lng, e.latlng.lat]);
+      return;
+    }
     if (S.mode === 'from' || S.mode === 'to') {
       if (ps.length < 2) return;
       const i = nearestIndex(map, e.latlng, ps);
+      if (offerOverlappingVertices(map, e.latlng, ps, i, S.mode)) return;
       const next = { ...S.segment, [S.mode]: i };
       if (next.from >= next.to) {
         message('O início deve vir antes do fim no sentido da linha.', true);
@@ -868,12 +899,12 @@ function renderEditorAgain() {
   S.screen = 'editor';
   renderEditor();
 }
-async function calculatePreview() {
+async function calculatePreview(direct = false) {
   await saveDraft();
   const request = ++S.routeRequest;
   if (!S.router.ready)
     throw new Error(S.router.error || 'A malha local está sendo preparada.');
-  if (!S.segment || !S.via.length)
+  if (!S.segment || (!S.via.length && !direct))
     throw new Error(
       'Selecione o trecho e adicione ou arraste uma referência intermediária.',
     );
@@ -887,7 +918,8 @@ async function calculatePreview() {
     path_id: pathId,
     from,
     to,
-    via: S.via,
+    via: direct ? [] : S.via,
+    direct,
   });
   if (
     request !== S.routeRequest ||
@@ -898,7 +930,7 @@ async function calculatePreview() {
     S.draft.revision !== result.revision
   )
     return;
-  S.preview = result;
+  S.preview = { ...result, passage_controls: direct ? [] : clone(S.via) };
   renderEditorAgain();
   message(
     'Alternativa calculada. Confira as vias e aplique para alterar o rascunho.',
@@ -1029,7 +1061,7 @@ function renderCompare() {
     [b, a],
   ])
     x.on('moveend', () => {
-      if (syncing) return;
+      if (syncing || !S.maps.includes(x) || !S.maps.includes(y)) return;
       syncing = true;
       y.setView(x.getCenter(), x.getZoom(), { animate: false });
       syncing = false;
@@ -1078,7 +1110,7 @@ function renderReview() {
       'Uma linha alterada · demais linhas preservadas.',
       `<button data-nav="editor">Voltar ao editor</button>`,
     ) +
-    `<div class="review-grid"><div class="stack"><section class="surface stack"><h3>${esc(r.payload.line.code)} · ${esc(r.payload.line.name)}</h3><p>${esc(r.payload.line.itinerary)}</p><div id="review-map" class="map small-map"></div><div class="summary-grid">${r.payload.features.map((f) => `<div><span class="mono">${esc(f.properties.label || f.properties.sentido)}</span><strong>${km(f.properties.distancia_km)} km</strong></div>`).join('')}</div><div class="legend"><span>Ida / circuito</span><span class="before">Volta</span></div><button data-nav="compare">Abrir comparação detalhada</button></section><section class="surface stack"><h3>Conferência</h3>${r.errors.map((e) => `<div class="issue error">✕ ${esc(e)}</div>`).join('') || '<div class="issue">✓ Identificação e geometrias obrigatórias presentes.</div>'}${r.warnings.map((w) => `<div class="issue">△ ${esc(w)}</div>`).join('')}</section></div><aside class="surface publish-box stack"><span class="eyebrow">VERSÃO DO CENÁRIO</span><h3>Publicar no atlas</h3><div class="pair"><span>Origem</span><span>${r.saved_number ? 'V' + r.saved_number : 'Sem versão salva'}</span></div><div class="pair"><span>Publicação ativa</span><span>${r.release_number}</span></div><div class="pair"><span>Impedimentos</span><span>${r.errors.length}</span></div><div class="pair"><span>Pendências declaradas</span><span>${r.warnings.length}</span></div><label class="check"><input id="publish-ack" type="checkbox"> Publicar como estudo, mantendo as pendências identificadas.</label><button data-action="publish" id="publish-button" class="primary" disabled>Publicar versão no estudo</button>${r.errors.length ? '<button data-nav="save">Salvar / corrigir versão</button>' : ''}<p class="muted">A publicação é atômica. A versão anterior permanece recuperável no histórico.</p></aside></div>`;
+    `<div class="review-grid"><div class="stack"><section class="surface stack"><h3>${esc(r.payload.line.code)} · ${esc(r.payload.line.name)}</h3><p>${esc(r.payload.line.itinerary)}</p><div id="review-map" class="map small-map"></div><div class="summary-grid">${r.payload.features.map((f) => `<div><span class="mono">${esc(f.properties.label || f.properties.sentido)}</span><strong>${km(f.properties.distancia_km)} km</strong></div>`).join('')}</div><div class="legend"><span>Ida / circuito</span><span class="before">Volta</span></div><button data-nav="compare">Abrir comparação detalhada</button><button data-nav="batch">Publicar junto de outras linhas e estações</button></section><section class="surface stack"><h3>Conferência</h3>${r.errors.map((e) => `<div class="issue error">✕ ${esc(e)}</div>`).join('') || '<div class="issue">✓ Identificação e geometrias obrigatórias presentes.</div>'}${r.warnings.map((w) => `<div class="issue">△ ${esc(w)}</div>`).join('')}</section></div><aside class="surface publish-box stack"><span class="eyebrow">VERSÃO DO CENÁRIO</span><h3>Publicar no atlas</h3><div class="pair"><span>Origem</span><span>${r.saved_number ? 'V' + r.saved_number : 'Sem versão salva'}</span></div><div class="pair"><span>Publicação ativa</span><span>${r.release_number}</span></div><div class="pair"><span>Impedimentos</span><span>${r.errors.length}</span></div><div class="pair"><span>Pendências declaradas</span><span>${r.warnings.length}</span></div><label class="check"><input id="publish-ack" type="checkbox"> Publicar como estudo, mantendo as pendências identificadas.</label><button data-action="publish" id="publish-button" class="primary" disabled>Publicar versão no estudo</button>${r.errors.length ? '<button data-nav="save">Salvar / corrigir versão</button>' : ''}<p class="muted">A publicação é atômica. A versão anterior permanece recuperável no histórico.</p></aside></div>`;
   makeMap('review-map', r.payload.features);
   $('#publish-ack').onchange = (e) =>
     ($('#publish-button').disabled = !e.target.checked || r.errors.length > 0);
@@ -1278,6 +1310,8 @@ document.addEventListener('click', (e) => {
           via: 'Clique na rua desejada para incluir uma passagem.',
           draw: 'Clique no mapa para adicionar referências.',
           navigate: 'Modo de navegação.',
+          permanent:
+            'Clique no mapa para guardar uma referência permanente neste sentido.',
         }[S.mode],
       );
       return;
@@ -1391,7 +1425,45 @@ document.addEventListener('click', (e) => {
           f.properties.manual = false;
           delete f.properties.observed_streets_percent;
           delete f.properties.central_pattern;
-          if (preview.controls) f.properties.editor_controls = preview.controls;
+          if (preview.controls) {
+            f.properties.editor_controls = preview.controls;
+            const controls = f.properties.control_points || [];
+            const used = new Set();
+            f.properties.control_points = preview.controls.map((p, i) => {
+              const match = controls.find(
+                (c) => same(c.position, p) && !used.has(c.id),
+              );
+              const control = match || {
+                id: id(),
+                label: 'Referência ' + (i + 1),
+                position: p,
+              };
+              used.add(control.id);
+              return control;
+            });
+          } else if (preview.passage_controls?.length) {
+            f.properties.control_points ||= [];
+            for (const p of preview.passage_controls) {
+              if (!f.properties.control_points.some((c) => same(c.position, p)))
+                f.properties.control_points.push({
+                  id: id(),
+                  label: 'Passagem ' + (f.properties.control_points.length + 1),
+                  position: p,
+                });
+            }
+            f.properties.control_points.sort(
+              (a, b) =>
+                nearestCoordinateIndex(f.geometry.coordinates, a.position) -
+                nearestCoordinateIndex(f.geometry.coordinates, b.position),
+            );
+          }
+          if (preview.trimmed) {
+            f.properties.control_points = (
+              f.properties.control_points || []
+            ).filter(
+              (c) => distanceToRoute(c.position, f.geometry.coordinates) < 80,
+            );
+          }
         });
         S.via = [];
         S.draw = [];
@@ -1477,6 +1549,9 @@ document.addEventListener('click', (e) => {
             'Conclua a ida antes de gerar a referência da volta.',
           );
         const ps =
+          (ida.properties.control_points?.length >= 2
+            ? ida.properties.control_points.map((c) => c.position)
+            : null) ||
           ida.properties.editor_controls ||
           ida.geometry.coordinates.filter(
             (_, i, all) =>
@@ -1537,8 +1612,8 @@ document.addEventListener('click', (e) => {
   });
 });
 window.addEventListener('beforeunload', (e) => {
-  if (S.dirty) {
-    protect();
+  if (S.dirty || S.placeDirty) {
+    if (S.dirty) protect();
     e.preventDefault();
     e.returnValue = '';
   }

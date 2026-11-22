@@ -800,3 +800,122 @@ dialog::backdrop {
     font-size: 16px;
   }
 }
+/* Infraestrutura compartilhada e controles do percurso. */
+.infrastructure-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.65fr) minmax(0, 1.8fr);
+  gap: 20px;
+  align-items: start;
+}
+.infrastructure-grid > *,
+.permanent-row {
+  min-width: 0;
+}
+.places-list {
+  display: grid;
+  gap: 7px;
+  max-height: 740px;
+  overflow: auto;
+}
+.places-list button {
+  text-align: left;
+  white-space: normal;
+}
+.places-list small,
+.check small {
+  display: block;
+  margin-top: 5px;
+}
+.permanent-row {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+}
+.permanent-row small {
+  overflow-wrap: anywhere;
+}
+.permanent-row .actions {
+  margin-top: 7px;
+}
+.place-handle,
+.control-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #151515;
+  background: #fff;
+  color: #151515;
+  font: 12px monospace;
+  box-sizing: border-box;
+}
+.place-handle.terminal {
+  background: #151515;
+  color: #fff;
+}
+.place-handle.station {
+  border-radius: 50%;
+}
+.control-handle {
+  border-radius: 4px;
+  border-color: #245544;
+  color: #245544;
+}
+#batch-form .check {
+  flex-wrap: wrap;
+}
+#batch-form .check span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#batch-result {
+  margin-top: 24px;
+}
+@media (max-width: 1000px) {
+  .infrastructure-grid {
+    grid-template-columns: 1fr;
+  }
+  .places-list {
+    max-height: 260px;
+  }
+}
+@media (min-width: 761px) {
+  .editor-grid {
+    height: clamp(600px, calc(100vh - 350px), 820px);
+  }
+  .editor-grid .points,
+  .editor-grid .context {
+    overflow: auto;
+    max-height: 100%;
+  }
+  .editor-grid .mapcol {
+    min-height: 0;
+    height: 100%;
+  }
+  #editor-map {
+    min-height: 0;
+  }
+  .focus-map .editor-grid {
+    height: auto;
+  }
+  .focus-map .points {
+    max-height: 720px;
+  }
+  .focus-map .mapcol {
+    height: 720px;
+  }
+  .focus-map .context {
+    max-height: none;
+    overflow: visible;
+  }
+}
+@media (max-width: 760px) {
+  .editor-grid .points {
+    max-height: 450px;
+    overflow: auto;
+  }
+  .editor-grid .mapcol {
+    height: 540px;
+  }
+  #editor-map {
+    min-height: 400px;
+  }
+}

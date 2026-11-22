@@ -109,7 +109,27 @@ def normalize(payload):
         f.update(type='Feature', id=key)
         p.setdefault('locked_sections', [])
         p.setdefault('reference_lines', [])
-        entries.append({'chave':key,'sentido':direction,'label':p.get('label',direction.capitalize()),'distancia_km':p['distancia_km'],'waypoints':p.get('waypoints',[]),'street_sequence':p.get('street_sequence',[]),'reference_lines':p['reference_lines'],'central_pattern':p.get('central_pattern'),'source':p.get('source','edicao-administrativa')})
+        stations = p.setdefault('station_ids', [])
+        if not isinstance(stations, list) or len(stations) > 200 or any(not isinstance(v, str) or len(v) > 80 for v in stations) or len(set(stations)) != len(stations):
+            raise Problem('Estações do percurso inválidas ou duplicadas.')
+        if 'control_points' not in p:
+            legacy = p.get('editor_controls', [])
+            if not isinstance(legacy,list) or len(legacy)>100:raise Problem('Referências legadas inválidas.')
+            coordinates({'type':'LineString','coordinates':legacy})
+            p['control_points'] = [{'id':uid(),'label':'Referência '+str(i+1),'position':c} for i,c in enumerate(legacy)]
+        controls = p['control_points']
+        if not isinstance(controls, list) or len(controls) > 100:
+            raise Problem('Limite de 100 referências permanentes por percurso.')
+        control_ids = set()
+        for control in controls:
+            if not isinstance(control, dict):raise Problem('Referência permanente inválida.')
+            cid = control.get('id')
+            if not isinstance(cid, str) or not re.fullmatch(r'[a-f0-9-]{36}',cid) or cid in control_ids:raise Problem('Identificador de referência permanente inválido.')
+            control_ids.add(cid)
+            if not isinstance(control.get('label'), str) or not control['label'].strip() or len(control['label']) > 160:raise Problem('Nome da referência permanente inválido.')
+            coordinates({'type':'LineString','coordinates':[control.get('position')]})
+            if control.get('station_id') is not None and (not isinstance(control['station_id'], str) or len(control['station_id']) > 80):raise Problem('Estação da referência inválida.')
+        entries.append({'chave':key,'sentido':direction,'label':p.get('label',direction.capitalize()),'distancia_km':p['distancia_km'],'waypoints':p.get('waypoints',[]),'street_sequence':p.get('street_sequence',[]),'reference_lines':p['reference_lines'],'central_pattern':p.get('central_pattern'),'source':p.get('source','edicao-administrativa'),'station_ids':p.get('station_ids',[]),'control_points':p.get('control_points',[])})
         if p.get('observed_streets_percent') is not None:
             entries[-1]['observed_streets_percent'] = p['observed_streets_percent']
     line['sentidos'] = entries
@@ -145,7 +165,10 @@ def validation(payload):
     return {'errors':errors,'warnings':warnings}
 
 
-class Store:
+from .management import Management
+
+
+class Store(Management):
     def __init__(self, data_dir, proposal_dir=PROPOSAL):
         self.directory = Path(data_dir)/'admin'
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -170,6 +193,7 @@ class Store:
             db.execute("UPDATE jobs SET state='interrupted',updated=? WHERE state='running'",(now(),))
             if not db.execute("SELECT 1 FROM meta WHERE key='active_release'").fetchone():
                 self.seed(db)
+            self.migrate_management(db)
         os.chmod(self.path, 0o600)
         token = self.directory/'setup-token'
         if not self.configured() and not token.exists():
@@ -183,7 +207,7 @@ class Store:
         db.execute('PRAGMA foreign_keys=ON')
         db.execute('PRAGMA journal_mode=WAL')
         try:
-            if write: db.execute('BEGIN IMMEDIATE')
+            db.execute('BEGIN IMMEDIATE' if write else 'BEGIN')
             yield db
             db.commit()
         except Exception:
@@ -291,7 +315,7 @@ class Store:
             for lid,v in self.versions_in(db):
                 p=json.loads(v['payload'])
                 lines.append({'id':lid,'version_id':v['id'],'version':v['number'],**p['line'],'draft':drafts.get(lid)})
-            return {'lines':lines,'drafts':[self.draft_row(r) for r in db.execute('SELECT * FROM drafts ORDER BY updated DESC')],'release':{'id':release['id'],'number':release['number'],'created':release['created'],'note':release['note']},'places':places,'releases':[dict(r) for r in db.execute('SELECT id,number,created,note FROM releases ORDER BY number DESC LIMIT 30')],'jobs':[dict(r) for r in db.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 10')]}
+            return {'lines':lines,'drafts':[self.draft_row(r) for r in db.execute('SELECT * FROM drafts ORDER BY updated DESC')],'release':{'id':release['id'],'number':release['number'],'created':release['created'],'note':release['note']},'places':places,'releases':[dict(r) for r in db.execute('SELECT id,number,created,note FROM releases ORDER BY number DESC LIMIT 30')],'jobs':[dict(r) for r in db.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 10')],**self.management_overview(db)}
 
     def draft_row(self, row):
         result=dict(row);result['payload']=json.loads(result['payload']);return result
@@ -311,13 +335,17 @@ class Store:
             base_version=None
             if source_id:
                 items=json.loads(self.active(db)['items'])
-                if source_id not in items:raise Problem('Linha de origem não encontrada.',404)
-                base_version=items[source_id]
+                base_version=items.get(source_id)
+                source_version=base_version
+                if not source_version:
+                    historical=db.execute('SELECT id FROM versions WHERE line_id=? ORDER BY number DESC LIMIT 1',(source_id,)).fetchone()
+                    if not historical:raise Problem('Linha de origem não encontrada.',404)
+                    source_version=historical['id']
                 if existing:
                     draft=db.execute('SELECT id FROM drafts WHERE line_id=?',(source_id,)).fetchone()
                     if draft:return self.draft_row(db.execute('SELECT * FROM drafts WHERE id=?',(draft['id'],)).fetchone())
-                payload=json.loads(db.execute('SELECT payload FROM versions WHERE id=?',(base_version,)).fetchone()[0])
-                payload['line'].setdefault('routing_policy',payload['line']['code'])
+                payload=json.loads(db.execute('SELECT payload FROM versions WHERE id=?',(source_version,)).fetchone()[0])
+                if not existing:payload['line'].setdefault('routing_policy',payload['line']['code'])
             else:
                 payload=body.get('payload') or {'line':{'code':body.get('code',''),'name':body.get('name',''),'type':body.get('type','integracional'),'kind':body.get('kind','bidirectional'),'points':[]},'features':[]}
             if not existing:
@@ -368,6 +396,10 @@ class Store:
                 report['errors'].append('Este código já está publicado em outra linha.')
         if items.get(row['line_id'])!=row['base_version']:
             report['errors'].append('A linha publicada mudou desde a criação deste rascunho. Abra um novo rascunho da publicação atual.')
+        report['errors'].extend(self.validate_references(payload,self.places_in(db)))
+        report['warnings'].extend(self.reference_warnings(payload,self.places_in(db)))
+        state=db.execute('SELECT archived FROM line_state WHERE line_id=?',(row['line_id'],)).fetchone()
+        if state and state['archived']:report['errors'].append('Reative a linha antes de publicar seu rascunho.')
         saved=db.execute('SELECT * FROM versions WHERE id=?',(row['saved_version'],)).fetchone()
         if not saved or saved['digest']!=digest(payload):report['errors'].append('Salve uma versão com as últimas alterações antes de publicar.')
         baseline=db.execute('SELECT payload FROM versions WHERE id=?',(items.get(row['line_id']),)).fetchone()
@@ -390,6 +422,7 @@ class Store:
             if report['warnings'] and body.get('acknowledge_warnings') is not True:raise Problem('Confirme a publicação como estudo com as pendências declaradas.',422)
             release=self.active(db);items=json.loads(release['items']);items[row['line_id']]=row['saved_version'];rid=uid()
             db.execute('INSERT INTO releases VALUES(?,?,?,?,?)',(rid,release['number']+1,encode(items),now(),'Publicação de '+report['payload']['line']['code']))
+            db.execute('INSERT INTO release_places VALUES(?,?)',(rid,encode(self.places_in(db,release))))
             db.execute("UPDATE meta SET value=? WHERE key='active_release'",(rid,))
             db.execute('UPDATE drafts SET base_version=?,revision=revision+1,updated=? WHERE id=?',(row['saved_version'],now(),draft_id))
             self.audit(db,user,'publish',rid,'Linha '+row['line_id'])
@@ -415,6 +448,11 @@ class Store:
             if not previous:raise Problem('Publicação não encontrada.',404)
             rid=uid();number=current['number']+1
             db.execute('INSERT INTO releases VALUES(?,?,?,?,?)',(rid,number,previous['items'],now(),'Restauração da publicação '+str(previous['number'])))
+            places=self.places_in(db,previous)
+            workspace=self.places_workspace_in(db)
+            db.execute('INSERT INTO release_places VALUES(?,?)',(rid,encode(places)))
+            if not workspace['dirty']:
+                db.execute('UPDATE place_workspace SET revision=revision+1,payload=? WHERE id=1',(encode(places),))
             db.execute("UPDATE meta SET value=? WHERE key='active_release'",(rid,))
             self.audit(db,user,'restore-release',rid)
         return {'release_id':rid,'number':number}
@@ -423,15 +461,21 @@ class Store:
         catalog=deepcopy(self.base['catalogo.json']);geo=deepcopy(self.base['linhas-por-sentido.geojson']);catalog['linhas']=[];geo['features']=[]
         with self.db() as db:
             release=self.active(db)
+            published_places=self.places_in(db,release)
             for lid,v in self.versions_in(db):
                 payload=json.loads(v['payload']);catalog['linhas'].append(payload['line']);geo['features'].extend(payload['features'])
+        catalog['lugares']={k:v for k,v in published_places.items() if not v.get('archived')}
+        waypoints=deepcopy(self.base['waypoints-roteamento.json'])
+        for key,place in published_places.items():
+            if place.get('archived'):waypoints.pop(key,None)
+            else:waypoints[key]=place.get('route_position',place['position'])
         catalog.update(publication={'id':release['id'],'number':release['number'],'created':release['created']})
         a=self.base['auditoria.json']
         comparisons=deepcopy(self.base['comparativos-i332.json'])
         baseline_i332=[f['geometry'] for f in self.base['linhas-por-sentido.geojson']['features'] if f['properties']['codigo']=='I-332']
         current_i332=[f['geometry'] for f in geo['features'] if f['properties']['codigo']=='I-332']
         if current_i332!=baseline_i332:comparisons={}  # não apresentar um recorte antigo como revisão atual
-        return {'catalog':catalog,'geojson':geo,'waypoints':deepcopy(self.base['waypoints-roteamento.json']),'comparisons':comparisons,'review':{k:a[k] for k in ['revision','method','station_reference','oitizeiro_reference','limits']}}
+        return {'catalog':catalog,'geojson':geo,'waypoints':waypoints,'comparisons':comparisons,'review':{k:a[k] for k in ['revision','method','station_reference','oitizeiro_reference','limits']}}
 
     def job(self, job_id, state, detail):
         with self.db(write=True) as db:

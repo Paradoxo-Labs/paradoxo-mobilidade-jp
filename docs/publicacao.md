@@ -9,6 +9,7 @@ O destino de execução verificado é o Docker Desktop com integração WSL, ser
 ```sh
 python3 -m unittest discover -s apps/planner/tests -v
 docker compose up -d --build --wait
+docker compose exec -T atlas python3 -m unittest discover -s apps/admin/tests -v
 docker compose exec -T atlas python3 -m unittest discover -s apps/collector/tests -v
 docker compose exec -T atlas python3 -m unittest discover -s apps/planner/tests -v
 docker compose ps
@@ -21,3 +22,5 @@ A pasta `data/` é persistida no host e fica fora do Git. Os resultados curados 
 O serviço também atende `/admin`, com cadastro inicial por código de uso único, sessão autenticada e banco persistido em `data/admin/`. O atlas usa a publicação ativa desse banco; salvar rascunho ou versão não publica. Publicar/restaurar no painel atualiza apenas o atlas local, sem executar Git, push ou deploy externo. Código e semente continuam entregues por commits na `develop`.
 
 Primeiro acesso, recuperação de senha, backup e limites: [ADMINISTRACAO.md](ADMINISTRACAO.md).
+
+A publicação conjunta no painel inclui versões de várias linhas, retiradas e o cadastro de estações/terminais em uma única transação. Restaurar uma publicação também recupera suas referências compartilhadas. Antes de atualizar o serviço com banco existente, faça um backup transacional usando o comando documentado em ADMINISTRACAO.md.

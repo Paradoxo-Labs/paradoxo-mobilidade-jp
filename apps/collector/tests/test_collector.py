@@ -265,6 +265,13 @@ class HTTPTests(unittest.TestCase):
         req=Request(self.url+'/api/admin/drafts',data=b'{}',headers={**self.headers,'X-CSRF-Token':'incorreto'})
         with self.assertRaises(HTTPError) as e:urlopen(req)
         self.assertEqual(e.exception.code,403)
+        for endpoint in ['places/save','lines/manage','batch/review','batch/publish']:
+            with self.assertRaises(HTTPError) as error:
+                urlopen(Request(self.url+'/api/admin/'+endpoint,data=b'{}',headers={'Origin':self.url,'Content-Type':'application/json'}))
+            self.assertEqual(error.exception.code,401)
+            with self.assertRaises(HTTPError) as error:
+                urlopen(Request(self.url+'/api/admin/'+endpoint,data=b'{}',headers={**self.headers,'X-CSRF-Token':'incorreto'}))
+            self.assertEqual(error.exception.code,403)
         request=Request(self.url+'/api/admin/login',data=json.dumps({'username':'test-admin','password':'uma senha longa para testes'}).encode(),headers={'Origin':self.url,'Content-Type':'application/json'})
         with urlopen(request) as response:
             cookie=response.headers['Set-Cookie'];session=json.load(response)
@@ -277,7 +284,7 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(e.exception.code,401)
         self.assertIn(b'/admin',self.get('/'))
         self.assertNotIn(b'id="collect-form"',self.get('/'))
-        for path in ['/admin','/admin.js','/admin.css']:
+        for path in ['/admin','/admin.js','/admin-network.js','/admin.css']:
             self.assertTrue(self.get(path))
 
 

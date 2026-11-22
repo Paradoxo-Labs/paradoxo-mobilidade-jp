@@ -82,9 +82,9 @@ window.TransitMap = class {
   markers(items) {
     this.points.clearLayers();
     for (const item of items) {
-      const point = L.circleMarker([item.position[1], item.position[0]], {radius: item.terminal ? 6 : 3, color: '#111112', weight: 2, fillColor: item.terminal ? '#fff' : '#ed2633', fillOpacity: 1, className: 'transit-reference'});
-      point.bindTooltip(this.tooltip(item.short || item.label), {permanent: Boolean(item.terminal), direction: 'top', className: 'terminal-label', offset: [0, -6]});
-      if (item.terminal) point.bindPopup(this.tooltip(item.label));
+      const point = L.circleMarker([item.position[1], item.position[0]], {radius: item.terminal ? 6 : item.kind === 'station' ? 5 : 3, color: '#111112', weight: 2, fillColor: item.terminal || item.kind === 'station' ? '#fff' : '#ed2633', fillOpacity: 1, className: 'transit-reference'});
+      point.bindTooltip(this.tooltip(item.short || item.label), {permanent: Boolean(item.terminal || item.kind === 'station'), direction: 'top', className: 'terminal-label', offset: [0, -6]});
+      if (item.terminal || item.kind === 'station') point.bindPopup(this.tooltip(item.label));
       point.addTo(this.points);
     }
   }

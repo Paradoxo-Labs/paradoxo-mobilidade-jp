@@ -69,7 +69,7 @@ class Router:
         if any(isinstance(i,bool) or not isinstance(i,int) for i in [a,b]) or not 0<=a<b<len(points):
             raise Problem('Selecione o início e o fim do trecho no percurso.')
         via=coordinates({'type':'LineString','coordinates':body.get('via',[])})
-        if not via or len(via)>12:raise Problem('Informe entre 1 e 12 referências intermediárias.')
+        if len(via)>100 or (not via and body.get('direct') is not True):raise Problem('Adicione uma passagem ou escolha reconectar diretamente pelas ruas.')
         if any(not (-35.05<p[0]<-34.70 and -7.40<p[1]<-6.95) for p in via):raise Problem('A referência está fora da área de trabalho de João Pessoa.')
         code=draft['payload']['line'].get('routing_policy') or draft['payload']['line']['code']
         with self.route_lock:
@@ -107,7 +107,7 @@ class Router:
             if not feature:raise Problem('Sentido não encontrado.',404)
             policy=draft['payload']['line'].get('routing_policy') or draft['payload']['line']['code']
         refs=coordinates({'type':'LineString','coordinates':body.get('points')})
-        if not 2<=len(refs)<=14:raise Problem('Informe de 2 a 14 pontos para criar o percurso.')
+        if not 2<=len(refs)<=100:raise Problem('Informe de 2 a 100 pontos para criar o percurso.')
         if any(not (-35.05<p[0]<-34.70 and -7.40<p[1]<-6.95) for p in refs):raise Problem('Referências fora da área de trabalho.')
         with self.route_lock:
             n=self.network;node=n.snap(refs[0]);joined=[node]
@@ -119,6 +119,7 @@ class Router:
                 except ValueError as exc:raise Problem('Não há caminho viário dirigido entre os pontos.') from exc
                 joined.extend(segment[1:]);node=end
             coords=[n.positions[node] for node in joined]
+            if len(coords)<2 or length_km(coords)<.01:raise Problem('As referências produziram um percurso vazio. Em circuitos, inclua passagens intermediárias.')
             streets=[]
             for u,v in zip(joined,joined[1:]):
                 name=n.edges[u,v]['name']
@@ -127,3 +128,24 @@ class Router:
                 for lock in feature['properties'].get('locked_sections',[]):
                     if not contains_section(coords,lock['coordinates']):raise Problem('O novo percurso substituiria um trecho preservado. Desbloqueie-o explicitamente para recalcular o sentido inteiro.',409)
         return {'revision':draft['revision'] if draft else None,'geometry':{'type':'LineString','coordinates':coords},'streets':streets,'distance_km':round(length_km(coords),2),'router_fingerprint':self.fingerprint}
+
+    def trim(self, draft, body):
+        if body.get('revision') != draft['revision']:
+            raise Problem('O rascunho mudou. Salve antes de cortar.', 409)
+        feature = next((f for f in draft['payload']['features'] if f['properties']['path_id'] == body.get('path_id')), None)
+        if not feature:raise Problem('Percurso não encontrado.', 404)
+        points = feature['geometry']['coordinates']
+        index = body.get('index')
+        if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < len(points):
+            raise Problem('Selecione um vértice válido para o corte.')
+        if body.get('side') not in {'before','after'}:raise Problem('Tipo de corte inválido.')
+        replacement = points[index:] if body['side'] == 'before' else points[:index+1]
+        if len(replacement) < 2 or length_km(replacement) < .01:
+            raise Problem('O corte deixaria um percurso vazio ou curto demais.')
+        for lock in feature['properties'].get('locked_sections', []):
+            if not contains_section(replacement, lock['coordinates']):
+                raise Problem('O corte removeria um trecho preservado. Desbloqueie-o primeiro.', 409)
+        return {'geometry': {'type':'LineString','coordinates': replacement},
+                'old_km': round(length_km(points),3), 'new_km': round(length_km(replacement),3),
+                'distance_km': round(length_km(replacement),2), 'streets': [], 'trimmed': True,
+                'revision': draft['revision'], 'path_id': body['path_id']}
