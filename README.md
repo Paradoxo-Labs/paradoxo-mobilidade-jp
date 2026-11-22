@@ -118,7 +118,7 @@ https://gitlab.com/paradoxo-labs/products/paradoxo-mobilidade-jp
 
 ## Painel administrativo local
 
-O [painel em `/admin`](http://127.0.0.1:8000/admin) reúne o coletor autenticado, criação e duplicação de linhas, importação da rede observada, edição independente de ida/volta, prévias por arrastar referências no mapa, preservação de trechos, desfazer/refazer, rascunhos, comparação, versões e publicação/restauração da rede local.
+O [painel em `/admin`](http://127.0.0.1:8000/admin) reúne o coletor autenticado, criação e duplicação de linhas, importação da rede observada, edição independente de ida/volta, arraste da própria rota com encaixe em ruas e prévia, preservação de trechos, desfazer/refazer, rascunhos, comparação, versões e publicação/restauração da rede local.
 
 Também inclui cadastro de estações/terminais com acessos por sentido, referências permanentes no editor, reconexão de trechos e cortes com prévia, arquivamento/reativação de linhas e publicação conjunta de linhas, retiradas e estações. Alterações administrativas só chegam ao atlas após publicação.
 

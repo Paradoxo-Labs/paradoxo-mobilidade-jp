@@ -47,7 +47,8 @@ const S = {
   via: [],
   draw: [],
   segment: null,
-  mode: 'navigate',
+  mode: 'drag',
+  advancedEditor: false,
   router: { ready: false },
   maps: [],
   resources: null,
@@ -263,7 +264,11 @@ async function warmRouter() {
   if (!S.router.ready) routerTimer = setInterval(update, 4000);
 }
 function updateRouterStatus() {
-  if (S.router.ready) S.maps.forEach((m) => m.loadRoads?.());
+  if (S.router.ready)
+    S.maps.forEach((m) => {
+      m.loadRoads?.();
+      m.loadDragRoads?.();
+    });
   const n = $('#router-status');
   if (n)
     n.textContent = S.router.ready
@@ -495,6 +500,8 @@ async function openDraft(did) {
   S.via = [];
   S.draw = [];
   S.segment = null;
+  S.mode = 'drag';
+  S.advancedEditor = false;
   S.undo = [];
   S.redo = [];
   S.dirty = false;
@@ -570,7 +577,7 @@ function renderEditor() {
     (S.recovery
       ? `<div class="recovery"><strong>Há alterações recuperáveis neste navegador.</strong><p>O servidor tem revisão ${S.draft.revision}; a cópia local partiu da revisão ${S.recovery.revision}. Confira antes de recuperar.</p><div class="actions"><button data-action="recover">Recuperar como rascunho atual</button><button data-action="discard-recovery">Descartar cópia local</button></div></div>`
       : '') +
-    `<div class="editor">${editorFields()}<div class="editor-head"><div class="directions">${S.payload.features.map((v, i) => `<button data-path="${i}" aria-pressed="${i === S.path}">${esc(v.properties.label || v.properties.sentido)}</button>`).join('')}<button data-action="add-path">+ Sentido / variante</button></div><div class="actions"><button data-action="undo" ${S.undo.length ? '' : 'disabled'}>↶ Desfazer</button><button data-action="redo" ${S.redo.length ? '' : 'disabled'}>↷ Refazer</button><button data-nav="compare">Comparar</button><button data-action="focus">${S.focus ? 'Recolher' : 'Ampliar mapa'}</button></div></div><div class="editor-grid"><aside class="points"><h3>${ps.length ? 'Trecho em edição' : 'Construir percurso'}</h3><p class="muted">${ps.length ? 'Selecione início e fim na linha. Arraste as referências vermelhas para outra rua.' : 'Clique no mapa para adicionar passagens. Arraste e reordene as referências.'}</p><div class="stack" id="point-list"></div>${ps.length ? `<div class="pair"><span>Início / fim</span><span>${S.segment?.from ?? '—'} → ${S.segment?.to ?? '—'}</span></div><button data-mode="from">Selecionar início A</button><button data-mode="to">Selecionar fim B</button><button data-mode="via">+ Passagem no trecho</button>` : `<button data-mode="draw">+ Referência no mapa</button><button class="primary" data-action="calculate-new" data-needs-router>Calcular percurso</button><button data-action="clear-draw">Limpar referências</button>`}<p class="muted">Referências não equivalem a paradas.</p>${editorExtensions()}<button data-action="import-observed">Consultar rede SEMOB</button>${f.properties.sentido === 'volta' ? '<button data-action="from-ida" data-needs-router>Recalcular volta a partir da ida</button>' : ''}</aside><div class="mapcol"><div class="map-tools"><button data-mode="navigate" aria-pressed="${S.mode === 'navigate'}">Navegar</button><button data-mode="via" aria-pressed="${S.mode === 'via'}">Alterar trecho</button><button data-action="lock">Preservar seleção</button><select id="editor-base" aria-label="Mapa base"></select></div><div id="editor-map" class="map" aria-label="Editor de rotas por arrastar e soltar"></div></div><aside class="context"><div class="stack"><span class="eyebrow">PRÉVIA DO TRECHO</span><h3>${esc(f.properties.label || f.properties.sentido)}</h3><label>Nome do sentido / variante<input id="path-label" maxlength="160" value="${esc(f.properties.label || f.properties.sentido)}"></label><div id="preview-status" class="route-status">${S.preview ? `Antes: ${km(S.preview.old_km || 0)} km · alternativa: ${km(S.preview.new_km || S.preview.distance_km)} km` : 'Sem prévia pendente. O percurso exibido é o rascunho.'}</div><button class="primary" data-action="calculate" data-needs-router ${ps.length ? '' : 'hidden'}>Calcular alternativa</button><button data-action="apply" ${S.preview ? '' : 'disabled'}>Aplicar alternativa</button><button data-action="discard" ${S.preview ? '' : 'disabled'}>Descartar prévia</button>${S.preview ? `<p class="muted">${S.preview.snap_offsets_m ? 'Encaixes na via: ' + S.preview.snap_offsets_m.map((v) => v + ' m').join(' / ') : ''}</p><details><summary>Vias da alternativa</summary><ol>${S.preview.streets.map((s) => `<li>${esc(s)}</li>`).join('')}</ol></details>` : ''}</div><div class="stack"><span class="eyebrow">TRECHOS PRESERVADOS</span>${(f.properties.locked_sections || []).map((l, i) => `<div class="lock"><span>▣ ${esc(l.label || 'Trecho preservado')}</span><button data-unlock="${i}">Desbloquear trecho</button></div>`).join('') || '<p class="muted">Nenhum bloqueio neste sentido.</p>'}<p class="note">O cálculo não modifica os trechos preservados. Conversões e gabarito ainda exigem validação operacional.</p></div><div class="stack"><span class="eyebrow">MALHA VIÁRIA</span>${S.payload.line.routing_policy ? `<p class="muted">Regras viárias da referência ${esc(S.payload.line.routing_policy)} preservadas.</p>` : ''}<p id="router-status" class="muted"></p>${S.router.error ? '<button data-action="warm-router">Tentar preparar malha</button>' : ''}<button class="danger" data-action="delete-path">Remover este sentido</button></div></aside></div><div class="editor-foot"><span>${esc(f.properties.label || f.properties.sentido)} / ${km(f.properties.distancia_km)} km</span><span>Arraste → calcule → confira → aplique → salve</span><span>© OpenStreetMap contributors · Filipeia / IBGE</span></div></div>`;
+    `<div class="editor">${editorFields()}<div class="editor-head"><div class="directions">${S.payload.features.map((v, i) => `<button data-path="${i}" aria-pressed="${i === S.path}">${esc(v.properties.label || v.properties.sentido)}</button>`).join('')}<button data-action="add-path">+ Sentido / variante</button></div><div class="actions"><button data-action="undo" ${S.undo.length ? '' : 'disabled'}>↶ Desfazer</button><button data-action="redo" ${S.redo.length ? '' : 'disabled'}>↷ Refazer</button><button data-nav="compare">Comparar</button><button data-action="focus">${S.focus ? 'Recolher' : 'Ampliar mapa'}</button></div></div><div class="editor-grid"><aside class="points"><h3>${ps.length ? 'Trecho em edição' : 'Construir percurso'}</h3><p class="muted">${ps.length ? 'Selecione início e fim na linha. Arraste as referências vermelhas para outra rua.' : 'Clique no mapa para adicionar passagens. Arraste e reordene as referências.'}</p><div class="stack" id="point-list"></div>${ps.length ? `<div class="pair"><span>Início / fim</span><span>${S.segment?.from ?? '—'} → ${S.segment?.to ?? '—'}</span></div><button data-mode="from">Selecionar início A</button><button data-mode="to">Selecionar fim B</button><button data-mode="via">+ Passagem no trecho</button>` : `<button data-mode="draw">+ Referência no mapa</button><button class="primary" data-action="calculate-new" data-needs-router>Calcular percurso</button><button data-action="clear-draw">Limpar referências</button>`}<p class="muted">Referências não equivalem a paradas.</p>${editorExtensions()}<button data-action="import-observed">Consultar rede SEMOB</button>${f.properties.sentido === 'volta' ? '<button data-action="from-ida" data-needs-router>Recalcular volta a partir da ida</button>' : ''}</aside><div class="mapcol"><div class="map-tools"><button data-mode="drag" aria-pressed="${S.mode === 'drag'}">Arrastar rota</button><button data-mode="navigate" aria-pressed="${S.mode === 'navigate'}">Navegar</button><button data-mode="via" aria-pressed="${S.mode === 'via'}">Seleção avançada</button><button data-action="lock">Preservar seleção</button><select id="editor-base" aria-label="Mapa base"></select></div><div id="editor-map" class="map" aria-label="Editor de rotas por arrastar e soltar"></div></div><aside class="context"><div class="stack"><span class="eyebrow">PRÉVIA DO TRECHO</span><h3>${esc(f.properties.label || f.properties.sentido)}</h3><label>Nome do sentido / variante<input id="path-label" maxlength="160" value="${esc(f.properties.label || f.properties.sentido)}"></label><div id="preview-status" class="route-status">${S.preview ? `Antes: ${km(S.preview.old_km || 0)} km · alternativa: ${km(S.preview.new_km || S.preview.distance_km)} km` : 'Sem prévia pendente. O percurso exibido é o rascunho.'}</div><button class="primary" data-action="calculate" data-needs-router ${ps.length ? '' : 'hidden'}>Calcular alternativa</button><button data-action="apply" ${S.preview ? '' : 'disabled'}>Aplicar alternativa</button><button data-action="discard" ${S.preview ? '' : 'disabled'}>Descartar prévia</button>${S.preview ? `<p class="muted">${S.preview.snap_offsets_m ? 'Encaixes na via: ' + S.preview.snap_offsets_m.map((v) => v + ' m').join(' / ') : ''}</p><details><summary>Vias da alternativa</summary><ol>${S.preview.streets.map((s) => `<li>${esc(s)}</li>`).join('')}</ol></details>` : ''}</div><div class="stack"><span class="eyebrow">TRECHOS PRESERVADOS</span>${(f.properties.locked_sections || []).map((l, i) => `<div class="lock"><span>▣ ${esc(l.label || 'Trecho preservado')}</span><button data-unlock="${i}">Desbloquear trecho</button></div>`).join('') || '<p class="muted">Nenhum bloqueio neste sentido.</p>'}<p class="note">O cálculo não modifica os trechos preservados. Conversões e gabarito ainda exigem validação operacional.</p></div><div class="stack"><span class="eyebrow">MALHA VIÁRIA</span>${S.payload.line.routing_policy ? `<p class="muted">Regras viárias da referência ${esc(S.payload.line.routing_policy)} preservadas.</p>` : ''}<p id="router-status" class="muted"></p>${S.router.error ? '<button data-action="warm-router">Tentar preparar malha</button>' : ''}<button class="danger" data-action="delete-path">Remover este sentido</button></div></aside></div><div class="editor-foot"><span>${esc(f.properties.label || f.properties.sentido)} / ${km(f.properties.distancia_km)} km</span><span>Arraste → calcule → confira → aplique → salve</span><span>© OpenStreetMap contributors · Filipeia / IBGE</span></div></div>`;
   $$('[data-field]').forEach((input) =>
     input.addEventListener('input', () => {
       mutate(() => (S.payload.line[input.dataset.field] = input.value));
@@ -588,8 +595,14 @@ function renderEditor() {
   );
   $('#path-label').oninput = (e) =>
     mutate(() => (current().properties.label = e.target.value));
-  drawPointList();
-  bindEditorExtensions();
+  if (ps.length && !S.advancedEditor) {
+    $('.editor-grid .points').innerHTML = routeDragSidebar();
+    $('[data-action=calculate]').hidden = true;
+    $('[data-action=lock]').hidden = true;
+  } else {
+    drawPointList();
+    bindEditorExtensions();
+  }
   drawEditor();
   updateRouterStatus();
   saveStatus(
@@ -790,7 +803,7 @@ function drawEditor() {
     L.geoJSON(geometryFeature(S.preview.geometry), {
       style: { color: '#c71020', weight: 5 },
     }).addTo(map);
-  if (ps.length && S.segment) {
+  if (ps.length && S.segment && S.advancedEditor) {
     const { from, to } = S.segment;
     const range = ps.slice(from, to + 1);
     L.polyline(
@@ -833,7 +846,7 @@ function drawEditor() {
         .addTo(map);
     }
   }
-  const refs = ps.length ? S.via : S.draw;
+  const refs = ps.length ? (S.advancedEditor ? S.via : []) : S.draw;
   refs.forEach((p, i) =>
     L.marker([p[1], p[0]], {
       draggable: true,
@@ -860,6 +873,7 @@ function drawEditor() {
       { padding: [40, 40], maxZoom: 16, animate: false },
     );
   drawEditorExtensions(map);
+  installRouteDragging(map, f);
   map.on('click', (e) => {
     if (S.mode === 'permanent') {
       addPermanent([e.latlng.lng, e.latlng.lat]);
@@ -1294,12 +1308,18 @@ document.addEventListener('click', (e) => {
       S.via = [];
       S.draw = [];
       S.segment = null;
-      S.mode = 'navigate';
+      S.mode = 'drag';
+      S.advancedEditor = false;
       renderEditorAgain();
       return;
     }
     if (b.dataset.mode) {
+      const oldAdvanced = S.advancedEditor;
+      if (b.dataset.mode === 'drag') S.advancedEditor = false;
+      if (['via', 'from', 'to', 'permanent'].includes(b.dataset.mode))
+        S.advancedEditor = true;
       S.mode = b.dataset.mode;
+      if (oldAdvanced !== S.advancedEditor) renderEditorAgain();
       $$('[data-mode]').forEach((v) =>
         v.setAttribute('aria-pressed', String(v.dataset.mode === S.mode)),
       );
@@ -1310,6 +1330,7 @@ document.addEventListener('click', (e) => {
           via: 'Clique na rua desejada para incluir uma passagem.',
           draw: 'Clique no mapa para adicionar referências.',
           navigate: 'Modo de navegação.',
+          drag: 'Segure a linha e arraste até uma rua. Aproxime o mapa para ver as ruas.',
           permanent:
             'Clique no mapa para guardar uma referência permanente neste sentido.',
         }[S.mode],
@@ -1421,6 +1442,12 @@ document.addEventListener('click', (e) => {
             : [];
           f.properties.editor_last_segment_streets = preview.streets;
           f.properties.source = 'edicao-administrativa';
+          if (preview.drag_target)
+            f.properties.editor_last_drag = {
+              source: preview.drag_source,
+              target: preview.drag_target,
+              street: preview.drag_street,
+            };
           f.properties.router_fingerprint = preview.router_fingerprint;
           f.properties.manual = false;
           delete f.properties.observed_streets_percent;

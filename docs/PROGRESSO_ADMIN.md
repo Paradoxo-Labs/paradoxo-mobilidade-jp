@@ -32,3 +32,17 @@ Se houver interrupção, consultar este arquivo, `git status`, o diff e os teste
 ## Como retomar após uma interrupção futura
 
 Abra o projeto e peça: “Continue pelo registro em docs/PROGRESSO_ADMIN.md”. Conferir primeiro a branch, `git status` e os últimos commits, sem sobrescrever mudanças do usuário. Se este pedido já estiver concluído, apresentar o estado atual antes de iniciar uma etapa nova. Este arquivo é um ponto de continuidade, não um agendamento ou uma garantia de execução quando não houver crédito disponível.
+
+## Refinamento: arraste direto da rota
+
+Pedido posterior: segurar e arrastar a própria rota, encaixando apenas em ruas, principalmente em circuitos.
+
+- [x] Seleção automática de trecho por posição na sequência, incluindo a passagem pelo início/fim do circuito.
+- [x] Destino projetado em arestas viárias permitidas e validação no servidor.
+- [x] Interface simples de arraste, com ferramentas de referências em modo avançado.
+- [x] Testes com ruas reais, sobreposições, soltura fora da rua e circuitos no navegador.
+- [x] Atualizar Docker, documentação e commit na develop.
+
+Validação do refinamento: 59 testes automatizados e gestos reais no Chromium passaram, incluindo as passagens opostas 0/419 da L-251 junto ao terminal. Fonte protegida é recusada antes do cálculo. Backup anterior à atualização: `data/admin/backups/admin-pre-arraste-2026-11-22.sqlite3`.
+
+Refinamento concluído: serviço principal atualizado e saudável; comparação de hashes confirmou preservação integral de conta, rascunhos, versões, publicações e infraestrutura. A publicação 2 continua com 24 linhas. Recarregar `/admin` para carregar o modo **Arrastar rota**.

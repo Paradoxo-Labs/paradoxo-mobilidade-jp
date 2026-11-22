@@ -919,3 +919,15 @@ dialog::backdrop {
     min-height: 400px;
   }
 }
+.route-drag-enabled.route-can-grab,
+.route-drag-enabled.route-can-grab .leaflet-interactive {
+  cursor: grab;
+}
+.route-drag-enabled.route-is-dragging,
+.route-drag-enabled.route-is-dragging * {
+  cursor: grabbing !important;
+}
+#drag-street-status {
+  min-height: 70px;
+  overflow-wrap: anywhere;
+}

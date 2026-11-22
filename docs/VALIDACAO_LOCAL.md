@@ -102,3 +102,12 @@ Esta revisão substitui os traçados e indicadores da etapa anterior na proposta
 - Antes de atualizar a instância principal, criado backup consistente em `data/admin/backups/admin-pre-infra-2026-11-22.sqlite3`, privado e fora do Git. O registro de continuidade está em `docs/PROGRESSO_ADMIN.md`.
 - Serviço principal atualizado e saudável. Comparação de hashes antes/depois confirmou preservação integral da conta existente, dos dois rascunhos, das 25 versões e das duas publicações. `PRAGMA integrity_check` retornou `ok`; apenas as tabelas novas de infraestrutura/gerenciamento foram inicializadas.
 - Conferência anônima no navegador após a atualização: publicação 2 com 24 linhas, Estação Cidade Universitária identificada como estação e com rótulo no mapa, login previamente configurado e módulos novos presentes, sem dados de QA. Container temporário e segredo de QA removidos.
+
+## Arraste direto sobre ruas — 22/11/2026
+
+- Interação principal substituída por arraste da própria linha, com captura do ponteiro, marcador projetado nas ruas permitidas e escolha automática do intervalo. A seleção manual e as referências continuam nas ferramentas avançadas.
+- 30 testes administrativos, 17 do coletor/HTTP e 12 do roteador passaram. Os novos testes cobrem projeção no meio de ruas longas, mão única, rejeição de terreno vazio/aresta inexistente/via proibida, posição da ocorrência na sequência, emenda de circuito, preservação do ponto inicial, geometria externa ao intervalo e trechos bloqueados.
+- Chromium com mouse em container isolado: arraste real da L-251 para uma rua disponível, prévia sem mutação antecipada, aplicação, desfazer e cancelamento ao soltar fora da malha. Conferidos os modos simples/avançado e larguras 1024/390/320 px, sem exceções JavaScript.
+- Na rua compartilhada junto ao início/fim da L-251, o navegador ofereceu as passagens 0 e 419. A passagem inicial foi escolhida e arrastada por mouse; o resultado envolveu a emenda do circuito, mantendo o início e o fechamento. Um segundo arraste iniciado em trecho preservado foi recusado sem alterar a geometria.
+- Antes da atualização principal, criado backup privado `data/admin/backups/admin-pre-arraste-2026-11-22.sqlite3`, fora do Git. Os testes de edição ocorreram apenas no banco de QA da porta 8003.
+- Docker principal atualizado e saudável. Comparação de hashes confirmou preservação integral de conta, rascunhos, versões, publicações e infraestrutura; o JSON público permaneceu idêntico (publicação 2, 24 linhas). Novo módulo de arraste servido pelo painel.

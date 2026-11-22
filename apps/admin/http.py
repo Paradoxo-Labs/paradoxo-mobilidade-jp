@@ -35,6 +35,10 @@ def get(handler, path):
     if path=='/api/admin/overview':handler.json(store.overview())
     elif path=='/api/admin/roads':handler.json(handler.server.router.roads(parse_qs(urlsplit(handler.path).query).get('bbox',[''])[0]))
     elif path=='/api/admin/router':handler.json(handler.server.router.status(start=True))
+    elif re.fullmatch(r'/api/admin/drafts/[a-f0-9-]+/drag-roads',path):
+        from .dragging import streets_for_drag
+        query=parse_qs(urlsplit(handler.path).query)
+        handler.json(streets_for_drag(handler.server.router,store.draft(path.split('/')[-2]),query.get('path_id',[''])[0],query.get('bbox',[''])[0]))
     elif re.fullmatch(r'/api/admin/drafts/[a-f0-9-]+',path):handler.json(store.draft(path.rsplit('/',1)[1]))
     elif re.fullmatch(r'/api/admin/drafts/[a-f0-9-]+/review',path):handler.json(store.review(path.split('/')[-2]))
     elif re.fullmatch(r'/api/admin/versions/[a-f0-9-]+',path):handler.json(store.version(path.rsplit('/',1)[1]))
@@ -64,10 +68,13 @@ def post(handler, path, body):
         if not handler.server.start_collection([]):raise Problem('Uma coleta já está em andamento.',409)
         handler.json({'message':'Coleta completa iniciada.'},202)
     else:
-        match=re.fullmatch(r'/api/admin/drafts/([a-f0-9-]+)/(update|save-version|publish|restore-version|route-preview|route-trim)',path)
+        match=re.fullmatch(r'/api/admin/drafts/([a-f0-9-]+)/(update|save-version|publish|restore-version|route-preview|route-trim|route-drag)',path)
         if not match:raise Problem('Rota administrativa não encontrada.',404)
         did,action=match.groups()
         if action=='route-preview':result=handler.server.router.preview(store.draft(did),body)
         elif action=='route-trim':result=handler.server.router.trim(store.draft(did),body)
+        elif action=='route-drag':
+            from .dragging import preview_drag
+            result=preview_drag(handler.server.router,store.draft(did),body)
         else:result={'update':store.update,'save-version':store.save_version,'publish':store.publish,'restore-version':store.restore_version}[action](did,body,user)
         handler.json(result)

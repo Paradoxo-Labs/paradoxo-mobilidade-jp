@@ -265,7 +265,7 @@ class HTTPTests(unittest.TestCase):
         req=Request(self.url+'/api/admin/drafts',data=b'{}',headers={**self.headers,'X-CSRF-Token':'incorreto'})
         with self.assertRaises(HTTPError) as e:urlopen(req)
         self.assertEqual(e.exception.code,403)
-        for endpoint in ['places/save','lines/manage','batch/review','batch/publish']:
+        for endpoint in ['places/save','lines/manage','batch/review','batch/publish','drafts/00000000-0000-0000-0000-000000000000/route-drag']:
             with self.assertRaises(HTTPError) as error:
                 urlopen(Request(self.url+'/api/admin/'+endpoint,data=b'{}',headers={'Origin':self.url,'Content-Type':'application/json'}))
             self.assertEqual(error.exception.code,401)
@@ -284,7 +284,7 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(e.exception.code,401)
         self.assertIn(b'/admin',self.get('/'))
         self.assertNotIn(b'id="collect-form"',self.get('/'))
-        for path in ['/admin','/admin.js','/admin-network.js','/admin.css']:
+        for path in ['/admin','/admin.js','/admin-network.js','/admin-drag.js','/admin.css']:
             self.assertTrue(self.get(path))
 
 

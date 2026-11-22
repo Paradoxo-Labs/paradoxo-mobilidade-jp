@@ -406,6 +406,7 @@ function drawEditorExtensions(map) {
         .bindTooltip(textNode(place.label))
         .addTo(map);
   }
+  if (!S.advancedEditor) return;
   (p.control_points || []).forEach((c, i) => {
     L.marker([c.position[1], c.position[0]], {
       icon: L.divIcon({

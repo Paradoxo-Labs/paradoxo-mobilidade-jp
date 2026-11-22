@@ -172,7 +172,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.json({"error": "Formato desconhecido"}, 400)
         else:
             files = {"/": WEB / "index.html", "/app.js": WEB / "app.js", "/maps.js": WEB / "maps.js", "/proposal.js": WEB / "proposal.js", "/styles.css": WEB / "styles.css", "/vendor/d3.js": STUDY / "mapa/d3.js", "/proposta-original": STUDY / "mapa.html"}
-            files.update({'/admin':WEB/'admin.html','/admin/':WEB/'admin.html','/admin.js':WEB/'admin.js','/admin.css':WEB/'admin.css','/admin-network.js':WEB/'admin-network.js'})
+            files.update({'/admin':WEB/'admin.html','/admin/':WEB/'admin.html','/admin.js':WEB/'admin.js','/admin.css':WEB/'admin.css','/admin-network.js':WEB/'admin-network.js','/admin-drag.js':WEB/'admin-drag.js'})
             for asset in (WEB / "assets").iterdir():
                 if asset.is_file():
                     files["/assets/" + asset.name] = asset
