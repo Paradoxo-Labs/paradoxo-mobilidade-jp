@@ -1,26 +1,29 @@
-# Revisão da proposta por padrões da rede observada
+# Revisão da proposta por corredores e rede observada
 
-O gerador `revise.py` recalcula os 39 sentidos dos 23 serviços da proposta usando ruas públicas do OSM, preferência por ruas com concentração de linhas SEMOB e regras de integração definidas pelo usuário.
+O gerador `revise.py` prepara os 39 sentidos dos 23 serviços da proposta. `policies.py` explicita as referências territoriais e restrições por serviço. A M-961 preserva exatamente as geometrias originais.
 
-Na raiz do repositório:
+Na raiz:
 
 ```sh
 python3 apps/planner/revise.py
 python3 -m unittest discover -s apps/planner/tests -v
+docker compose up -d --build --wait
 ```
 
-As entradas locais são `data/processed/semob/latest.json` e `data/raw/cartografia/osm-revisao-rotas.json`, mais o estudo importado versionado. A consulta OSM, a data e os hashes das entradas estão em `docs/proposta-brs-bhls/revisao-atual/auditoria.json`. O resultado é gravado em `docs/proposta-brs-bhls/revisao-atual`; os dados brutos não entram no Git.
+As entradas locais são `data/processed/semob/latest.json`, `data/raw/cartografia/osm-revisao-rotas.json` e o estudo importado versionado. A auditoria identifica consulta OSM, hashes dos dados e das regras. Os resultados são gravados em `docs/proposta-brs-bhls/revisao-atual`, separados do estudo original; dados brutos não entram no Git.
 
-O atlas serve os resultados versionados, sem recalcular trajetos a cada consulta. Após regenerar, reconstruir o container com `docker compose up -d --build --wait`. O gerador deve ser executado no host; a imagem mantém os arquivos da aplicação somente leitura.
+O atlas serve os resultados versionados. O gerador roda no host; o container mantém os arquivos da aplicação somente leitura.
 
-Regras principais:
+## Regras de circulação
 
-- Grafo dirigido por vias e nós OSM, respeitando os atributos de mão única e exceções explícitas para ônibus. Exclui acesso privado/proibido e estacionamento interno quando não há permissão de transporte público.
-- Bloqueio da `Via UFPB` e do interior do campus, preservando apenas vias públicas de contorno e a baia da Estação Cidade Universitária. Referências próximas são encaixadas no componente viário com entrada e saída disponíveis.
+- Grafo dirigido OSM, mãos únicas e exceções explícitas de ônibus. Acesso privado/proibido, estacionamento interno e vias não motorizadas são excluídos.
+- Interior do campus e `Via UFPB` bloqueados, preservando ruas públicas de contorno e a baia da Estação Cidade Universitária. Os giradores públicos CCHLA/CT não são ruas internas do campus.
+- Distância, vias estruturantes e continuidade dos corredores prevalecem. A concentração SEMOB varia o custo de cada segmento em até 8%; não deve induzir voltas por ruas paralelas. Códigos contam uma única vez, sem confundir variantes com linhas adicionais.
+- Referências admitem alternativas próximas na pista correta. Corredores nomeados procuram candidatos na própria avenida. A T-410 permanece na Beira-Rio até a ligação com o Altiplano. T-610/TRV-321 não usam BR-230; BRS-800 usa a rodovia após Cidade Universitária e evita o interior do Castelo Branco.
+- Trechos centrais da 0301 preservam os acessos do TIV por sentido. A saída é estendida pela circulação pública da Lagoa até suas plataformas. A referência da Lagoa é o Terminal de Passageiros, não o centro do parque.
+- Cristo no terminal atual das 204/208. Oitizeiro no terreno adjacente ao novo mercado: marcador do mercado separado da conexão viária aproximada, com entrada no lote ainda dependente de planta.
+- I-332 liga Muçumagro ao terminal sem circular no Parque do Sol; L-751 assume esse atendimento. R-241/242 ampliam José Américo e entram no Colibris. L-251 alcança IFPB/Jaguaribe e amplia cobertura local com referências 204/208/203; a antiga 201 não está nas bases locais.
 
-Os giradores de CCHLA e Centro de Tecnologia têm “UFPB” no nome, mas são vias públicas primárias de contorno, fora do interior bloqueado. Eles permanecem disponíveis para evitar impor voltas pela cidade apenas pelo nome da via. A proibição é da circulação interna, não do acesso público ao entorno da universidade.
-- Custo por distância com preferência pela concentração de linhas observadas por segmento e por nome de rua; cada código conta uma única vez, sem confundir variantes com linhas adicionais.
-- Trechos centrais dos sete serviços radiais copiados da 0301 SEMOB por sentido, para preservar a Lagoa, o espaço atual do TIV e seus percursos de entrada e saída.
-- Oitizeiro na área junto ao viaduto/BR-230 indicada pelo usuário, com acessos internos ainda pendentes. Referências por sentido para Cidade Universitária, sem impor a mesma plataforma à ida e à volta.
+A auditoria registra ligações entre referências, vias, referências rodoviárias, extensões e ajustes de encaixe. Os testes verificam restrições de corredor, cobertura, terminais, geometrias originais da M-961 e preservação dos 23 serviços/39 sentidos. O custo de concentração não pode escolher uma volta 20% maior em um caso controlado.
 
-As geometrias são propostas de estudo. Relações de proibição de conversão OSM, raio de giro, dimensões do ônibus, sinalização e circulação interna de terminais ainda precisam de verificação específica. As estatísticas de ruas observadas não medem demanda, viagens/hora ou capacidade.
+Geometrias são propostas de estudo. Relações de proibição de conversão OSM, raios de giro, gabarito, sinalização, paradas e circulação interna dos terminais exigem validação. Estatísticas de ruas observadas não medem demanda, frequência ou capacidade.

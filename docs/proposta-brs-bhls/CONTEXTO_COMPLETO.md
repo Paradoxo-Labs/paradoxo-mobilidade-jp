@@ -123,7 +123,7 @@ Função:
 
 ### Terminal Oitizeiro
 
-Local de referência atualizado: área junto ao viaduto/BR-230, próxima ao novo mercado, conforme confirmação do usuário. A entrada operacional e as plataformas ainda precisam da planta do terminal. A antiga referência na feira foi substituída na [revisão ativa](revisao-atual/README.md).
+Local de referência atualizado: terreno ao lado do novo mercado, conforme ponto enviado pelo usuário (-7,163894 / -34,893325). A entrada operacional e as plataformas ainda precisam da planta do terminal. A antiga referência na feira foi substituída na [revisão ativa](revisao-atual/README.md).
 
 Função: portal oeste.
 

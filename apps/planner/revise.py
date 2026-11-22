@@ -12,6 +12,11 @@ import math
 from pathlib import Path
 import unicodedata
 
+try:
+    from . import policies
+except ImportError:
+    import policies
+
 ROOT = Path(__file__).resolve().parents[2]
 STUDY = ROOT / 'docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21'
 OUTPUT = ROOT / 'docs/proposta-brs-bhls/revisao-atual'
@@ -173,7 +178,7 @@ class Network:
             return
         length = distance(self.positions[a], self.positions[b])
         tags = way['tags']
-        self.edges[key] = {'length': length, 'name': tags.get('name', tags.get('ref', 'Via sem nome cadastrado')), 'way': way['id'], 'observed': set(), 'street_count': len(self.street_lines[street_key(tags.get('name', ''))])}
+        self.edges[key] = {'length': length, 'name': tags.get('name', tags.get('ref', 'Via sem nome cadastrado')), 'way': way['id'], 'observed': set(), 'ref': tags.get('ref', ''), 'highway': tags.get('highway'), 'street_count': len(self.street_lines[street_key(tags.get('name', ''))])}
         self.graph[a].append(b)
         ca, cb = self.cell(self.positions[a]), self.cell(self.positions[b])
         for x in range(min(ca[0], cb[0]), max(ca[0], cb[0]) + 1):
@@ -184,8 +189,8 @@ class Network:
         x, y = self.cell(point)
         return {key for key in set().union(*(self.edge_grid[x + dx, y + dy] for dx in (-1, 0, 1) for dy in (-1, 0, 1))) if key in self.edges}
 
-    def snap(self, point):
-        key = tuple(point)
+    def snap(self, point, heading=None):
+        key = (tuple(point), tuple(heading) if heading else None)
         if key not in self.snaps:
             x, y = self.cell(point)
             candidates = []
@@ -197,6 +202,23 @@ class Network:
                         break
             if not candidates:
                 raise ValueError(f'Sem via pública próxima de {point}')
+            if heading:
+                hx, hy = heading[0] * SCALE_X, heading[1] * SCALE_Y
+                hlen = math.hypot(hx, hy)
+                directed = []
+                # Encaixe na pista que segue o sentido do percurso, até 45 m da referência.
+                for u, v in self.near_edges(point):
+                    gap = segment_distance(point, self.positions[u], self.positions[v])
+                    if gap > 45:
+                        continue
+                    dx = (self.positions[v][0] - self.positions[u][0]) * SCALE_X
+                    dy = (self.positions[v][1] - self.positions[u][1]) * SCALE_Y
+                    cosine = (dx*hx + dy*hy) / max(.01, math.hypot(dx,dy)*hlen)
+                    for node in (u, v):
+                        if distance(point, self.positions[node]) <= 65:
+                            directed.append((distance(point, self.positions[node]) + 45*(1-cosine), node))
+                if directed:
+                    best = min(directed)[1]
             self.snaps[key] = best
         return self.snaps[key]
 
@@ -222,23 +244,41 @@ class Network:
                 supported += length
         return round(100 * supported / total, 1) if total else 0
 
-    def route(self, start, end):
-        if start == end:
+    def candidates(self, point, hint=None):
+        if hint:
+            named = {n for name, nodes in self.corridor_nodes.items() if policies.fold(hint) in name for n in nodes if distance(point, self.positions[n]) <= (140 if 'JOSE AMERICO' in policies.fold(hint) else 45)}
+            if named:
+                return named
+        edges = self.near_edges(point)
+        if not edges:
+            return {self.snap(point)}
+        nearest = min(segment_distance(point, self.positions[a], self.positions[b]) for a, b in edges)
+        result = {n for a, b in edges if segment_distance(point, self.positions[a], self.positions[b]) <= nearest + 18 for n in (a, b) if distance(point, self.positions[n]) <= 70}
+        return result or {self.snap(point)}
+
+    def route(self, start, end, code=None, goals=None):
+        goals = goals or {end}
+        if start in goals:
             return [start]
         costs, previous, queue = {start: 0}, {}, [(0, start)]
         while queue:
             cost, a = heapq.heappop(queue)
             if cost > costs[a]:
                 continue
-            if a == end:
-                result = [end]
+            if a in goals:
+                result = [a]
                 while result[-1] != start:
                     result.append(previous[result[-1]])
                 return result[::-1]
             for b in self.graph[a]:
                 edge = self.edges[a, b]
                 support = max(len(edge['observed']), min(edge['street_count'], 12))
-                candidate = cost + edge['length'] * (.8 + 2.4 / (1 + support))
+                midpoint = [(self.positions[a][i] + self.positions[b][i])/2 for i in (0, 1)]
+                if code and policies.forbidden(code, edge, midpoint):
+                    continue
+                # Concentração é desempate leve: não compra voltas por ruas paralelas.
+                hierarchy = {'residential': 1.6, 'living_street': 1.8, 'service': 1.5, 'unclassified': 1.3}.get(edge.get('highway'), 1)
+                candidate = cost + edge['length'] * hierarchy * (1 + .08 / (1 + support))
                 if candidate < costs.get(b, math.inf):
                     costs[b], previous[b] = candidate, a
                     heapq.heappush(queue, (candidate, b))
@@ -254,14 +294,23 @@ def main():
     station = network.positions[2533629066]
     central_line = next(line for line in observed['lines'] if line['code'] == '0301')
     donor = {f['properties']['ITINERARIO'].lower(): f['geometry']['coordinates'] for f in central_line['geojson']['features']}
-    lake = [-34.87915, -7.1217]
+    lake = policies.LAGOA_PLATFORM
     cuts = {direction: min(range(len(path)), key=lambda i: distance(path[i], lake)) for direction, path in donor.items()}
     central = {'ida': donor['ida'][cuts['ida']:], 'volta': donor['volta'][:cuts['volta'] + 1]}
+    # A saída observada da 0301 segue para sul da Lagoa; estende-se em ruas públicas
+    # até as plataformas antes de distribuir as linhas por seus corredores.
+    lake_node = network.snap(min(donor['ida'], key=lambda p: distance(p, lake)))
+    lake_link = network.route(network.snap(central['volta'][-1]), lake_node)
+    central['volta'] += [network.positions[n] for n in lake_link]
     central_streets = {}
     for itinerary in central_line['itineraries']:
         streets = itinerary['streets']
         i = streets.index('PARQUE SOLON DE LUCENA')
         central_streets[itinerary['direction'].lower()] = streets[i:] if itinerary['direction'].lower() == 'ida' else streets[:i + 1]
+    for a, b in zip(lake_link, lake_link[1:]):
+        name = network.edges[a, b]['name']
+        if central_streets['volta'][-1] != name:
+            central_streets['volta'].append(name)
     station_refs = {direction: network.positions[network.snap(min(path, key=lambda p: distance(p, station)))] for direction, path in donor.items()}
     station_refs['volta'] = station
     overrides = {
@@ -270,18 +319,22 @@ def main():
         'lagoa_ida': central['ida'][0], 'lagoa_volta': central['volta'][-1],
     }
     waypoints.update(overrides)
+    policies.configure(network, waypoints)
+    overrides['oitizeiro'] = waypoints['oitizeiro']
     catalog['lugares']['universidade'].update(label='Estação Cidade Universitária · Via Expressa Padre Zé', short='Cidade Universitária', position=station, terminal=True)
     catalog['lugares']['metro'].update(label='Terminal Metropolitano · mesmo espaço do TIV Varadouro', position=overrides['metro'])
-    catalog['lugares']['oitizeiro'].update(label='Terminal Oitizeiro · área junto ao viaduto/BR-230', position=overrides['oitizeiro'], note='Área indicada pelo usuário e referência do plano municipal; acesso e plataformas ainda não definidos.')
-    catalog['lugares']['lagoa'] = {'label': 'Lagoa · Parque Solon de Lucena', 'position': central['ida'][0], 'terminal': True}
+    catalog['lugares']['oitizeiro'].update(label='Terminal Oitizeiro · terreno ao lado do novo mercado', position=policies.OITIZEIRO_MARKET, note='Referência do mercado no link enviado pelo usuário; lote adjacente, acesso e plataformas pendentes de planta.')
+    catalog['lugares']['lagoa'] = {'label': 'Terminal de Passageiros da Lagoa', 'position': lake, 'terminal': True}
     catalog['lugares']['lagoa_ida'] = {'label': 'Lagoa · sentido Varadouro', 'position': central['ida'][0]}
     catalog['lugares']['lagoa_volta'] = {'label': 'Lagoa · saída do Varadouro', 'position': central['volta'][-1]}
     for direction in ['ida', 'volta']:
         catalog['lugares']['estacao_' + direction] = {'label': 'Estação Cidade Universitária · ' + ('referência Centro/Norte' if direction == 'ida' else 'referência Bancários/Sul'), 'position': station_refs[direction]}
+    catalog['lugares']['cristo'].update(label='Terminal Cristo · terminal atual das linhas 204 e 208', position=policies.CRISTO_TERMINAL)
     features, audit, snap_audit = [], [], []
     radial_codes = {'BRS-100', 'BRS-200', 'BRS-300', 'BRS-500', 'BRS-501', 'T-410', 'T-610'}
     for line in catalog['linhas']:
         code = line['code']
+        line['name'] = policies.NAMES.get(code, line['name']).replace(' (Almeidão)', '').replace(' (Estádio Almeidão)', '')
         line['points'] = list(dict.fromkeys('universidade' if key == 'campus' else key for key in line['points'] if key not in {'ct', 'ponte'}))
         if code == 'I-334':
             line['name'] = 'Circular Cidade Universitária via Três Ruas e Bancários'
@@ -296,19 +349,31 @@ def main():
                 keys = ['estacao_volta' if k == 'universidade_public' else k for k in keys if k != 'ct_public']
             if code == 'R-343':
                 keys = ['estacao_volta' if k == 'padre' else k for k in keys if k != 'ponte']
+            keys = policies.route_keys(code, direction, keys)
             if code in radial_codes:
                 # As plataformas e os acessos centrais são cópia do traçado SEMOB da 0301.
                 keys = [k for k in keys if k not in {'metro', 'pedro', 'pedro_back', 'centro_lagoa'}]
                 keys = keys + ['lagoa_ida'] if direction == 'ida' else ['lagoa_volta'] + keys
-            nodes = [network.snap(waypoints[k]) for k in keys]
+            nodes = []
+            for i, name in enumerate(keys):
+                prev = waypoints[keys[max(0, i-1)]]
+                after = waypoints[keys[min(len(keys)-1, i+1)]]
+                heading = [after[j]-prev[j] for j in (0, 1)] if 0 < i < len(keys)-1 and not name.startswith(('lagoa', 'estacao')) else None
+                nodes.append(network.snap(waypoints[name], heading))
+            joined, legs = [], []
+            for i in range(1, len(nodes)):
+                a, b = nodes[i-1], nodes[i]
+                fixed = keys[i].startswith(('lagoa', 'estacao')) or (i == len(nodes)-1 and keys[i] == keys[0])
+                goals = {nodes[0]} if i == len(nodes)-1 and keys[i] == keys[0] else ({b} if fixed else network.candidates(waypoints[keys[i]], policies.ROAD_HINTS.get(keys[i])))
+                path = network.route(a, b, code, goals)
+                nodes[i] = path[-1]
+                leg_edges = [network.edges[u, v] for u, v in zip(path, path[1:])]
+                legs.append({'from': keys[i-1], 'to': keys[i], 'distance_m': round(sum(e['length'] for e in leg_edges), 1), 'streets': list(dict.fromkeys(e['name'] for e in leg_edges)), 'road_refs': sorted({e['ref'] for e in leg_edges if e.get('ref')})})
+                joined.extend(path if not joined else path[1:])
             for name, node in zip(keys, nodes):
                 gap = distance(waypoints[name], network.positions[node])
                 if gap > 35:
                     snap_audit.append({'route': key, 'waypoint': name, 'distance_m': round(gap, 1), 'reference': waypoints[name], 'road_point': network.positions[node]})
-            joined = []
-            for a, b in zip(nodes, nodes[1:]):
-                path = network.route(a, b)
-                joined.extend(path if not joined else path[1:])
             coords = [network.positions[node] for node in joined]
             gaps = []
             if code in radial_codes:
@@ -328,9 +393,14 @@ def main():
                     street_order.append(edge['name'])
             if code in radial_codes:
                 street_order = street_order + central_streets[direction] if direction == 'ida' else central_streets[direction] + street_order
-            report = {'code': code, 'key': key, 'direction': direction, 'old_distance_km': old['properties']['distancia_km'], 'distance_km': round(length / 1000, 2), 'baseline_observed_streets_percent': network.support_metric(old['geometry']['coordinates']), 'observed_streets_percent': network.support_metric(dedup), 'reference_lines': sorted(set().union(*(e['observed'] for e in edge_list))), 'street_sequence': street_order, 'way_sequence': list(dict.fromkeys(e['way'] for e in edge_list)), 'central_pattern': '0301/' + direction if code in radial_codes else None, 'central_join_m': [round(gap, 1) for gap in gaps]}
+            if code == 'M-961':
+                dedup = old['geometry']['coordinates']
+                length = sum(distance(a, b) for a, b in zip(dedup, dedup[1:]))
+                street_order = []  # sem atribuir ruas recalculadas à geometria original
+                keys = entry['waypoints'][:]
+            report = {'code': code, 'key': key, 'direction': direction, 'old_distance_km': old['properties']['distancia_km'], 'distance_km': round(length / 1000, 2), 'baseline_observed_streets_percent': network.support_metric(old['geometry']['coordinates']), 'observed_streets_percent': network.support_metric(dedup), 'reference_lines': sorted(set().union(*(e['observed'] for e in edge_list))) if code != 'M-961' else [], 'street_sequence': street_order, 'way_sequence': list(dict.fromkeys(e['way'] for e in edge_list)) if code != 'M-961' else [], 'restored_original': code == 'M-961', 'legs': legs if code != 'M-961' else [], 'road_refs': sorted({e['ref'] for e in edge_list if e.get('ref')}) if code != 'M-961' else [], 'central_pattern': '0301/' + direction if code in radial_codes else None, 'central_join_m': [round(gap, 1) for gap in gaps]}
             audit.append(report)
-            entry.update(waypoints=keys, distancia_km=report['distance_km'], source='revisao-rede-observada', street_sequence=street_order, central_pattern=report['central_pattern'], reference_lines=report['reference_lines'], observed_streets_percent=report['observed_streets_percent'])
+            entry.update(waypoints=keys, distancia_km=report['distance_km'], source='estudo-original-restaurado' if code == 'M-961' else 'revisao-rede-observada', street_sequence=street_order, central_pattern=report['central_pattern'], reference_lines=report['reference_lines'], observed_streets_percent=report['observed_streets_percent'])
             properties = {**old['properties'], 'nome': line['name'], 'distancia_km': report['distance_km'], 'waypoints': keys, 'revision': 'rede-observada-2026-11-21', 'observed_streets_percent': report['observed_streets_percent']}
             features.append({'type': 'Feature', 'id': key, 'properties': properties, 'geometry': {'type': 'LineString', 'coordinates': dedup}})
             print(key, report['distance_km'], f"{report['observed_streets_percent']}% em ruas observadas", flush=True)
@@ -340,18 +410,32 @@ def main():
             line['itinerary'] = 'T. Mangabeira → Jardim Cidade Universitária / Bancários → Estação Cidade Universitária → Dom Pedro II → Lagoa → TIV Varadouro'
         if code in radial_codes and 'Lagoa' not in line['itinerary']:
             line['itinerary'] = line['itinerary'].replace('Centro', 'Lagoa / Centro')
-        line['note'] = 'Revisão por ruas públicas, priorizando concentração da rede SEMOB. ' + ('Acesso ao Varadouro e passagem pela Lagoa preservados por sentido.' if code in radial_codes else 'Percursos sem uso de ruas internas do campus UFPB.')
+        line['itinerary'] = line['itinerary'].replace(' (Almeidão)', '').replace(' (Estádio Almeidão)', '')
+        line['note'] = 'Revisão por ruas públicas, com continuidade dos corredores e preferência moderada por referências SEMOB. ' + ('Acesso ao Varadouro e passagem pela Lagoa preservados por sentido.' if code in radial_codes else 'Percursos sem uso de ruas internas do campus UFPB.')
         if code in {'BRS-300', 'BRS-800', 'I-334', 'R-343'}:
             line['note'] += ' Integração na Estação Cidade Universitária, com referências por sentido e circulação pública de contorno.'
         if code in {'BRS-100', 'BRS-800', 'TRV-721'}:
-            line['note'] += ' Oitizeiro deslocado para a área junto ao viaduto/BR-230; acessos internos do terminal pendentes.'
-    report = {'revision': 'rede-observada-2026-11-21', 'generated_at': datetime.now(timezone.utc).isoformat(), 'method': 'Grafo dirigido OSM; custo por distância com preferência por concentração SEMOB; bloqueio do interior do campus e da Via UFPB; trechos centrais copiados da linha 0301. Percentuais por correspondência de segmentos a até 22 m e mesma direção em ruas com linhas observadas; comparação antes/depois pelo mesmo método.', 'inputs': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [osm_path, semob_path]}, 'osm_source': osm.get('paradoxo_source'), 'central_reference': {'line': '0301', 'lake': lake, 'entry': central['ida'], 'exit': central['volta'], 'streets': central_streets}, 'station_reference': {'osm_way': 59821461, 'osm_stop': 2533629066, 'position': station, 'direction_references': station_refs}, 'oitizeiro_reference': {'position': overrides['oitizeiro'], 'status': 'Área aproximada indicada pelo usuário junto ao viaduto/BR-230; entrada operacional pendente.'}, 'campus_polygon': network.campus, 'public_perimeter': [[network.positions[n] for n in network.ways[wid]['nodes']] for wid in sorted(network.public_perimeter)], 'street_concentration': [{'street': name, 'line_count': len(codes), 'lines': sorted(codes)} for name, codes in sorted(network.street_lines.items(), key=lambda item: (-len(item[1]), item[0])) if not name.startswith(('TERMINAL', 'RETORNO'))][:40], 'snap_adjustments': snap_audit, 'routes': audit, 'limits': ['Restrições de conversão por relação OSM e gabarito de ônibus ainda exigem validação.', 'Concentração de linhas não representa demanda ou frequência.', 'Oitizeiro e demais novos terminais não têm circulação interna aprovada.']}
+            line['note'] += ' Oitizeiro no terreno adjacente ao novo mercado indicado pelo usuário; implantação interna pendente.'
+        line['note'] += ' ' + policies.NOTES.get(code, '')
+        line['itinerary'] = policies.ITINERARIES.get(code, line['itinerary'])
+        if code == 'I-332':
+            line['points'] = [p for p in line['points'] if p != 'parque']
+        if code == 'L-751':
+            line['points'] = list(dict.fromkeys(line['points'] + ['parque']))
+    report = {'revision': 'rede-observada-2026-11-21', 'generated_at': datetime.now(timezone.utc).isoformat(), 'method': 'Grafo dirigido OSM; continuidade de corredores, preferência por vias estruturantes; concentração SEMOB limitada a 8% do custo e referências com alternativas de pista por sentido; bloqueio do interior do campus e da Via UFPB; trechos centrais copiados da linha 0301. Percentuais por correspondência de segmentos a até 22 m e mesma direção em ruas com linhas observadas; comparação antes/depois pelo mesmo método.', 'inputs': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [osm_path, semob_path, Path(__file__), Path(policies.__file__)]}, 'osm_source': osm.get('paradoxo_source'), 'central_reference': {'line': '0301', 'lake': lake, 'entry': central['ida'], 'exit': central['volta'], 'streets': central_streets}, 'station_reference': {'osm_way': 59821461, 'osm_stop': 2533629066, 'position': station, 'direction_references': station_refs}, 'oitizeiro_reference': {'position': policies.OITIZEIRO_MARKET, 'road_reference': overrides['oitizeiro'], 'market_to_road_m': round(distance(policies.OITIZEIRO_MARKET, overrides['oitizeiro']), 1), 'status': 'Referência do mercado enviada pelo usuário (-7.163894, -34.893325); lote adjacente e acesso operacional pendentes de planta.'}, 'campus_polygon': network.campus, 'public_perimeter': [[network.positions[n] for n in network.ways[wid]['nodes']] for wid in sorted(network.public_perimeter)], 'street_concentration': [{'street': name, 'line_count': len(codes), 'lines': sorted(codes)} for name, codes in sorted(network.street_lines.items(), key=lambda item: (-len(item[1]), item[0])) if not name.startswith(('TERMINAL', 'RETORNO'))][:40], 'snap_adjustments': snap_audit, 'routes': audit, 'limits': ['Restrições de conversão por relação OSM e gabarito de ônibus ainda exigem validação.', 'Concentração de linhas não representa demanda ou frequência.', 'Oitizeiro e demais novos terminais não têm circulação interna aprovada.']}
     comparisons = read(STUDY / 'dados/comparativos-i332.json')
     revised = next(f['geometry']['coordinates'] for f in features if f['id'] == 'I-332')
     for name, start, end in [('paratibe', 'porfirio', 'mucu'), ('parque-do-sol', 'mucu', 'val')]:
-        a = min(range(len(revised)), key=lambda i: distance(revised[i], waypoints[start]))
+        a = min(range(len(revised) - 1), key=lambda i: distance(revised[i], waypoints[start]))
         b = min(range(a + 1, len(revised)), key=lambda i: distance(revised[i], waypoints[end]))
         comparisons[name]['after'] = revised[a:b + 1]
+        if name == 'parque-do-sol':
+            # A comparação registra o estudo importado, não depende de execuções anteriores.
+            original = next(f['geometry']['coordinates'] for f in old_geo['features'] if f['properties']['chave'] == 'I-332')
+            start_i = min(range(len(original)-1), key=lambda i: distance(original[i], waypoints['mucu']))
+            end_i = min(range(start_i+1, len(original)), key=lambda i: distance(original[i], waypoints['val']))
+            comparisons[name]['before'] = original[start_i:end_i+1]
+            comparisons[name]['name'] = 'Parque do Sol · atendimento interno transferido para L-751'
         comparisons[name]['revision'] = report['revision']
     catalog.update(revision=report['revision'], generated_at=report['generated_at'])
     OUTPUT.mkdir(parents=True, exist_ok=True)

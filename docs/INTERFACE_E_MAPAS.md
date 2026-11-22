@@ -14,7 +14,7 @@ São 23 serviços e 39 geometrias por sentido, com busca por código/trecho, fil
 
 O mapa de origem continua disponível em `/proposta-original`; `/proposta` leva à nova página integrada. Os arquivos originais do estudo não foram modificados.
 
-A revisão ativa usa a Estação Cidade Universitária, preserva os acessos do TIV/Lagoa e desloca a referência de Oitizeiro para o viaduto/BR-230. Os detalhes de cada serviço mostram a sequência de vias e o percentual de extensão em ruas com referência observada. Método, diferenças e limites estão em [revisao-atual/README.md](proposta-brs-bhls/revisao-atual/README.md).
+A revisão ativa usa a Estação Cidade Universitária, preserva os acessos do TIV/Lagoa e desloca a referência de Oitizeiro para o terreno adjacente ao novo mercado. Os detalhes de cada serviço mostram a sequência de vias e o percentual de extensão em ruas com referência observada. Método, diferenças e limites estão em [revisao-atual/README.md](proposta-brs-bhls/revisao-atual/README.md).
 
 ## Referência do Atlas de Distritos
 

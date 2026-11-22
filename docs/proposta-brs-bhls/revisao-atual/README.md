@@ -1,62 +1,77 @@
-# Revisão ativa — rede observada, Cidade Universitária e TIV
+# Revisão ativa — corredores, terminais e cobertura local
 
-Esta é a versão servida por `/api/proposal`. O estudo importado em `../estudos/rede-integrada-2026-11-21` permanece preservado como histórico. Os 23 códigos de serviço e os 39 sentidos/circuitos foram mantidos; todas as geometrias passaram pelo recalculo.
+Esta versão é servida por `/api/proposal`: 23 serviços e 39 sentidos/circuitos. O estudo importado em `../estudos/rede-integrada-2026-11-21` permanece preservado. A M-961 recupera integralmente suas duas geometrias originais; os demais serviços usam a revisão de corredores.
 
-## Integrações e restrições
+## Terminais e integrações
 
-- **Cidade Universitária:** referência na Estação Cidade Universitária, OSM stop `2533629066`, na Via Expressa Padre Zé / Rua Tabelião Estanislau Eloy. Não é um terminal dentro da universidade. Há referências distintas para Centro/Norte e Bancários/Sul. BRS-300, BRS-800, I-334 e R-343 foram ajustadas, com bloqueio da Via UFPB e das ruas internas do campus.
-- **Varadouro:** Terminal Metropolitano no espaço atual do TIV. BRS-100, BRS-200, BRS-300, BRS-500, BRS-501, T-410 e T-610 usam a passagem pela Lagoa e os acessos centrais da linha 0301, preservados literalmente em cada geometria por sentido.
-- **Entrada no TIV:** Lagoa / Parque Solon de Lucena → Miguel Couto → Cardoso Vieira → Cândido Pessoa → João Suassuna → Sanhauá → General Lima Mindelo → Desembargador Trindade → TIV.
-- **Saída do TIV:** Padre Azevedo → Praça Pedro Américo → Praça Aristides Lobo → Guedes Pereira → Padre Meira → Lagoa, seguindo então o corredor de cada serviço.
-- **Oitizeiro:** referência deslocada da feira para a área junto ao viaduto/BR-230, conforme confirmação do usuário sobre a imagem enviada. O ponto é uma referência aproximada na chegada pela Cruz das Armas, não uma planta de plataforma aprovada. Afeta BRS-100, BRS-800 e TRV-721.
+- **Lagoa:** Terminal de Passageiros da Lagoa, com referência na plataforma 4 cadastrada no OSM (nó 3962688662, fonte SEMOB), em vez de um ponto genérico no parque. O acesso ao TIV mantém o trecho observado da 0301 por sentido. Na saída, o trecho central é estendido pela circulação pública da Lagoa até as plataformas antes de distribuir os serviços por seus corredores. A distribuição operacional entre plataformas ainda deve ser definida.
+- **Varadouro:** Terminal Metropolitano no espaço atual do TIV. Os sete serviços radiais mantêm os acessos observados: entrada por Miguel Couto / Cardoso Vieira / Cândido Pessoa / João Suassuna / Sanhauá / General Lima Mindelo / Desembargador Trindade; saída por Padre Azevedo / Pedro Américo / Aristides Lobo / Guedes Pereira / Padre Meira.
+- **Cristo:** terminal atual das linhas 204 e 208, aproximadamente -7,16650 / -34,87198. A referência anterior no Almeidão foi substituída.
+- **Oitizeiro:** referência do terreno adjacente ao novo mercado, conforme o link enviado pelo usuário (-7,163894 / -34,893325). O marcador identifica a referência do mercado; a conexão viária aproximada fica a 115 m, na BR-230. O limite do lote, a entrada e o percurso interno ainda dependem da planta; não se desenha uma entrada fictícia dentro do terreno.
+- **Cidade Universitária:** Estação Cidade Universitária, nó OSM 2533629066 / via 59821461, no entorno público. Vias internas do campus e Via UFPB continuam bloqueadas. Os giradores públicos de CCHLA e CT permanecem disponíveis.
 
-## Preferência por padrões observados
+## Ajustes por serviço
 
-A revisão usa a coleta de 85 linhas SEMOB (149 traçados disponíveis) e uma malha viária OSM com 84.209 nós roteáveis e 173.540 segmentos dirigidos. A concentração considera códigos distintos por segmento e por rua. O custo favorece ruas com maior concentração, mantendo as referências territoriais de cada serviço.
+| Serviços | Alteração |
+| --- | --- |
+| BRS-501 | Eixo mais interior de Manaíra, por Sapé, Francisco Brandão e Manoel Morais, distinto da BRS-500. |
+| BRS-800 | Depois da estação Cidade Universitária, retorna à BR-230; sem circulação residencial no Castelo Branco. |
+| T-410 | Beira-Rio contínua entre o Centro e a ligação com o Altiplano; sem UFPB ou Epitácio Pessoa. |
+| T-610 | Bessa / Shopping / Ipês / Mandacaru / Roger, sem BR-230. |
+| TRV-321 | Shopping e retorno ao eixo próximo à praia / Jardim Oceania para Bessa; sem BR-230. |
+| TRV-721 | Mantém Perimetral Sul / BR-101, retirando o desvio pelo interior do Planalto da Boa Esperança. |
+| I-332 | Muçumagro → terminal Valentina, sem o percurso interno do Parque do Sol. |
+| R-241 / R-242 | Ambas entram no Colibris por seu setor central e ampliam José Américo com ruas da atual 107. |
+| L-251 | Amplia Cristo, Vale das Palmeiras e Rangel, alcança o IFPB pela Primeiro de Maio e retorna. Usa trechos de referência das 204, 208 e 203. A antiga 201 não está disponível nas bases locais e não é apresentada como reproduzida. |
+| L-751 | Assume o atendimento interno do **Parque do Sol**, retirado da I-332, preservando Muçumagro, Barra de Gramame e Praia do Sol. |
+| M-961 | Restaura exatamente as coordenadas originais, nos dois sentidos. |
 
-O interior do campus é bloqueado com uma margem de contorno de 25 m, para não excluir as próprias ruas públicas de borda. A baia da estação e as vias públicas nomeadas de contorno são exceções explícitas. Ruas privadas, vias não motorizadas e pontas isoladas não são atalhos permitidos.
+## Critério de traçado
 
-A correspondência geométrica usa tolerância de 22 m e direção compatível. Calculada da mesma forma antes/depois, a parcela dos traçados em ruas com referência na rede observada passou de **69,6% para 83,0%**, ponderada pela extensão. Houve aumento em **35 dos 39 sentidos**; os quatro restantes não melhoraram nesse indicador. Preservar a passagem pela Lagoa, os acessos do TIV e a cobertura territorial prevalece sobre maximizar um percentual isolado. Não se trata de percentual de demanda atendida ou de validação de frequência.
+A concentração de linhas deixou de dominar o custo. Agora o cálculo prioriza distância e continuidade dos corredores, favorece vias estruturantes e limita o efeito da concentração a 8% do custo de cada segmento. Ruas residenciais recebem custo adicional para evitar atalhos em sucessões de pequenas ruas. As regras territoriais prevalecem sobre esse custo.
 
-| Serviço | Extensões revisadas (km) | Ruas observadas por sentido |
+Referências intermediárias aceitam alternativas próximas na pista adequada ao sentido. Corredores nomeados usam candidatos na própria avenida, preservando as mãos únicas do OSM. Na T-410, as ligações entre as referências da Beira-Rio permanecem nessa avenida; os antigos desvios por ruas paralelas foram retirados. Isso não implica inverter ilegalmente uma rua de mão única para forçar simetria.
+
+O grafo utiliza 84.209 nós roteáveis e 173.540 segmentos dirigidos. A coleta SEMOB contém 85 linhas e 149 traçados; seis serviços têm GeoJSON vazio. Os percentuais abaixo medem somente correspondência com ruas observadas, com tolerância de 22 m e direção compatível. São indicadores descritivos, não metas de otimização, demanda ou capacidade. A M-961 original tem menor correspondência com a base municipal.
+
+| Serviço | Extensões (km) | Ruas observadas |
 | --- | --- | --- |
-| BRS-100 | ida: 12,28 / volta: 8,52 | 91,9% / 92,2% |
-| BRS-200 | ida: 10,64 / volta: 9,70 | 91,1% / 89,6% |
-| BRS-300 | ida: 12,51 / volta: 13,02 | 95,5% / 93,8% |
-| BRS-500 | ida: 19,22 / volta: 16,30 | 97,7% / 99,5% |
-| BRS-501 | ida: 18,23 / volta: 15,49 | 98,1% / 98,6% |
-| BRS-800 | ida: 32,16 / volta: 36,98 | 75,8% / 75,1% |
-| T-410 | ida: 18,50 / volta: 17,53 | 86,1% / 82,0% |
-| T-610 | ida: 15,56 / volta: 15,34 | 88,5% / 90,2% |
-| TRV-321 | ida: 20,78 / volta: 19,55 | 83,4% / 83,9% |
-| TRV-322 | circuito: 34,91 | 67,7% |
-| TRV-721 | ida: 14,29 / volta: 16,34 | 85,1% / 91,7% |
-| I-331 | ida: 8,31 / volta: 9,12 | 90,3% / 89,9% |
-| I-332 | ida: 20,97 / volta: 22,09 | 76,2% / 78,8% |
-| I-333 | ida: 13,94 / volta: 14,92 | 88,5% / 89,3% |
-| I-334 | circuito: 26,44 | 84,0% |
-| I-731 | ida: 7,35 / volta: 8,26 | 90,3% / 94,3% |
-| R-241 | circuito: 15,04 | 89,3% |
-| R-242 | circuito: 13,66 | 77,3% |
-| R-343 | circuito: 30,73 | 74,7% |
-| L-251 | circuito: 9,32 | 93,1% |
-| L-351 | ida: 13,83 / volta: 15,03 | 93,5% / 93,7% |
-| L-751 | circuito: 20,10 | 71,3% |
-| M-961 | ida: 26,28 / volta: 26,02 | 60,3% / 58,4% |
+| BRS-100 | ida: 8,95 / volta: 10,48 | 98,2% / 93,2% |
+| BRS-200 | ida: 9,18 / volta: 9,52 | 95,2% / 87,7% |
+| BRS-300 | ida: 12,69 / volta: 12,55 | 99,1% / 97,8% |
+| BRS-500 | ida: 18,51 / volta: 16,62 | 94,0% / 97,8% |
+| BRS-501 | ida: 16,95 / volta: 17,23 | 82,8% / 90,9% |
+| BRS-800 | ida: 31,83 / volta: 30,58 | 50,9% / 55,8% |
+| T-410 | ida: 16,15 / volta: 14,02 | 77,5% / 74,7% |
+| T-610 | ida: 15,02 / volta: 15,12 | 84,8% / 88,4% |
+| TRV-321 | ida: 19,75 / volta: 20,79 | 86,5% / 76,7% |
+| TRV-322 | circuito: 33,80 | 65,0% |
+| TRV-721 | ida: 10,60 / volta: 13,82 | 73,0% / 79,5% |
+| I-331 | ida: 7,96 / volta: 8,10 | 92,2% / 86,4% |
+| I-332 | ida: 16,49 / volta: 16,44 | 74,4% / 71,0% |
+| I-333 | ida: 11,94 / volta: 12,32 | 70,8% / 74,4% |
+| I-334 | circuito: 24,62 | 84,4% |
+| I-731 | ida: 7,11 / volta: 7,23 | 82,1% / 77,0% |
+| R-241 | circuito: 15,06 | 81,2% |
+| R-242 | circuito: 13,78 | 66,4% |
+| R-343 | circuito: 29,15 | 63,1% |
+| L-251 | circuito: 15,26 | 85,8% |
+| L-351 | ida: 12,51 / volta: 12,88 | 88,3% / 89,5% |
+| L-751 | circuito: 21,20 | 65,1% |
+| M-961 | ida: 23,25 / volta: 24,76 | 29,0% / 29,9% |
 
-## Auditoria e limites
+## Auditoria e reprodução
 
-`auditoria.json` registra hashes das entradas, consulta OSM, geometria da referência central, referências da estação, ajustes de encaixe, sequência de ruas e formas de acesso. Os encaixes de referências no grafo atingem no máximo 100 m; os dois encaixes entre grafo e geometria central medem 4,4 m e 29,4 m. Eles estão registrados para revisão, sem transformar waypoints em plataformas ou paradas aprovadas.
+`auditoria.json` registra hashes dos dados e das regras, origem OSM, referências dos terminais, trechos centrais, sequência de ruas, referências rodoviárias, ajustes de encaixe e ligações entre cada par de referências. Na M-961, ruas e ligações recalculadas são omitidas para não atribuí-las à geometria original restaurada.
 
-A referência do HU foi mantida no entorno público, e a ligação Altiplano–Castelo Branco segue vias existentes em vez de impor uma ponte/atalho interno. A linha metropolitana M-961 e alguns setores periféricos têm menor correspondência com o catálogo municipal; a ausência de uma linha municipal no trecho não demonstra ausência de transporte metropolitano.
+Execute `python3 apps/planner/revise.py` com os dados brutos locais disponíveis; veja [o gerador](../../../apps/planner/README.md). Os dados brutos ficam em `data/`, fora do Git. Após gerar, use `docker compose up -d --build --wait`.
 
-O roteamento respeita a direção cadastrada nas vias, mas ainda exige verificação de restrições de conversão por relação OSM, raios de giro, gabarito de ônibus, sinalização, paradas e acessos internos dos futuros terminais. Distâncias são aproximadas. Não há alegação de capacidade comprovada ou de rede operacional aprovada.
+Conversões proibidas por relações OSM, raio de giro, dimensões dos ônibus, sinalização, paradas e circulação interna de terminais ainda exigem validação operacional. A referência do mercado não substitui uma planta do lote do terminal.
 
-## Fontes e reprodução
+## Fontes
 
-- SEMOB-JP, coleta local completa de 21/11/2026: [serviço de linhas](https://servicos.semobjp.pb.gov.br/linhas-de-onibus/) e [GeoJSON da 0301](https://servicos.semobjp.pb.gov.br/linhas-de-onibus/0301/itinerario/geojson).
-- OpenStreetMap: [Estação Cidade Universitária, via 59821461](https://www.openstreetmap.org/way/59821461), [parada 2533629066](https://www.openstreetmap.org/node/2533629066) e malha obtida pelo Overpass. Consulta, data e hashes preservados na auditoria; dados viários © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright).
-- Prefeitura de João Pessoa: [localização do novo mercado e terminal próximo ao viaduto das Três Lagoas](https://www.joaopessoa.pb.gov.br/noticias/prefeito-autoriza-a-construcao-do-novo-mercado-de-oitizeiro-e-destaca-investimento-de-r-70-milhoes-nos-espacos-publicos-de-comercio-na-capital/). A notícia situa a área; a confirmação do usuário adotou o entorno do viaduto, não o marcador anterior da feira.
-- Regras e execução do gerador: [apps/planner/README.md](../../../apps/planner/README.md).
-
-Os arquivos brutos ficam em `data/`, fora do Git. Esta pasta contém os resultados derivados e os metadados necessários para revisar as escolhas, sem substituir os dados observados.
+- [SEMOB: linhas e itinerários](https://servicos.semobjp.pb.gov.br/linhas-de-onibus/) e [GeoJSON da 0301](https://servicos.semobjp.pb.gov.br/linhas-de-onibus/0301/itinerario/geojson), coleta local completa de 21/11/2026; linhas 107, 203, 204, 208 e corredores atuais como referências.
+- [SEMOB: Terminal de Passageiros da Lagoa e plataformas](https://portal.semobjp.pb.gov.br/2024/07/prefeito-entrega-novo-terminal-de-integracao-da-lagoa-e-destaca-avanco-em-obras-de-mobilidade-e-infraestrutura-urbana-na-capital/).
+- [OpenStreetMap: plataforma 4 da Lagoa](https://www.openstreetmap.org/node/3962688662), [Estação Cidade Universitária](https://www.openstreetmap.org/way/59821461). Malha e consulta Overpass identificadas na auditoria; dados © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright).
+- [Prefeitura: novo mercado de Oitizeiro e terminal adjacente](https://www.joaopessoa.pb.gov.br/noticias/prefeito-autoriza-a-construcao-do-novo-mercado-de-oitizeiro-e-destaca-investimento-de-r-70-milhoes-nos-espacos-publicos-de-comercio-na-capital/). O usuário refinou a localização com o ponto do mercado no Google Maps; os limites do terreno e acessos seguem pendentes de planta.
+- [IFPB: campus João Pessoa / Primeiro de Maio, 720](https://estudante.ifpb.edu.br/cursos/polo/2/).

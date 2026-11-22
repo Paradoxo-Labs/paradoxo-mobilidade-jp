@@ -57,3 +57,15 @@ O mapa observado é vetorial, sem mapa detalhado de ruas. A referência históri
 - Auditoria antes/depois pelo mesmo método: 69,6% → 83,0% da extensão em ruas com referência na rede observada, ponderada por extensão. Aumento em 35 sentidos; quatro não melhoraram esse indicador. Isso não mede demanda nem prova viabilidade de operação.
 - Entradas e saídas internas dos futuros terminais, restrições de conversão e gabarito de ônibus continuam pendentes. As referências de Oitizeiro adotam a área junto ao viaduto indicada pelo usuário, sem tratar o ponto aproximado como plataforma aprovada.
 - Fontes, método, tabela por serviço e encaixes de referência estão em [revisao-atual/README.md](proposta-brs-bhls/revisao-atual/README.md).
+
+## Revisão de corredores e cobertura — 21/11/2026
+
+Esta revisão substitui os traçados e indicadores da etapa anterior na proposta ativa.
+
+- Preservados 23 serviços e 39 geometrias. M-961 restaurada integralmente a partir do estudo original; I-332 sem o percurso interno do Parque do Sol, assumido pela L-751.
+- Lagoa referenciada no Terminal de Passageiros; Cristo no terminal atual das 204/208; Oitizeiro no ponto do mercado enviado pelo usuário, distinguindo-o da conexão viária aproximada. A entrada no lote adjacente ainda depende da planta.
+- T-410 contínua pela Beira-Rio entre as referências do corredor; T-610/TRV-321 sem BR-230; BRS-800 com BR-230 após Cidade Universitária e sem ruas residenciais do Castelo Branco. R-241/242 com Colibris e José Américo; L-251 ampliada até IFPB/Jaguaribe, com referências das 203/204/208. A antiga 201 está ausente das bases locais.
+- Passaram **11 testes do planejador e 16 testes do coletor/API dentro do Docker**. Incluem geometria exata da M-961, terminais, preservação dos serviços, continuidade da Beira-Rio, exclusão de rodovia nas linhas indicadas, cobertura local e sentido dirigido. Os hashes dos dados e das regras conferem com a auditoria.
+- Chromium: 12 serviços alterados selecionados e cada sentido/circuito exibido individualmente; comparação do Parque do Sol identificada como transferência à L-751; marcadores dos terminais; navegação com a rede SEMOB de 85 linhas e coletor integral. Telas de 320, 390 e 1440 px sem overflow e sem exceções JavaScript. Requisições externas de tiles explicitamente bloqueadas; fallback cartográfico local confirmado.
+- `docker compose up -d --build --wait` concluiu com o serviço `atlas` saudável em `127.0.0.1:8000`. Capturas de conferência local: `/tmp/mobilidade-jp-beira-rio.png` e `/tmp/mobilidade-jp-parque-do-sol.png` (temporárias, fora do Git).
+- O estudo original permaneceu intocado. A revisão é conceitual; os testes não substituem validação de conversões, gabarito, plataformas e operação. Não houve publicação em hospedagem externa.

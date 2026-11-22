@@ -33,7 +33,7 @@ Não representa proposta oficial de órgão público.
 
 ## Estudo complementar de rede integrada
 
-A versão atualmente exibida no atlas é a [revisão por padrões da rede observada](revisao-atual/README.md): 23 serviços / 39 sentidos recalculados, integração na Estação Cidade Universitária, Varadouro no espaço atual do TIV com passagem pela Lagoa e Oitizeiro junto ao viaduto/BR-230. O pacote importado abaixo permanece como histórico.
+A versão atualmente exibida no atlas é a [revisão por padrões da rede observada](revisao-atual/README.md): 23 serviços / 39 sentidos recalculados, integração na Estação Cidade Universitária, Varadouro no espaço atual do TIV com passagem pela Lagoa e Oitizeiro no terreno adjacente ao novo mercado. O pacote importado abaixo permanece como histórico.
 
 Foi incorporada a revisão de **21/11/2026** do projeto paralelo, com **23 linhas propostas e 39 traçados de referência**.
 

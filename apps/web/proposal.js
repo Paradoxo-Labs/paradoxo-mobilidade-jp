@@ -47,7 +47,7 @@
     renderPoints(line); legend(); detail(line);
   }
   function renderPoints(line) {
-    const names = {hub: 'Mangabeira', metro: 'Varadouro / TIV', bessa: 'Bessa', oitizeiro: 'Oitizeiro / BR-230', cristo: 'Cristo', val: 'Valentina', universidade: 'Est. Cidade Universitária', lagoa: 'Lagoa'};
+    const names = {hub: 'Mangabeira', metro: 'Varadouro / TIV', bessa: 'Bessa', oitizeiro: 'Oitizeiro / novo mercado', cristo: 'Cristo', val: 'Valentina', universidade: 'Est. Cidade Universitária', lagoa: 'Terminal da Lagoa'};
     const markers = $('proposal-terminals').checked ? Object.entries(names).filter(([key]) => data.catalog.lugares[key]).map(([key, short]) => ({...data.catalog.lugares[key], terminal: true, short, label: data.catalog.lugares[key].label + ' · integração proposta'})) : [];
     if (line && $('proposal-points').checked) {
       const keys = new Set(line.sentidos.filter(s => direction === 'all' || s.sentido === direction).flatMap(s => s.waypoints));
@@ -81,7 +81,7 @@
         streets.append(list); item.append(streets);
       }
     }
-    paths.append(element('p', 'Extensões aproximadas. Priorização por ruas públicas e concentração de linhas observadas; isso não mede demanda ou frequência. Referências não equivalem a paradas. Conversões, gabarito e acessos de novos terminais ainda exigem validação.', 'muted'));
+    paths.append(element('p', 'Extensões aproximadas. Continuidade dos corredores em vias públicas, com referências da rede observada; isso não mede demanda ou frequência. Referências não equivalem a paradas. Conversões, gabarito e acessos de novos terminais ainda exigem validação.', 'muted'));
     grid.append(itinerary, paths); root.append(grid);
   }
   window.loadProposal = async () => {
