@@ -157,6 +157,10 @@ class HTTPTests(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
         cls.url = f"http://127.0.0.1:{cls.server.server_port}"
+        token=(Path(cls.temp.name)/'admin/setup-token').read_text()
+        cls.auth=cls.server.admin.setup(token,'test-admin','uma senha longa para testes')
+        cls.headers={'Content-Type':'application/json','Origin':cls.url,'Cookie':'px_admin='+cls.auth['token'],'X-CSRF-Token':cls.auth['csrf']}
+
 
     @classmethod
     def tearDownClass(cls):
@@ -209,8 +213,8 @@ class HTTPTests(unittest.TestCase):
         for headers, body, status in [
             ({"Content-Type": "application/json", "Origin": "https://example.com"}, b'{"codes":[]}', 403),
             ({"Content-Type": "text/plain"}, b'{"codes":[]}', 403),
-            ({"Content-Type": "application/json"}, b'{"codes":["../../etc"]}', 400),
-            ({"Content-Type": "application/json"}, b'[]', 400),
+            (self.headers, b'{"codes":["../../etc"]}', 400),
+            (self.headers, b'[]', 400),
         ]:
             with self.assertRaises(HTTPError) as context:
                 urlopen(Request(self.url + "/api/collect", data=body, headers=headers), timeout=5)
@@ -222,7 +226,7 @@ class HTTPTests(unittest.TestCase):
             self.server.job["running"] = True
         try:
             self.assertFalse(self.server.start_collection(["0002"]))
-            req = Request(self.url + "/api/collect", data=b'{"codes":["0002"]}', headers={"Content-Type": "application/json"})
+            req = Request(self.url + "/api/collect", data=b'{"codes":[]}', headers=self.headers)
             with self.assertRaises(HTTPError) as context:
                 urlopen(req, timeout=5)
             self.assertEqual(context.exception.code, 409)
@@ -242,7 +246,7 @@ class HTTPTests(unittest.TestCase):
                 ("localhost:18080", "http://localhost:8000", 403),
                 ("example.com:18080", "http://example.com:18080", 403),
             ]:
-                request = Request(self.url + "/api/collect", data=b'{"codes":["0002"]}', headers={"Content-Type": "application/json", "Host": host, "Origin": origin})
+                request = Request(self.url + "/api/collect", data=b'{"codes":[]}', headers={**self.headers, "Host": host, "Origin": origin})
                 with self.assertRaises(HTTPError) as context:
                     urlopen(request, timeout=5)
                 self.assertEqual(context.exception.code, expected)
@@ -250,6 +254,31 @@ class HTTPTests(unittest.TestCase):
             self.server.public_port = previous
             with self.server.job_lock:
                 self.server.job["running"] = False
+
+
+    def test_administrator_authentication_cookie_csrf_and_public_read_only(self):
+        with self.assertRaises(HTTPError) as e:self.get('/api/admin/overview')
+        self.assertEqual(e.exception.code,401)
+        req=Request(self.url+'/api/collect',data=b'{"codes":[]}',headers={'Origin':self.url,'Content-Type':'application/json'})
+        with self.assertRaises(HTTPError) as e:urlopen(req)
+        self.assertEqual(e.exception.code,401)
+        req=Request(self.url+'/api/admin/drafts',data=b'{}',headers={**self.headers,'X-CSRF-Token':'incorreto'})
+        with self.assertRaises(HTTPError) as e:urlopen(req)
+        self.assertEqual(e.exception.code,403)
+        request=Request(self.url+'/api/admin/login',data=json.dumps({'username':'test-admin','password':'uma senha longa para testes'}).encode(),headers={'Origin':self.url,'Content-Type':'application/json'})
+        with urlopen(request) as response:
+            cookie=response.headers['Set-Cookie'];session=json.load(response)
+            self.assertIn('HttpOnly',cookie);self.assertIn('SameSite=Strict',cookie)
+            self.assertEqual(response.headers['Cache-Control'],'no-store')
+        headers={'Origin':self.url,'Content-Type':'application/json','Cookie':cookie.split(';')[0],'X-CSRF-Token':session['csrf']}
+        with urlopen(Request(self.url+'/api/admin/overview',headers=headers)) as response:self.assertEqual(len(json.load(response)['lines']),24)
+        with urlopen(Request(self.url+'/api/admin/logout',data=b'{}',headers=headers)) as response:self.assertTrue(json.load(response)['ok'])
+        with self.assertRaises(HTTPError) as e:urlopen(Request(self.url+'/api/admin/overview',headers=headers))
+        self.assertEqual(e.exception.code,401)
+        self.assertIn(b'/admin',self.get('/'))
+        self.assertNotIn(b'id="collect-form"',self.get('/'))
+        for path in ['/admin','/admin.js','/admin.css']:
+            self.assertTrue(self.get(path))
 
 
 if __name__ == "__main__":

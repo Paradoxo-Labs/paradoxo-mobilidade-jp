@@ -94,3 +94,7 @@ A revisão ativa passou a priorizar continuidade dos corredores, com menor peso 
 ### Alimentadora oeste — I-131
 
 A proposta ativa passa a 24 serviços e 41 traçados, incluindo a I-131: Alto do Mateus ↔ Novais ↔ Jardim Planalto ↔ Cidade dos Funcionários ↔ Terminal Oitizeiro. Preserva trechos locais da 108/110 e conecta a área da 105. Ida de 10,38 km e volta de 11,15 km; complementação de Tiradentes, frota, frequência e acesso interno a Oitizeiro ainda não dimensionados. Os 39 traçados anteriores permanecem preservados.
+
+### Painel administrativo local — 22/11/2026
+
+O atlas passa a ter `/admin`, com login de administrador único e SQLite persistido em `data/admin/`. Reúne o coletor autenticado, criação/duplicação/importação de linhas, sentidos independentes, edição de trechos com arraste e roteamento local, preservação de segmentos, rascunhos automáticos, comparação, versões, publicação e restauração. O atlas consulta a publicação ativa do banco, inicialmente importada das 24 linhas/41 traçados versionados; rascunhos não alteram a rede de consulta. Não existe senha padrão: o primeiro cadastro exige o código local obtido por `docker compose exec atlas python3 apps/admin/manage.py setup-token`. [Operação, limites e backup](ADMINISTRACAO.md).

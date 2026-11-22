@@ -18,7 +18,7 @@
     <nav aria-label="Navegação principal">
       <a href="#atual" data-view="atual"><span aria-hidden="true">◎</span> Rede atual</a>
       <a href="#proposta" data-view="proposta"><span aria-hidden="true">⌘</span> Rede proposta</a>
-      <a href="#coletor" data-view="coletor" aria-label="Coletor SEMOB"><span aria-hidden="true">↓</span> Coletor</a>
+      <a href="/admin">Administrar</a>
     </nav>
     <span class="local-tag">LAB / JOÃO PESSOA</span>
   </aside>
@@ -49,7 +49,7 @@
     </section>
 
     <section id="view-proposta" aria-label="Rede proposta" hidden>
-      <div class="stats"><div><strong id="proposal-service-total">—</strong><span>linhas propostas</span></div><div><strong id="proposal-route-total">—</strong><span>traçados de referência</span></div><div><strong id="proposal-class-total">—</strong><span>classes de serviço</span></div><div class="stat-source"><span>REVISÃO DO ESTUDO</span><strong>21 de novembro de 2026</strong><small>Rede integrada · estudo complementar</small></div></div>
+      <div class="stats"><div><strong id="proposal-service-total">—</strong><span>linhas propostas</span></div><div><strong id="proposal-route-total">—</strong><span>traçados de referência</span></div><div><strong id="proposal-class-total">—</strong><span>classes de serviço</span></div><div class="stat-source"><span id="proposal-date-label">REVISÃO DO ESTUDO</span><strong id="proposal-date">21 de novembro de 2026</strong><small id="proposal-date-note">Rede integrada · estudo complementar</small></div></div>
       <div class="notice">Proposta em revisão: Estação Cidade Universitária, Terminal de Passageiros da Lagoa, Varadouro no TIV atual, Cristo no terminal existente e Oitizeiro ao lado do novo mercado. Parque do Sol atendido pela L-751; M-961 com traçado original. Estudo independente, sujeito a validação operacional e dos acessos de novos terminais.</div>
       <div class="workspace proposal-workspace">
         <aside class="line-panel"><label for="proposal-search">Encontrar um serviço</label><input id="proposal-search" type="search" placeholder="Código, destino ou trecho"><label for="proposal-class">Classe de serviço</label><select id="proposal-class"><option value="all">Todas as classes</option></select><div class="list-heading"><span id="proposal-count">Carregando serviços…</span><button id="proposal-all" class="text-button" type="button">Ver toda a rede</button></div><div id="proposal-lines" class="line-list" aria-label="Serviços propostos"></div></aside>
@@ -63,13 +63,6 @@
       <p class="muted archive-link">O estudo original foi preservado para consulta: <a href="/proposta-original" target="_blank" rel="noopener">abrir mapa de origem</a>.</p>
     </section>
 
-    <section id="view-coletor" aria-label="Coletor SEMOB" hidden>
-      <div class="collector-layout"><section class="card collector-form"><p class="eyebrow">FONTE OFICIAL / DADOS PÚBLICOS</p><h2>Trazer a rede para perto.</h2><p>Consulte o catálogo da SEMOB e salve itinerários, horários e geometrias para explorar aqui, mesmo sem internet depois da coleta.</p>
-        <form id="collect-form"><p class="collection-scope"><strong>Catálogo completo da SEMOB</strong><br>Todas as linhas publicadas, com os sentidos e variantes disponíveis. A coleta pode levar alguns minutos.</p><button id="collect-button" class="primary" type="submit">Coletar todas as rotas</button></form>
-        <div id="job-status" class="job-status" aria-live="polite">Consultando estado da coleta…</div><progress id="job-progress" max="1" value="0" hidden></progress><p id="job-error" class="error-text" role="alert" hidden></p>
-      </section><section class="card"><p class="eyebrow">SUA BASE LOCAL</p><h2>Dados com procedência.</h2><p id="collection-summary">Ainda não há dados coletados da SEMOB.</p><p>As linhas atualizadas substituem suas versões anteriores. As demais ficam preservadas. Datas de coleta e de atualização declarada pela fonte aparecem separadamente.</p><div id="downloads" class="downloads" hidden><a class="secondary" href="/api/download?format=json">Baixar JSON completo</a><a class="secondary" href="/api/download?format=geojson">Baixar GeoJSON</a><a class="secondary" href="/api/download?format=csv">Baixar catálogo CSV</a><button id="open-official" class="primary" type="button">Consultar no mapa</button></div></section></div>
-      <section class="card methodology"><p class="eyebrow">COMO FUNCIONA</p><h2>Uma coleta, três camadas de informação.</h2><div class="method-grid"><div><h3>Catálogo e itinerários</h3><p>Percorre a listagem paginada e lê as ruas por sentido e variante, preservando os códigos publicados.</p></div><div><h3>Geometrias do mapa</h3><p>Consome o GeoJSON utilizado pelo mapa da SEMOB. Não reconstrói trajetos pelos nomes das ruas.</p></div><div><h3>Quadros de horários</h3><p>Registra os dias e partidas publicados. Um dia ausente não é interpretado como ausência de serviço.</p></div></div><p class="source-links">Fonte: <a href="https://servicos.semobjp.pb.gov.br/linhas-de-onibus/" target="_blank" rel="noopener">Serviço de linhas de ônibus da SEMOB-JP</a>. Respostas originais e relatório de cada execução são mantidos localmente.</p></section>
-    </section>
     <footer class="page-footer"><span>PARADOXO LABS <span aria-hidden="true">/</span> MOBILIDADE JP</span><span>Conhecer o presente. Planejar as conexões.</span></footer>
   </main>
 </body>

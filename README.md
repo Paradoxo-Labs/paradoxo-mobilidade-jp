@@ -115,3 +115,9 @@ https://github.com/Paradoxo-Labs/paradoxo-mobilidade-jp
 
 GitLab técnico:
 https://gitlab.com/paradoxo-labs/products/paradoxo-mobilidade-jp
+
+## Painel administrativo local
+
+O [painel em `/admin`](http://127.0.0.1:8000/admin) reúne o coletor autenticado, criação e duplicação de linhas, importação da rede observada, edição independente de ida/volta, prévias por arrastar referências no mapa, preservação de trechos, desfazer/refazer, rascunhos, comparação, versões e publicação/restauração da rede local.
+
+No primeiro uso, execute `docker compose exec atlas python3 apps/admin/manage.py setup-token` e use o código no formulário para escolher seu usuário e senha. Não há senha padrão. Os dados administrativos ficam em `data/admin/`, fora do Git. [Primeiro acesso, operação, backup e limites](docs/ADMINISTRACAO.md).

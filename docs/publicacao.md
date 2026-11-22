@@ -15,3 +15,9 @@ docker compose ps
 ```
 
 A pasta `data/` é persistida no host e fica fora do Git. Os resultados curados da proposta são versionados em `docs/proposta-brs-bhls/revisao-atual`. Consultar também [a política de publicação](PUBLICATION_POLICY.md) e [a execução do Docker](../docker/README.md).
+
+## Painel administrativo local
+
+O serviço também atende `/admin`, com cadastro inicial por código de uso único, sessão autenticada e banco persistido em `data/admin/`. O atlas usa a publicação ativa desse banco; salvar rascunho ou versão não publica. Publicar/restaurar no painel atualiza apenas o atlas local, sem executar Git, push ou deploy externo. Código e semente continuam entregues por commits na `develop`.
+
+Primeiro acesso, recuperação de senha, backup e limites: [ADMINISTRACAO.md](ADMINISTRACAO.md).

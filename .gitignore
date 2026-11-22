@@ -13,3 +13,6 @@ data/processed/**
 !data/processed/.gitkeep
 exports/**
 !exports/.gitkeep
+
+# Estado administrativo local: contas, sessões e versões.
+data/admin/

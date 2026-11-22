@@ -41,3 +41,15 @@ Nesse caso, abra [http://127.0.0.1:8080](http://127.0.0.1:8080). O Compose mant�
 O servidor escuta em `0.0.0.0` dentro do container, mas a porta é publicada apenas em `127.0.0.1` no host. A imagem tem verificação de saúde via `/api/status`, filesystem de aplicação somente leitura e `/tmp` temporário. Somente a pasta de dados persiste gravações.
 
 O build baixa a imagem Python. A consulta dos mapas locais não requer serviços externos; as coletas dependem de acesso HTTPS à SEMOB a partir do container. Respostas locais, credenciais e ambientes de desenvolvimento são excluídos do contexto de build pelo `.dockerignore`.
+
+## Administração
+
+Acesse [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin). No primeiro uso, leia o código local:
+
+```sh
+docker compose exec atlas python3 apps/admin/manage.py setup-token
+```
+
+Cadastre seu usuário e senha no formulário. Não há conta nem senha padrão. O banco `data/admin/admin.sqlite3` e o código de primeiro acesso ficam no volume de dados, fora do Git. Reiniciar/recriar a imagem preserva contas, rascunhos, versões e publicações. O código deixa de funcionar após o cadastro.
+
+O coletor está restrito ao administrador. A consulta pública de redes permanece disponível. O editor calcula rotas com a malha OSM/coleta local; o primeiro carregamento é indicado na tela. Instruções completas, dados necessários e backup: [administração local](../docs/ADMINISTRACAO.md).

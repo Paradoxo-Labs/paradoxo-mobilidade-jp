@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Administração · Mobilidade JP</title>
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/admin.css" />
+    <script src="/vendor/leaflet/leaflet.js" defer></script>
+    <script src="/admin.js" defer></script>
+  </head>
+  <body>
+    <div id="auth" class="auth" hidden></div>
+    <div id="admin-app" class="shell" hidden>
+      <aside class="rail">
+        <a class="brand" href="/"
+          ><img src="/assets/paradoxo-logo.webp" alt="Paradoxo Labs" /><span
+            >MOBILIDADE JP<br />ADMINISTRAÇÃO</span
+          ></a
+        >
+        <nav aria-label="Administração">
+          <button data-nav="list">Rede proposta</button
+          ><button data-nav="observed">Rede atual / coletor</button
+          ><button data-nav="history">Publicações</button
+          ><a href="/" target="_blank" rel="noopener">Abrir atlas ↗</a>
+        </nav>
+        <div class="rail-foot">
+          <span
+            >DOCKER LOCAL<br id="rail-break" />
+            ADMINISTRADOR</span
+          ><button id="logout">Encerrar sessão</button>
+        </div>
+      </aside>
+      <main>
+        <div class="topbar">
+          <span>REDE PROPOSTA / CENÁRIO BASE</span
+          ><span id="save-state">Sessão autenticada</span>
+        </div>
+        <div id="message" role="status" hidden></div>
+        <div id="admin-body"></div>
+      </main>
+    </div>
+    <dialog id="confirm-dialog">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-text"></p>
+      <div class="actions">
+        <button data-confirm="cancel">Cancelar</button
+        ><button data-confirm="ok" class="primary">Continuar</button>
+      </div>
+    </dialog>
+  </body>
+</html>

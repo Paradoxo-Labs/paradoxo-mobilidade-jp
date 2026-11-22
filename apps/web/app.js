@@ -32,9 +32,9 @@ async function api(url, options) {
 const pages = {
   atual: ['A cidade em movimento.', 'Explore os trajetos, consulte as linhas e conheça as fontes.'],
   proposta: ['Uma rede. Novas conexões.', 'Explore o estudo de uma rede integrada para João Pessoa.'],
-  coletor: ['Dados para ir além.', 'Colete os dados públicos da SEMOB e construa sua base local.'],
 };
 function navigate() {
+  if (location.hash === '#coletor') { location.href='/admin#observed'; return; }
   const view = Object.prototype.hasOwnProperty.call(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'atual';
   for (const key of Object.keys(pages)) $(`view-${key}`).hidden = key !== view;
   document.querySelectorAll('[data-view]').forEach(link => {
@@ -113,7 +113,7 @@ function renderLines() {
     $('lines').append(button);
   }
   if (!lines.length) {
-    $('lines').append(element('p', state.network ? 'Nenhuma linha encontrada. Tente outro código, nome ou rua coletada.' : 'Inicie uma coleta na aba Coletor SEMOB ou escolha a referência histórica.', 'empty-state'));
+    $('lines').append(element('p', state.network ? 'Nenhuma linha encontrada. Tente outro código, nome ou rua coletada.' : 'Faça uma coleta no painel administrativo ou escolha a referência histórica.', 'empty-state'));
   }
 }
 function selectLine(code) {
@@ -186,48 +186,6 @@ function drawMap() {
   currentMap.markers(stops);
 }
 
-async function updateStatus() {
-  try {
-    const status = await api('/api/status');
-    const job = status.job;
-    $('job-status').textContent = job.message;
-    $('job-error').textContent = job.error || '';
-    $('job-error').hidden = !job.error;
-    $('collect-button').disabled = job.running;
-    $('collect-button').textContent = job.running ? 'Coleta completa em andamento…' : 'Coletar todas as rotas';
-    $('job-progress').hidden = !job.running;
-    if (job.total) { $('job-progress').max = job.total; $('job-progress').value = job.done; }
-    else $('job-progress').removeAttribute('value');
-    $('downloads').hidden = !status.semob_available;
-    $('collection-summary').textContent = status.semob_available ? `${status.semob_lines} linhas de um catálogo de ${status.catalog_count} · ${status.geometry_count} traçados · ${status.pending_count} pendências. Última coleta: ${date(status.retrieved_at)}.` : 'Ainda não há dados coletados da SEMOB. A referência histórica permanece disponível na página da rede atual.';
-    if (state.wasRunning && !job.running && !job.error && status.semob_available) {
-      $('source').value = 'semob';
-      await loadNetwork('semob');
-    }
-    state.wasRunning = job.running;
-    return job.running;
-  } catch (exc) {
-    $('job-status').textContent = 'Não foi possível consultar o servidor local.';
-    $('job-error').textContent = exc.message;
-    $('job-error').hidden = false;
-    return state.wasRunning;
-  }
-}
-let pollTimer;
-async function pollStatus() {
-  clearTimeout(pollTimer);
-  if (await updateStatus()) pollTimer = setTimeout(pollStatus, 1500);
-}
-$('collect-form').addEventListener('submit', async event => {
-  event.preventDefault(); error();
-  const codes = []; // O painel sempre coleta o catálogo completo, incluindo todos os sentidos disponíveis.
-  $('collect-button').disabled = true;
-  try {
-    await api('/api/collect', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({codes})});
-    state.wasRunning = true;
-    await pollStatus();
-  } catch (exc) { $('collect-button').disabled = false; $('job-error').textContent = exc.message; $('job-error').hidden = false; }
-});
 $('source').addEventListener('change', () => loadNetwork($('source').value));
 $('search').addEventListener('input', renderLines);
 $('show-all').addEventListener('click', () => { state.selected = null; state.direction = 'all'; $('search').value = ''; renderLines(); updateDirections(); renderDetail(); drawMap(); });
@@ -236,10 +194,9 @@ $('show-stops').addEventListener('change', drawMap);
 $('reset-map').addEventListener('click', drawMap);
 $('zoom-in').addEventListener('click', () => currentMap?.map.zoomIn());
 $('zoom-out').addEventListener('click', () => currentMap?.map.zoomOut());
-$('open-official').addEventListener('click', () => { $('source').value = 'semob'; loadNetwork('semob'); location.hash = 'atual'; });
 window.addEventListener('hashchange', navigate);
 navigate();
 (async () => {
-  try { state.resources = await mapResources; state.base = state.resources.base; const status = await api('/api/status'); const source = status.semob_available ? 'semob' : 'historical'; $('source').value = source; await loadNetwork(source); await pollStatus(); }
+  try { state.resources = await mapResources; state.base = state.resources.base; const status = await api('/api/status'); const source = status.semob_available ? 'semob' : 'historical'; $('source').value = source; await loadNetwork(source); }
   catch (exc) { error(`Não foi possível iniciar o atlas: ${exc.message}. Confira se o servidor local está em execução.`); }
 })();

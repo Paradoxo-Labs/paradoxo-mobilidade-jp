@@ -6,6 +6,13 @@ import json
 import mimetypes
 from pathlib import Path
 import threading
+import sqlite3
+import sys
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
+from apps.admin.store import Store, Problem, uid
+from apps.admin.routing import Router
+from apps.admin import http as admin_http
 from urllib.parse import parse_qs, urlsplit
 
 from collector import DATA, ROOT, collect, export_csv, export_geojson, load_snapshot
@@ -49,6 +56,8 @@ class AtlasServer(ThreadingHTTPServer):
         super().__init__(address, Handler)
         self.public_port = public_port if public_port is not None else self.server_port
         self.data_dir = Path(data_dir)
+        self.admin = Store(self.data_dir)
+        self.router = Router(self.data_dir)
         self.job_lock = threading.Lock()
         self.job = {"running": False, "message": "Nenhuma coleta iniciada nesta sessão", "done": 0, "total": 0, "error": None}
         self.history = historical_network()
@@ -57,11 +66,15 @@ class AtlasServer(ThreadingHTTPServer):
         with self.job_lock:
             if self.job["running"]:
                 return False
+            job_id = uid()
             self.job = {"running": True, "message": "Iniciando coleta", "done": 0, "total": 0, "error": None}
+
+        self.admin.job(job_id, "running", self.job)
 
         def update(message, done, total):
             with self.job_lock:
                 self.job.update(message=message, done=done, total=total)
+                self.admin.job(job_id, "running", self.job)
 
         def worker():
             try:
@@ -73,6 +86,7 @@ class AtlasServer(ThreadingHTTPServer):
             finally:
                 with self.job_lock:
                     self.job["running"] = False
+                    self.admin.job(job_id, "failed" if self.job["error"] else "complete", self.job)
 
         threading.Thread(target=worker, daemon=True).start()
         return True
@@ -85,7 +99,14 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Frame-Options", "DENY")
+        policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        if urlsplit(self.path).path == '/proposta-original':
+            policy = policy.replace("script-src 'self';", "script-src 'self' 'unsafe-inline';")
+        self.send_header('Content-Security-Policy', policy)
+        for key,value in getattr(self,"extra_headers",[]): self.send_header(key,value)
+        self.extra_headers=[]
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
         if filename:
@@ -99,12 +120,17 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             self.get_route()
-        except (OSError, ValueError, KeyError) as exc:
+        except Problem as exc:
+            self.json({"error":str(exc),**exc.details},exc.status)
+        except (OSError, ValueError, KeyError, sqlite3.Error) as exc:
             self.json({"error": f"Não foi possível ler os dados locais: {exc}"}, 500)
 
     def get_route(self):
         url = urlsplit(self.path)
         params = parse_qs(url.query)
+        if url.path.startswith('/api/admin/'):
+            self.check_host()
+            if admin_http.get(self,url.path): return
         if url.path == "/api/status":
             snapshot = load_snapshot(self.server.data_dir)
             with self.server.job_lock:
@@ -113,8 +139,7 @@ class Handler(BaseHTTPRequestHandler):
         elif url.path == "/api/base":
             self.json(read_json(STUDY / "dados/base-cartografica.json"))
         elif url.path == "/api/proposal":
-            audit = read_json(PROPOSAL / "auditoria.json")
-            self.json({"catalog": read_json(PROPOSAL / "catalogo.json"), "geojson": read_json(PROPOSAL / "linhas-por-sentido.geojson"), "waypoints": read_json(PROPOSAL / "waypoints-roteamento.json"), "comparisons": read_json(PROPOSAL / "comparativos-i332.json"), "review": {"revision": audit["revision"], "method": audit["method"], "station_reference": audit["station_reference"], "oitizeiro_reference": audit["oitizeiro_reference"], "limits": audit["limits"]}})
+            self.json(self.server.admin.public_proposal())
         elif url.path == "/api/map-sources":
             self.json(read_json(WEB / "map-sources.json"))
         elif url.path == "/proposta":
@@ -128,7 +153,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.json(self.server.history)
             elif source == "semob":
                 snapshot = load_snapshot(self.server.data_dir)
-                self.json(semob_network(snapshot) if snapshot else {"error": "Nenhuma coleta SEMOB disponível. Inicie uma coleta na aba Coletor."}, 200 if snapshot else 404)
+                self.json(semob_network(snapshot) if snapshot else {"error": "Nenhuma coleta SEMOB disponível. Entre no painel administrativo para iniciar uma coleta."}, 200 if snapshot else 404)
             else:
                 self.json({"error": "Fonte desconhecida"}, 400)
         elif url.path == "/api/download":
@@ -147,6 +172,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.json({"error": "Formato desconhecido"}, 400)
         else:
             files = {"/": WEB / "index.html", "/app.js": WEB / "app.js", "/maps.js": WEB / "maps.js", "/proposal.js": WEB / "proposal.js", "/styles.css": WEB / "styles.css", "/vendor/d3.js": STUDY / "mapa/d3.js", "/proposta-original": STUDY / "mapa.html"}
+            files.update({'/admin':WEB/'admin.html','/admin/':WEB/'admin.html','/admin.js':WEB/'admin.js','/admin.css':WEB/'admin.css'})
             for asset in (WEB / "assets").iterdir():
                 if asset.is_file():
                     files["/assets/" + asset.name] = asset
@@ -158,32 +184,33 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.json({"error": "Página não encontrada"}, 404)
 
+    def check_host(self):
+        host=self.headers.get('Host','')
+        allowed={f'127.0.0.1:{self.server.public_port}', f'localhost:{self.server.public_port}'}
+        if host not in allowed: raise Problem('Acesso permitido somente pelo endereço local publicado.',403)
+        return host
+
     def do_POST(self):
-        # Somente o painel servido pelo próprio processo pode iniciar uma coleta.
-        host = self.headers.get("Host", "")
-        allowed = {f"127.0.0.1:{self.server.public_port}", f"localhost:{self.server.public_port}"}
-        origin = self.headers.get("Origin")
-        if host not in allowed or (origin and origin != f"http://{host}") or self.headers.get_content_type() != "application/json":
-            self.json({"error": "Solicitação deve partir do painel local com conteúdo JSON"}, 403)
-            return
-        if self.path != "/api/collect":
-            self.json({"error": "Rota não encontrada"}, 404)
-            return
         try:
-            length = int(self.headers.get("Content-Length", "0"))
-            if not 0 < length <= 4096:
-                raise ValueError("Corpo da solicitação inválido")
-            body = json.loads(self.rfile.read(length))
-            codes = body.get("codes", [])
-            if not isinstance(codes, list) or len(codes) > 100 or any(not isinstance(c, str) or not CODE.fullmatch(c) for c in codes):
-                raise ValueError("Informe códigos válidos separados por vírgula")
-        except (ValueError, AttributeError) as exc:
-            self.json({"error": str(exc)}, 400)
-            return
-        if not self.server.start_collection(codes):
-            self.json({"error": "Uma coleta já está em andamento"}, 409)
-            return
-        self.json({"message": "Coleta iniciada"}, 202)
+            host=self.check_host()
+            if self.headers.get('Origin')!=f'http://{host}' or self.headers.get_content_type()!='application/json':
+                raise Problem('A solicitação deve partir do painel local com conteúdo JSON.',403)
+            path=urlsplit(self.path).path
+            if not (path.startswith('/api/admin/') or path=='/api/collect'):
+                raise Problem('Rota não encontrada.',404)
+            # Autenticação antes de ler corpos grandes de rascunhos/rotas.
+            if path not in {'/api/admin/setup','/api/admin/login'}: admin_http.require(self,write=True)
+            length=int(self.headers.get('Content-Length','0'))
+            if not 0<length<=4_000_000: raise Problem('Corpo da solicitação inválido (máximo 4 MB).',413)
+            body=json.loads(self.rfile.read(length))
+            if not isinstance(body,dict): raise Problem('Informe um objeto JSON.')
+            admin_http.post(self,path,body)
+        except Problem as exc:
+            self.json({'error':str(exc),**exc.details},exc.status)
+        except (ValueError,TypeError,KeyError,AttributeError):
+            self.json({'error':'Dados inválidos na solicitação.'},400)
+        except (OSError,sqlite3.Error):
+            self.json({'error':'Não foi possível persistir a operação local. Confira o serviço e o espaço em disco.'},500)
 
 
 def main():

@@ -41,7 +41,7 @@
     const line = data.catalog.linhas.find(line => line.code === selected);
     $('proposal-map-title').textContent = line ? `${line.code} / ${line.name}` : 'Conexões propostas';
     const directionSelect = $('proposal-direction'); directionSelect.replaceChildren(new Option('Todos os sentidos', 'all'));
-    for (const entry of line?.sentidos || []) directionSelect.add(new Option(['circuito', 'circular'].includes(entry.sentido) ? 'Circuito' : entry.sentido === 'ida' ? 'Ida' : 'Volta', entry.sentido));
+    for (const entry of line?.sentidos || []) directionSelect.add(new Option(entry.label || (['circuito', 'circular'].includes(entry.sentido) ? 'Circuito' : entry.sentido === 'ida' ? 'Ida' : entry.sentido === 'volta' ? 'Volta' : entry.sentido), entry.sentido));
     directionSelect.value = direction; directionSelect.disabled = !line;
     map.render(features(), {selected: Boolean(line), color: feature => classes[feature.properties.classe]?.color || '#c71020'});
     renderPoints(line); legend(); detail(line);
@@ -63,7 +63,7 @@
     if (!line) { root.append(element('p', 'Escolha um serviço para explorar o itinerário, os sentidos e as conexões propostas.', 'empty-state')); return; }
     const heading = element('div', undefined, 'detail-heading');
     const title = element('div'); title.append(element('p', classes[line.type].name + ' / SERVIÇO PROPOSTO', 'eyebrow'), element('h2', `${line.code} · ${line.name}`));
-    heading.append(title, element('span', 'REVISÃO / 21.11.2026', 'revision')); root.append(heading);
+    heading.append(title, element('span', data.catalog.publication ? 'PUBLICAÇÃO / ' + data.catalog.publication.number : 'REVISÃO / 21.11.2026', 'revision')); root.append(heading);
     const grid = element('div', undefined, 'detail-grid');
     const itinerary = element('section'); itinerary.append(element('h3', 'Itinerário proposto'), element('p', line.itinerary, 'route-itinerary'));
     if (line.note) itinerary.append(element('p', line.note, 'muted'));
@@ -90,6 +90,14 @@
     loading = (async () => {
       try {
         const [proposal, resources] = await Promise.all([api('/api/proposal'), mapResources]); data = proposal;
+        const comparisonSelect = $('proposal-comparison');
+        for (const option of [...comparisonSelect.options]) if (option.value && !data.comparisons[option.value]) option.remove();
+        comparisonSelect.closest('.comparison-strip').hidden = !Object.keys(data.comparisons).length;
+        if (data.catalog.publication) {
+          $('proposal-date-label').textContent = 'PUBLICAÇÃO LOCAL';
+          $('proposal-date').textContent = 'Versão ' + data.catalog.publication.number;
+          $('proposal-date-note').textContent = date(data.catalog.publication.created) + ' · estudo conceitual';
+        }
         $('proposal-service-total').textContent = data.catalog.linhas.length;
         $('proposal-route-total').textContent = data.geojson.features.length;
         $('proposal-class-total').textContent = new Set(data.catalog.linhas.map(line => line.type)).size;

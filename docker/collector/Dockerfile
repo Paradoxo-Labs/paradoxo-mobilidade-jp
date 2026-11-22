@@ -13,6 +13,7 @@ RUN groupadd --gid 1000 atlas \
 COPY apps/collector/ /app/apps/collector/
 COPY apps/web/ /app/apps/web/
 COPY apps/planner/ /app/apps/planner/
+COPY apps/admin/ /app/apps/admin/
 COPY docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21/ /app/docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21/
 COPY docs/proposta-brs-bhls/revisao-atual/ /app/docs/proposta-brs-bhls/revisao-atual/
 
