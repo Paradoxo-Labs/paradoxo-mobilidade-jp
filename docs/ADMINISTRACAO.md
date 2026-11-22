@@ -47,7 +47,7 @@ Esta versão aproveita Python e Leaflet existentes e usa SQLite transacional, ad
 
 O roteador carrega em memória a malha local de `data/raw/cartografia/osm-revisao-rotas.json` e a coleta `data/processed/semob/latest.json`. O primeiro carregamento pode levar alguns instantes; o painel informa seu estado. Os dados já disponíveis neste ambiente são reutilizados. Após substituir a malha OSM no disco, reinicie o serviço para carregá-la novamente. Para preparar outra instalação, obtenha as entradas descritas em [apps/planner/README.md](../apps/planner/README.md) e faça a coleta SEMOB pelo painel. Sem malha/coleta, é possível cadastrar e salvar rascunhos, mas o cálculo de ruas fica indisponível com mensagem explícita.
 
-O contexto viário detalhado do editor também é servido da malha local. Fundos online são opcionais; o fundo local preserva o mapa em falhas de internet. A imagem da aplicação continua somente leitura; o banco e as coletas persistem no volume `./data`.
+O contexto viário detalhado do editor também é servido da malha local. O OpenStreetMap é o fundo padrão no painel e no atlas. A base local continua selecionável e é ativada automaticamente se o fundo online falhar. A imagem da aplicação continua somente leitura; o banco e as coletas persistem no volume `./data`.
 
 O coletor percorre o catálogo completo. Execuções iniciadas pelo painel têm progresso e estado persistidos; se o processo reiniciar, um trabalho em andamento fica identificado como interrompido, sem fingir continuidade. Uma coleta não recalcula nem publica a proposta. O controle de ativação de snapshots observados e cancelamento/retomada fina de trabalhos ficam para uma evolução posterior; a rede observada usa o último snapshot processado pelo coletor existente.
 

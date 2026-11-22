@@ -738,9 +738,12 @@ function makeMap(container, features, baseId = null, fit = true) {
       attribution: src.attribution,
       referrerPolicy: 'strict-origin-when-cross-origin',
     }).addTo(map);
+    const currentTile = tile;
     tile.once('tileerror', () => {
+      if (tile !== currentTile || !S.maps.includes(map)) return;
       setBase('local');
-      if (baseId) document.getElementById(baseId).value = 'local';
+      if (baseId && document.getElementById(baseId))
+        document.getElementById(baseId).value = 'local';
     });
   };
   if (baseId) {
@@ -751,8 +754,10 @@ function makeMap(container, features, baseId = null, fit = true) {
         .filter((s) => s.id !== 'local')
         .map((s) => `<option value="${s.id}">${esc(s.label)}</option>`)
         .join('');
+    select.value = 'streets';
     select.onchange = () => setBase(select.value);
   }
+  setBase('streets');
   const layer = L.geoJSON(
     {
       type: 'FeatureCollection',
