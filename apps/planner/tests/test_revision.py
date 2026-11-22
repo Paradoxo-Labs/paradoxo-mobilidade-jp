@@ -17,9 +17,9 @@ class RevisionTests(unittest.TestCase):
 
     def test_all_services_and_directions_are_preserved(self):
         original = read(STUDY / 'dados/linhas-por-sentido.geojson')['features']
-        self.assertEqual(len(self.catalog['linhas']), 23)
-        self.assertEqual(len(self.features), 39)
-        self.assertEqual({f['id'] for f in self.features}, {f['id'] for f in original})
+        self.assertEqual(len(self.catalog['linhas']), 24)
+        self.assertEqual(len(self.features), 41)
+        self.assertEqual({f['id'] for f in self.features}, {f['id'] for f in original} | {'I-131', 'I-131-volta'})
         for line in self.catalog['linhas']:
             for entry in line['sentidos']:
                 self.assertTrue(all(key in self.waypoints for key in entry['waypoints']))
@@ -149,6 +149,40 @@ class RevisionTests(unittest.TestCase):
             self.assertNotIn('perimetral_leste', entry['waypoints'])
             self.assertNotIn('perimetral_leste_back', entry['waypoints'])
 
+
+
+    def test_west_feeder_preserves_108_and_connects_the_four_areas(self):
+        line = next(line for line in self.catalog['linhas'] if line['code'] == 'I-131')
+        self.assertEqual(line['type'], 'integracional')
+        self.assertEqual({e['sentido'] for e in line['sentidos']}, {'ida', 'volta'})
+        for entry in line['sentidos']:
+            keys = entry['waypoints']
+            sequence = ['alto_mateus', 'novais_108_' + entry['sentido'], 'planalto_terminal_' + entry['sentido'], 'cidade_funcionarios', 'oitizeiro']
+            order = sequence if entry['sentido'] == 'ida' else sequence[::-1]
+            self.assertEqual(sorted(order, key=keys.index), order)
+            self.assertTrue(any(key.startswith('novais') for key in keys))
+            self.assertTrue(any(key.startswith('planalto_terminal') for key in keys))
+            feature = next(f for f in self.features if f['id'] == entry['chave'])
+            report = next(r for r in self.audit['routes'] if r['key'] == entry['chave'])
+            self.assertIsNone(report['old_distance_km'])
+            section = report['observed_sections'][0]
+            locked = section['coordinates']
+            self.assertEqual(section['line'], '0108')
+            self.assertLessEqual(section['join_m'], 35)
+            self.assertGreater(sum(distance(a, b) for a, b in zip(locked, locked[1:])), 4000)
+            coords = feature['geometry']['coordinates']
+            self.assertEqual(coords[:len(locked)] if entry['sentido'] == 'ida' else coords[-len(locked):], locked)
+            self.assertTrue({'0105', '0108', '0110'} <= set(entry['reference_lines']))
+            self.assertGreater(entry['distancia_km'], 6)
+            self.assertLess(entry['distancia_km'], 12)
+            source_max = max(distance(a,b) for section in report['observed_sections'] for a,b in zip(section['coordinates'], section['coordinates'][1:]))
+            self.assertLessEqual(max(distance(a,b) for a,b in zip(coords, coords[1:])), max(100, source_max) + .01)
+            self.assertEqual(len(report['observed_sections']), 2)
+            plan = report['observed_sections'][1]
+            self.assertEqual(plan['line'], '0110')
+            self.assertTrue(any(coords[i:i+len(plan['coordinates'])] == plan['coordinates'] for i in range(len(coords))))
+        self.assertTrue(self.catalog['lugares']['alto_mateus']['terminal'])
+        self.assertIn('Tiradentes', line['note'])
 
 if __name__ == '__main__':
     unittest.main()

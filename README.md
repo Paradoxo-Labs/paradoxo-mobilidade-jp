@@ -60,7 +60,7 @@ bash scripts/run-dashboard.sh
 Abra [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 - **Rede atual:** referência histórica offline de 111 códigos de linha, 296 traçados/variantes e 3.047 paradas; seleção de linha/sentido e consulta dos dados disponíveis.
-- **Rede proposta:** mapa interativo do estudo complementar, com 23 linhas e 39 traçados.
+- **Rede proposta:** mapa interativo da proposta ativa, com 24 linhas e 41 traçados, incluindo a alimentadora I-131 entre Alto do Mateus, Novais, Jardim Planalto, Cidade dos Funcionários e Oitizeiro.
 - **Interface Paradoxo:** identidade do site institucional, mapas nativos Leaflet, filtros por serviço e sentido, ruas OpenStreetMap, topografia/satélite Esri e fallback cartográfico local. [Identidade e fontes](docs/INTERFACE_E_MAPAS.md).
 - **Coletor SEMOB:** coleta de linhas, ruas por sentido, horários e GeoJSON, progresso e downloads. A base SEMOB é consultada separadamente da referência histórica.
 

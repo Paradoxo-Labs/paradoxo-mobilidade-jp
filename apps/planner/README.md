@@ -1,6 +1,6 @@
 # Revisão da proposta por corredores e rede observada
 
-O gerador `revise.py` prepara os 39 sentidos dos 23 serviços da proposta. `policies.py` explicita as referências territoriais e restrições por serviço. A M-961 preserva exatamente as geometrias originais.
+O gerador `revise.py` prepara os 41 sentidos dos 24 serviços da proposta. `policies.py` explicita as referências territoriais e restrições por serviço. A M-961 preserva exatamente as geometrias originais.
 
 Na raiz:
 
@@ -24,6 +24,10 @@ O atlas serve os resultados versionados. O gerador roda no host; o container man
 - Cristo no terminal atual das 204/208. Oitizeiro no terreno adjacente ao novo mercado: marcador do mercado separado da conexão viária aproximada, com entrada no lote ainda dependente de planta.
 - I-332 liga Muçumagro ao terminal sem circular no Parque do Sol; L-751 assume esse atendimento. R-241/242 ampliam José Américo e entram no Colibris. L-251 alcança IFPB/Jaguaribe e amplia cobertura local com referências 204/208/203; a antiga 201 não está nas bases locais.
 
-A auditoria registra ligações entre referências, vias, referências rodoviárias, extensões e ajustes de encaixe. Os testes verificam restrições de corredor, cobertura, terminais, geometrias originais da M-961 e preservação dos 23 serviços/39 sentidos. O custo de concentração não pode escolher uma volta 20% maior em um caso controlado.
+A auditoria registra ligações entre referências, vias, referências rodoviárias, extensões e ajustes de encaixe. Os testes verificam restrições de corredor, cobertura, terminais, geometrias originais da M-961 e preservação dos 23 serviços/39 sentidos anteriores e inclusão da I-131 em dois sentidos. O custo de concentração não pode escolher uma volta 20% maior em um caso controlado.
 
 Geometrias são propostas de estudo. Relações de proibição de conversão OSM, raios de giro, gabarito, sinalização, paradas e circulação interna dos terminais exigem validação. Estatísticas de ruas observadas não medem demanda, frequência ou capacidade.
+
+## Alimentadora oeste — I-131
+
+`west.py` acrescenta Alto do Mateus ↔ Novais ↔ Jardim Planalto ↔ Cidade dos Funcionários ↔ Terminal Oitizeiro. Preserva literalmente os trechos locais da 108 e da 110 em cada sentido e conecta o setor da 105 por vias públicas. As referências de Cidade dos Funcionários são as da 105, não o polígono agregado de Funcionários da cartografia. A auditoria identifica os trechos, sentidos e índices das fontes, coordenadas preservadas e encaixes de até 35 m. O código I-131 é de estudo; atendimento complementar de Tiradentes, frequências, frota e entrada no terreno do terminal continuam para avaliação.

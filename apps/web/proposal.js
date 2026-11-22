@@ -47,7 +47,7 @@
     renderPoints(line); legend(); detail(line);
   }
   function renderPoints(line) {
-    const names = {hub: 'Mangabeira', metro: 'Varadouro / TIV', bessa: 'Bessa', oitizeiro: 'Oitizeiro / novo mercado', cristo: 'Cristo', val: 'Valentina', universidade: 'Est. Cidade Universitária', lagoa: 'Terminal da Lagoa'};
+    const names = {alto_mateus: 'Alto do Mateus', hub: 'Mangabeira', metro: 'Varadouro / TIV', bessa: 'Bessa', oitizeiro: 'Oitizeiro / novo mercado', cristo: 'Cristo', val: 'Valentina', universidade: 'Est. Cidade Universitária', lagoa: 'Terminal da Lagoa'};
     const markers = $('proposal-terminals').checked ? Object.entries(names).filter(([key]) => data.catalog.lugares[key]).map(([key, short]) => ({...data.catalog.lugares[key], terminal: true, short, label: data.catalog.lugares[key].label + ' · integração proposta'})) : [];
     if (line && $('proposal-points').checked) {
       const keys = new Set(line.sentidos.filter(s => direction === 'all' || s.sentido === direction).flatMap(s => s.waypoints));
@@ -90,6 +90,9 @@
     loading = (async () => {
       try {
         const [proposal, resources] = await Promise.all([api('/api/proposal'), mapResources]); data = proposal;
+        $('proposal-service-total').textContent = data.catalog.linhas.length;
+        $('proposal-route-total').textContent = data.geojson.features.length;
+        $('proposal-class-total').textContent = new Set(data.catalog.linhas.map(line => line.type)).size;
         for (const [value, group] of Object.entries(classes)) $('proposal-class').add(new Option(group.name, value));
         map = new TransitMap('proposal-map', resources, $('proposal-base'), select);
         render();

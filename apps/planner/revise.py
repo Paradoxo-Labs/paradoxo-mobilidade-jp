@@ -13,9 +13,10 @@ from pathlib import Path
 import unicodedata
 
 try:
-    from . import policies
+    from . import policies, west
 except ImportError:
     import policies
+    import west
 
 ROOT = Path(__file__).resolve().parents[2]
 STUDY = ROOT / 'docs/proposta-brs-bhls/estudos/rede-integrada-2026-11-21'
@@ -422,7 +423,13 @@ def main():
             line['points'] = [p for p in line['points'] if p != 'parque']
         if code == 'L-751':
             line['points'] = list(dict.fromkeys(line['points'] + ['parque']))
-    report = {'revision': 'rede-observada-2026-11-21', 'generated_at': datetime.now(timezone.utc).isoformat(), 'method': 'Grafo dirigido OSM; continuidade de corredores, preferência por vias estruturantes; concentração SEMOB limitada a 8% do custo e referências com alternativas de pista por sentido; bloqueio do interior do campus e da Via UFPB; trechos centrais copiados da linha 0301. Percentuais por correspondência de segmentos a até 22 m e mesma direção em ruas com linhas observadas; comparação antes/depois pelo mesmo método.', 'inputs': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [osm_path, semob_path, Path(__file__), Path(policies.__file__)]}, 'osm_source': osm.get('paradoxo_source'), 'central_reference': {'line': '0301', 'lake': lake, 'entry': central['ida'], 'exit': central['volta'], 'streets': central_streets}, 'station_reference': {'osm_way': 59821461, 'osm_stop': 2533629066, 'position': station, 'direction_references': station_refs}, 'oitizeiro_reference': {'position': policies.OITIZEIRO_MARKET, 'road_reference': overrides['oitizeiro'], 'market_to_road_m': round(distance(policies.OITIZEIRO_MARKET, overrides['oitizeiro']), 1), 'status': 'Referência do mercado enviada pelo usuário (-7.163894, -34.893325); lote adjacente e acesso operacional pendentes de planta.'}, 'campus_polygon': network.campus, 'public_perimeter': [[network.positions[n] for n in network.ways[wid]['nodes']] for wid in sorted(network.public_perimeter)], 'street_concentration': [{'street': name, 'line_count': len(codes), 'lines': sorted(codes)} for name, codes in sorted(network.street_lines.items(), key=lambda item: (-len(item[1]), item[0])) if not name.startswith(('TERMINAL', 'RETORNO'))][:40], 'snap_adjustments': snap_audit, 'routes': audit, 'limits': ['Restrições de conversão por relação OSM e gabarito de ônibus ainda exigem validação.', 'Concentração de linhas não representa demanda ou frequência.', 'Oitizeiro e demais novos terminais não têm circulação interna aprovada.']}
+    west_line, west_features, west_reports, west_offsets = west.build(network, observed, waypoints, catalog, distance)
+    west_index = next(i for i, line in enumerate(catalog['linhas']) if line['type'] == 'integracional')
+    catalog['linhas'].insert(west_index, west_line)
+    features.extend(west_features)
+    audit.extend(west_reports)
+    snap_audit.extend(west_offsets)
+    report = {'revision': 'rede-observada-2026-11-21', 'generated_at': datetime.now(timezone.utc).isoformat(), 'method': 'Grafo dirigido OSM; continuidade de corredores, preferência por vias estruturantes; concentração SEMOB limitada a 8% do custo e referências com alternativas de pista por sentido; bloqueio do interior do campus e da Via UFPB; trechos centrais copiados da linha 0301. Percentuais por correspondência de segmentos a até 22 m e mesma direção em ruas com linhas observadas; comparação antes/depois pelo mesmo método.', 'inputs': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [osm_path, semob_path, Path(__file__), Path(policies.__file__), Path(west.__file__)]}, 'osm_source': osm.get('paradoxo_source'), 'central_reference': {'line': '0301', 'lake': lake, 'entry': central['ida'], 'exit': central['volta'], 'streets': central_streets}, 'station_reference': {'osm_way': 59821461, 'osm_stop': 2533629066, 'position': station, 'direction_references': station_refs}, 'oitizeiro_reference': {'position': policies.OITIZEIRO_MARKET, 'road_reference': overrides['oitizeiro'], 'market_to_road_m': round(distance(policies.OITIZEIRO_MARKET, overrides['oitizeiro']), 1), 'status': 'Referência do mercado enviada pelo usuário (-7.163894, -34.893325); lote adjacente e acesso operacional pendentes de planta.'}, 'campus_polygon': network.campus, 'public_perimeter': [[network.positions[n] for n in network.ways[wid]['nodes']] for wid in sorted(network.public_perimeter)], 'street_concentration': [{'street': name, 'line_count': len(codes), 'lines': sorted(codes)} for name, codes in sorted(network.street_lines.items(), key=lambda item: (-len(item[1]), item[0])) if not name.startswith(('TERMINAL', 'RETORNO'))][:40], 'snap_adjustments': snap_audit, 'routes': audit, 'limits': ['Restrições de conversão por relação OSM e gabarito de ônibus ainda exigem validação.', 'Concentração de linhas não representa demanda ou frequência.', 'Oitizeiro e demais novos terminais não têm circulação interna aprovada.']}
     comparisons = read(STUDY / 'dados/comparativos-i332.json')
     revised = next(f['geometry']['coordinates'] for f in features if f['id'] == 'I-332')
     for name, start, end in [('paratibe', 'porfirio', 'mucu'), ('parque-do-sol', 'mucu', 'val')]:

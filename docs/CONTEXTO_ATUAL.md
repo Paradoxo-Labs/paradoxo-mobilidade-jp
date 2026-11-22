@@ -90,3 +90,7 @@ A proposta ativa passa a ser `docs/proposta-brs-bhls/revisao-atual`, com todos o
 ### Refinamento de corredores e cobertura
 
 A revisão ativa passou a priorizar continuidade dos corredores, com menor peso da concentração e alternativas de pista por sentido. T-410 mantém a Beira-Rio, T-610/TRV-321 evitam BR-230 e BRS-800 retorna à rodovia após Cidade Universitária. R-241/242 ampliam José Américo e entram no centro do Colibris; L-251 amplia a cobertura local e passa pelo IFPB. Parque do Sol fica com L-751, retirado da I-332; M-961 recupera os traçados originais. A referência de Oitizeiro foi refinada pelo ponto do novo mercado enviado pelo usuário; circulação interna do terreno segue pendente de planta. Lagoa e Cristo usam os terminais existentes. Ver [regras e resultados ativos](proposta-brs-bhls/revisao-atual/README.md).
+
+### Alimentadora oeste — I-131
+
+A proposta ativa passa a 24 serviços e 41 traçados, incluindo a I-131: Alto do Mateus ↔ Novais ↔ Jardim Planalto ↔ Cidade dos Funcionários ↔ Terminal Oitizeiro. Preserva trechos locais da 108/110 e conecta a área da 105. Ida de 10,38 km e volta de 11,15 km; complementação de Tiradentes, frota, frequência e acesso interno a Oitizeiro ainda não dimensionados. Os 39 traçados anteriores permanecem preservados.
