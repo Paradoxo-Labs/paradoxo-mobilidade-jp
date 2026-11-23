@@ -126,3 +126,17 @@ Ao soltar em uma rua, o servidor escolhe conexões antes e depois do trecho, res
 Em uma rua percorrida mais de uma vez pelo circuito, escolha a passagem indicada pela direção e segure a linha novamente. O cálculo usa a posição dessa passagem na sequência do percurso. Um arraste próximo da emenda fim/início pode envolver os dois lados do circuito, mantendo-o fechado, preservando seu ponto inicial e a ordem do restante do percurso. Não se tenta identificar a passagem apenas pela primeira coordenada coincidente.
 
 **Ferramentas avançadas** reúne a seleção A/B, referências permanentes, cortes e preservação de trechos. **Arrastar rota** retorna à interação direta. As vias para o encaixe vêm do grafo local já filtrado por acesso e regras da linha; o servidor revalida a aresta recebida e a distância da soltura, sem aceitar uma referência livre fora da rua. O encaixe usa projeção no segmento, inclusive em ruas longas sem uma interseção próxima.
+
+## Filtros de consulta das linhas
+
+O catálogo administrativo e a página pública da proposta oferecem **Classe**, **Corredor · eixo viário**, **Família da numeração**, **Terminal** e busca textual. Os critérios são combinados por interseção; limpar os filtros recupera a lista completa. No painel, o mesmo filtro alcança linhas publicadas, novos rascunhos e linhas fora da publicação ativa, mantendo suas ações de gerenciamento.
+
+Corredores seguem os eixos documentados no projeto: Centro/Roger/Jaguaribe, Cruz das Armas, Dois de Fevereiro/Rangel, Dom Pedro II, Beira-Rio, Epitácio/Ruy Carneiro, Mandacaru/Tancredo Neves, Via Oeste e BR-230/orbital. A associação é identificada pelas referências e vias registradas no itinerário; não é calculada pelo código da linha nem representa uma nova análise espacial do traçado. Sem evidência registrada, a linha aparece em **Sem corredor identificado**.
+
+Família é a faixa numérica do código: por exemplo, BRS-100 e I-131 pertencem à família 1xx. Terminal usa os vínculos cadastrados de origem/destino, estações do percurso e referências do itinerário, incluindo as referências legadas da Lagoa por sentido. Proximidade física sem vínculo não é usada para inferir atendimento a um terminal. Os filtros são de consulta e não modificam nem publicam a rede.
+
+Testes das regras compartilhadas, usando Node.js em desenvolvimento:
+
+```sh
+node --test apps/web/tests/line-filters.test.cjs
+```

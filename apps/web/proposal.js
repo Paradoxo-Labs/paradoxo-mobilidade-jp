@@ -9,16 +9,20 @@
   const filtered = () => data.catalog.linhas.filter(line => {
     const group = $('proposal-class').value;
     const query = normalized($('proposal-search').value);
-    return (group === 'all' || line.type === group) && normalized(`${line.code} ${line.name} ${line.itinerary}`).includes(query);
+    return (group === 'all' || line.type === group) && normalized(`${line.code} ${line.name} ${line.itinerary}`).includes(query) && ProposalFilters.matches(line,data.catalog.lugares,{corridor:$('proposal-corridor').value,family:$('proposal-family').value,terminal:$('proposal-terminal').value});
   });
-  const features = () => data.geojson.features.filter(f => selected ? f.properties.codigo === selected : filtered().some(line => line.code === f.properties.codigo)).filter(f => direction === 'all' || f.properties.sentido === direction);
+  const features = () => {
+    const codes = selected ? null : new Set(filtered().map(line => line.code));
+    return data.geojson.features.filter(f => selected ? f.properties.codigo === selected : codes.has(f.properties.codigo)).filter(f => direction === 'all' || f.properties.sentido === direction);
+  };
   function select(code) {
     selected = code; direction = 'all'; $('proposal-comparison').value = '';
     render();
   }
   function legend(comparison = false) {
     $('proposal-legend').replaceChildren();
-    const groups = comparison ? [{name: 'Revisão anterior · tracejada', color: '#6b6b6b'}, {name: 'Proposta atualizada', color: '#c71020'}] : Object.entries(classes).filter(([key]) => filtered().some(line => line.type === key)).map(([, value]) => value);
+    const matchingLines = filtered();
+    const groups = comparison ? [{name: 'Revisão anterior · tracejada', color: '#6b6b6b'}, {name: 'Proposta atualizada', color: '#c71020'}] : Object.entries(classes).filter(([key]) => matchingLines.some(line => line.type === key)).map(([, value]) => value);
     for (const group of groups) {
       const item = element('span'); const swatch = element('i', '', 'swatch'); swatch.style.background = group.color;
       item.append(swatch, document.createTextNode(group.name)); $('proposal-legend').append(item);
@@ -105,14 +109,15 @@
         $('proposal-route-total').textContent = data.geojson.features.length;
         $('proposal-class-total').textContent = new Set(data.catalog.linhas.map(line => line.type)).size;
         for (const [value, group] of Object.entries(classes)) $('proposal-class').add(new Option(group.name, value));
+        ProposalFilters.populate({corridor:$('proposal-corridor'),family:$('proposal-family'),terminal:$('proposal-terminal')},data.catalog.linhas,data.catalog.lugares);
         map = new TransitMap('proposal-map', resources, $('proposal-base'), select);
         render();
       } catch (exc) { error(`Não foi possível abrir a proposta: ${exc.message}`); loading = null; }
     })();
     return loading;
   };
-  for (const id of ['proposal-search', 'proposal-class']) $(id).addEventListener(id === 'proposal-search' ? 'input' : 'change', () => { selected = null; direction = 'all'; $('proposal-comparison').value = ''; render(); });
-  $('proposal-all').addEventListener('click', () => { $('proposal-search').value = ''; $('proposal-class').value = 'all'; select(null); });
+  for (const id of ['proposal-search', 'proposal-class', 'proposal-corridor', 'proposal-family', 'proposal-terminal']) $(id).addEventListener(id === 'proposal-search' ? 'input' : 'change', () => { selected = null; direction = 'all'; $('proposal-comparison').value = ''; render(); });
+  $('proposal-all').addEventListener('click', () => { $('proposal-search').value = ''; $('proposal-class').value = 'all'; for (const id of ['proposal-corridor','proposal-family','proposal-terminal']) $(id).value='all'; select(null); });
   $('proposal-direction').addEventListener('change', () => { direction = $('proposal-direction').value; render(); });
   for (const id of ['proposal-terminals', 'proposal-points']) $(id).addEventListener('change', () => { if (data) renderPoints(data.catalog.linhas.find(line => line.code === selected)); });
   $('proposal-fit').addEventListener('click', () => map?.fit());

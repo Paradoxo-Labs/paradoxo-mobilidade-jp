@@ -46,3 +46,9 @@ Pedido posterior: segurar e arrastar a própria rota, encaixando apenas em ruas,
 Validação do refinamento: 59 testes automatizados e gestos reais no Chromium passaram, incluindo as passagens opostas 0/419 da L-251 junto ao terminal. Fonte protegida é recusada antes do cálculo. Backup anterior à atualização: `data/admin/backups/admin-pre-arraste-2026-11-22.sqlite3`.
 
 Refinamento concluído: serviço principal atualizado e saudável; comparação de hashes confirmou preservação integral de conta, rascunhos, versões, publicações e infraestrutura. A publicação 2 continua com 24 linhas. Recarregar `/admin` para carregar o modo **Arrastar rota**.
+
+## Filtros por eixo, família e terminal
+
+Pedido: filtros por corredor e terminal; usuário confirmou que deseja tanto eixo viário quanto família numérica. Implementados campos independentes no catálogo administrativo e no atlas da proposta, combinados com classe e busca. Regras compartilhadas em `apps/web/line-filters.js`; oito testes de classificação passaram. Validação de navegador concluída na imagem Docker do container `mobilidade-filter-qa`, porta 8003, banco isolado com exemplos de rascunho/arquivamento. Nenhuma publicação de teste foi feita no banco principal.
+
+As combinações, estados vazios, limpeza de filtros, mapa e ações de gerenciamento passaram, incluindo publicadas, novos rascunhos e arquivadas. Telas 1024/390/320 px passaram após ajustar a navegação e os controles do mapa. Entrega concluída: Docker principal atualizado e saudável; commit desta etapa na develop. A conta, versões, publicações e infraestrutura ficaram idênticas ao inventário. Houve criação e edição de um rascunho pelo usuário após o inventário, registradas na auditoria e mantidas; não restaurar o estado anterior. O JSON da proposta publicada permaneceu idêntico.

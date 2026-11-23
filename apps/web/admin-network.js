@@ -224,35 +224,31 @@ function drawPlaceAccesses() {
 function renderList() {
   renderLegacyList();
   const o = S.overview;
-  $$('#line-table tr').forEach((row) => {
-    const lid = row.querySelector('[data-edit]').dataset.edit,
-      state = o.line_states[lid];
-    if (state?.archived)
-      row.cells[2].insertAdjacentHTML(
-        'afterbegin',
-        '<strong class="danger">Retirada pendente</strong>',
+  const drafts = o.drafts.filter(
+    (d) => !o.lines.some((l) => l.id === d.line_id),
+  );
+  for (const d of drafts) {
+    const button = $(`[data-open-draft="${d.id}"]`);
+    if (button)
+      button.insertAdjacentHTML(
+        'afterend',
+        lineStateButton(d.line_id, !!o.line_states[d.line_id]?.archived) +
+          `<button data-discard-line="${d.line_id}">Descartar rascunho</button>`,
       );
-    row
-      .querySelector('.actions')
-      .insertAdjacentHTML('beforeend', lineStateButton(lid, !!state?.archived));
-    const draft = o.drafts.find((d) => d.line_id === lid);
-    if (draft)
-      row
-        .querySelector('.actions')
-        .insertAdjacentHTML(
-          'beforeend',
-          `<button data-discard-line="${lid}">Descartar rascunho</button>`,
-        );
-  });
-  // A pesquisa redesenha a tabela: mantenha os controles de estado em cada resultado.
-  const search = $('#line-search'),
-    filter = $('#class-filter'),
-    oldSearch = search.oninput,
-    oldFilter = filter.onchange;
+  }
+  const inactive = o.inactive_lines.filter(
+    (l) => !drafts.some((d) => d.line_id === l.id),
+  );
+  if (inactive.length)
+    $('#admin-body').insertAdjacentHTML(
+      'beforeend',
+      `<section class="surface stack" data-filter-group><h3>Fora da publicação ativa</h3>${inactive.map((l) => `<div class="spread rule" data-filter-line="${l.id}"><div><strong>${esc(l.code)} · ${esc(l.name)}</strong><p class="muted">${o.line_states[l.id]?.archived ? 'Arquivada' : 'Disponível para republicação'} · histórico preservado</p></div><div class="actions">${lineStateButton(l.id, !!o.line_states[l.id]?.archived)}<button data-edit="${l.id}">Abrir versão em rascunho</button></div></div>`).join('')}</section>`,
+    );
   const decorate = () => {
     $$('#line-table tr').forEach((row) => {
-      if (row.querySelector('[data-manage-line]')) return;
-      const lid = row.querySelector('[data-edit]').dataset.edit,
+      const edit = row.querySelector('[data-edit]');
+      if (!edit || row.querySelector('[data-manage-line]')) return;
+      const lid = edit.dataset.edit,
         state = o.line_states[lid];
       if (state?.archived)
         row.cells[2].insertAdjacentHTML(
@@ -273,40 +269,25 @@ function renderList() {
             `<button data-discard-line="${lid}">Descartar rascunho</button>`,
           );
     });
-  };
-  search.oninput = () => {
-    oldSearch();
-    decorate();
-  };
-  filter.onchange = () => {
-    oldFilter();
-    decorate();
-  };
-  const drafts = o.drafts.filter(
-    (d) => !o.lines.some((l) => l.id === d.line_id),
-  );
-  for (const d of drafts) {
-    const b = $(`[data-open-draft="${d.id}"]`);
-    if (b)
-      b.insertAdjacentHTML(
-        'afterend',
-        lineStateButton(d.line_id, !!o.line_states[d.line_id]?.archived) +
-          `<button data-discard-line="${d.line_id}">Descartar rascunho</button>`,
-      );
-  }
-  const inactive = o.inactive_lines.filter(
-    (l) => !drafts.some((d) => d.line_id === l.id),
-  );
-  if (inactive.length)
-    $('#admin-body').insertAdjacentHTML(
-      'beforeend',
-      `<section class="surface stack"><h3>Fora da publicação ativa</h3>${inactive.map((l) => `<div class="spread rule"><div><strong>${esc(l.code)} · ${esc(l.name)}</strong><p class="muted">${o.line_states[l.id]?.archived ? 'Arquivada' : 'Disponível para republicação'} · histórico preservado</p></div><div class="actions">${lineStateButton(l.id, !!o.line_states[l.id]?.archived)}<button data-edit="${l.id}">Abrir versão em rascunho</button></div></div>`).join('')}</section>`,
+    $$('[data-filter-line]').forEach((card) => {
+      const l = S.listRecords.get(card.dataset.filterLine);
+      card.hidden = !l || !S.listLineMatches(l);
+    });
+    $$('[data-filter-group]').forEach(
+      (group) =>
+        (group.hidden = Array.from(
+          group.querySelectorAll('[data-filter-line]'),
+        ).every((card) => card.hidden)),
     );
+  };
+  $('#line-table').addEventListener('lines-rendered', decorate);
+  decorate();
   $('#admin-body .heading .actions').insertAdjacentHTML(
     'afterbegin',
     '<button data-nav="batch">Preparar publicação conjunta</button>',
   );
 }
+
 function lineStateButton(lid, archived) {
   return `<button data-manage-line="${lid}" data-line-action="${archived ? 'restore' : 'archive'}">${archived ? 'Reativar' : 'Arquivar / retirar'}</button>`;
 }

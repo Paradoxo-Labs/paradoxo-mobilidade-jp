@@ -398,33 +398,83 @@ function renderLegacyList() {
       `Publicação ${S.overview.release.number} · ${published.length} serviços · ${S.overview.drafts.length} rascunhos`,
       `<button data-action="new" class="primary">+ Criar linha</button>`,
     ) +
-    `<div class="row"><label style="flex:1">Encontrar linha<input id="line-search" type="search" placeholder="Código, nome, bairro ou terminal"></label><label>Classe<select id="class-filter"><option value="all">Todas</option>${classOptions('')}</select></label></div><div class="surface table-wrap"><table><thead><tr><th>Linha</th><th>Percurso</th><th>Estado</th><th>Ações</th></tr></thead><tbody id="line-table"></tbody></table></div>${newDrafts.length ? '<section class="surface stack"><h3>Linhas novas em rascunho</h3>' + newDrafts.map((d) => `<div class="spread"><div><span class="mono">${esc(d.payload.line.code || 'Sem código')}</span> · ${esc(d.payload.line.name || 'Sem nome')}<p class="muted">${stamp(d.updated)} · não publicada</p></div><button data-open-draft="${d.id}">Retomar rascunho</button></div>`).join('') + '</section>' : ''}<p class="note">O atlas usa somente a publicação ativa. Edições e novas linhas ficam separadas em rascunhos.</p>`;
+    `<div class="line-filter-grid"><label>Encontrar linha<input id="line-search" type="search" placeholder="Código, nome, bairro ou terminal"></label><label>Classe<select id="class-filter"><option value="all">Todas</option>${classOptions('')}</select></label><label>Corredor · eixo viário<select id="corridor-filter"></select></label><label>Família da numeração<select id="family-filter"></select></label><label>Terminal<select id="terminal-filter"></select></label><button id="clear-line-filters">Limpar filtros</button></div><p id="line-filter-count" role="status"></p><p id="line-filter-empty" class="note" hidden>Nenhuma linha encontrada para estes filtros.</p><div id="published-lines-block" class="surface table-wrap"><table><thead><tr><th>Linha</th><th>Percurso</th><th>Estado</th><th>Ações</th></tr></thead><tbody id="line-table"></tbody></table></div>${newDrafts.length ? '<section class="surface stack" data-filter-group><h3>Linhas novas em rascunho</h3>' + newDrafts.map((d) => `<div class="spread" data-filter-line="${d.line_id}"><div><span class="mono">${esc(d.payload.line.code || 'Sem código')}</span> · ${esc(d.payload.line.name || 'Sem nome')}<p class="muted">${stamp(d.updated)} · não publicada</p></div><button data-open-draft="${d.id}">Retomar rascunho</button></div>`).join('') + '</section>' : ''}<p class="note">O atlas usa somente a publicação ativa. Edições e novas linhas ficam separadas em rascunhos.</p>`;
+  const inactive = S.overview.inactive_lines.filter(
+    (l) => !newDrafts.some((d) => d.line_id === l.id),
+  );
+  const records = [
+    ...published.map((l) => [l.id, l]),
+    ...newDrafts.map((d) => [d.line_id, d.payload.line]),
+    ...inactive.map((l) => [l.id, l]),
+  ];
+  S.listRecords = new Map(records);
+  ProposalFilters.populate(
+    {
+      corridor: $('#corridor-filter'),
+      family: $('#family-filter'),
+      terminal: $('#terminal-filter'),
+    },
+    records.map(([, l]) => l),
+    S.overview.places,
+  );
+  const matches = (l) => {
+    const q = $('#line-search')
+        .value.normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase(),
+      type = $('#class-filter').value;
+    return (
+      (type === 'all' || l.type === type) &&
+      `${l.code} ${l.name} ${l.itinerary}`
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .includes(q) &&
+      ProposalFilters.matches(l, S.overview.places, {
+        corridor: $('#corridor-filter').value,
+        family: $('#family-filter').value,
+        terminal: $('#terminal-filter').value,
+      })
+    );
+  };
+  S.listLineMatches = matches;
   const draw = () => {
-    const query = $('#line-search')
-      .value.normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase();
-    const type = $('#class-filter').value;
-    $('#line-table').innerHTML = published
-      .filter(
-        (l) =>
-          (type === 'all' || l.type === type) &&
-          `${l.code} ${l.name} ${l.itinerary}`
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .includes(query),
-      )
+    const lines = published.filter(matches);
+    $('#line-table').innerHTML = lines
       .map(
         (l) =>
           `<tr><td class="code">${esc(l.code)}</td><td><span class="line-title">${esc(l.name)}</span><small>${esc(l.itinerary)}</small></td><td>${l.draft ? 'Rascunho disponível' : 'Publicada'}<small>V${l.version}</small></td><td><div class="actions"><button data-edit="${l.id}">${l.draft ? 'Retomar' : 'Editar'}</button><button data-duplicate="${l.id}">Duplicar</button></div></td></tr>`,
       )
       .join('');
+    $('#published-lines-block').hidden = !lines.length;
+    const count = records.filter(([, l]) => matches(l)).length;
+    $('#line-filter-count').textContent =
+      `${count} ${count === 1 ? 'linha encontrada' : 'linhas encontradas'}`;
+    $('#line-filter-empty').hidden = count > 0;
+    $('#line-table').dispatchEvent(new Event('lines-rendered'));
   };
   $('#line-search').oninput = draw;
-  $('#class-filter').onchange = draw;
+  for (const id of [
+    'class-filter',
+    'corridor-filter',
+    'family-filter',
+    'terminal-filter',
+  ])
+    $('#' + id).onchange = draw;
+  $('#clear-line-filters').onclick = () => {
+    $('#line-search').value = '';
+    for (const id of [
+      'class-filter',
+      'corridor-filter',
+      'family-filter',
+      'terminal-filter',
+    ])
+      $('#' + id).value = 'all';
+    draw();
+  };
   draw();
 }
+
 function renderCreate(source = null) {
   const line = source || {
     code: '',
