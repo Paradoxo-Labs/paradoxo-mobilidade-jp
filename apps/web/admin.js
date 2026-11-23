@@ -398,7 +398,7 @@ function renderLegacyList() {
       `Publicação ${S.overview.release.number} · ${published.length} serviços · ${S.overview.drafts.length} rascunhos`,
       `<button data-action="new" class="primary">+ Criar linha</button>`,
     ) +
-    `<div class="line-filter-grid"><label>Encontrar linha<input id="line-search" type="search" placeholder="Código, nome, bairro ou terminal"></label><label>Classe<select id="class-filter"><option value="all">Todas</option>${classOptions('')}</select></label><label>Corredor · eixo viário<select id="corridor-filter"></select></label><label>Família da numeração<select id="family-filter"></select></label><label>Terminal<select id="terminal-filter"></select></label><button id="clear-line-filters">Limpar filtros</button></div><p id="line-filter-count" role="status"></p><p id="line-filter-empty" class="note" hidden>Nenhuma linha encontrada para estes filtros.</p><div id="published-lines-block" class="surface table-wrap"><table><thead><tr><th>Linha</th><th>Percurso</th><th>Estado</th><th>Ações</th></tr></thead><tbody id="line-table"></tbody></table></div>${newDrafts.length ? '<section class="surface stack" data-filter-group><h3>Linhas novas em rascunho</h3>' + newDrafts.map((d) => `<div class="spread" data-filter-line="${d.line_id}"><div><span class="mono">${esc(d.payload.line.code || 'Sem código')}</span> · ${esc(d.payload.line.name || 'Sem nome')}<p class="muted">${stamp(d.updated)} · não publicada</p></div><button data-open-draft="${d.id}">Retomar rascunho</button></div>`).join('') + '</section>' : ''}<p class="note">O atlas usa somente a publicação ativa. Edições e novas linhas ficam separadas em rascunhos.</p>`;
+    `<div class="line-filter-grid"><label>Encontrar linha<input id="line-search" type="search" placeholder="Código, nome, bairro ou terminal"></label><label>Classe<select id="class-filter"><option value="all">Todas</option>${classOptions('')}</select></label><label>Corredor · eixo viário<select id="corridor-filter"></select></label><label>Família da numeração<select id="family-filter"></select></label><label>Terminal<select id="terminal-filter"></select></label><button id="clear-line-filters">Limpar filtros</button></div><p id="line-filter-count" role="status"></p><p id="line-filter-empty" class="note" hidden>Nenhuma linha encontrada para estes filtros.</p><section class="surface catalog-preview"><div class="spread"><div><span class="eyebrow">PRÉVIA DA LISTAGEM</span><h2>Linhas no mapa</h2></div><div class="actions"><button id="list-map-fit">Enquadrar linhas</button><select id="list-map-base" aria-label="Mapa base da prévia"></select></div></div><p class="muted">Traço contínuo: publicação ativa · pontilhado: rascunho · tracejado: fora da publicação. Clique em uma linha para abrir o editor.</p><div id="list-map" aria-label="Mapa das linhas da listagem"></div><p id="list-map-status" class="muted" role="status"></p></section><div id="published-lines-block" class="surface table-wrap"><table><thead><tr><th>Linha</th><th>Percurso</th><th>Estado</th><th>Ações</th></tr></thead><tbody id="line-table"></tbody></table></div>${newDrafts.length ? '<section class="surface stack" data-filter-group><h3>Linhas novas em rascunho</h3>' + newDrafts.map((d) => `<div class="spread" data-filter-line="${d.line_id}"><div><span class="mono">${esc(d.payload.line.code || 'Sem código')}</span> · ${esc(d.payload.line.name || 'Sem nome')}<p class="muted">${stamp(d.updated)} · não publicada</p></div><button data-open-draft="${d.id}">Retomar rascunho</button></div>`).join('') + '</section>' : ''}<p class="note">O atlas usa somente a publicação ativa. Edições e novas linhas ficam separadas em rascunhos.</p>`;
   const inactive = S.overview.inactive_lines.filter(
     (l) => !newDrafts.some((d) => d.line_id === l.id),
   );
@@ -417,6 +417,7 @@ function renderLegacyList() {
     records.map(([, l]) => l),
     S.overview.places,
   );
+  const updateMap = createListMap();
   const matches = (l) => {
     const q = $('#line-search')
         .value.normalize('NFD')
@@ -451,6 +452,7 @@ function renderLegacyList() {
     $('#line-filter-count').textContent =
       `${count} ${count === 1 ? 'linha encontrada' : 'linhas encontradas'}`;
     $('#line-filter-empty').hidden = count > 0;
+    updateMap(records.filter(([, l]) => matches(l)));
     $('#line-table').dispatchEvent(new Event('lines-rendered'));
   };
   $('#line-search').oninput = draw;
@@ -473,6 +475,54 @@ function renderLegacyList() {
     draw();
   };
   draw();
+}
+
+function createListMap() {
+  const map = makeMap('list-map', [], 'list-map-base', false);
+  const routes = L.featureGroup().addTo(map);
+  const drafts = new Map(S.overview.drafts.map((d) => [d.line_id, d]));
+  const published = new Set(S.overview.lines.map((l) => l.id));
+  const colors = {brs:'#c71020',troncal:'#294e80',transversal:'#915c9c',integracional:'#08756c',regional:'#b47316',local:'#785c42',metropolitana:'#5150ae'};
+  const fit = () => {
+    if (routes.getBounds().isValid()) map.fitBounds(routes.getBounds(), {padding:[30,30],maxZoom:16,animate:false});
+    else map.setView([-7.145,-34.87],12,{animate:false});
+  };
+  $('#list-map-fit').onclick = fit;
+  const observer = new ResizeObserver(() => map.invalidateSize({animate:false}));
+  observer.observe($('#list-map'));
+  map.on('unload', () => observer.disconnect());
+  return (visible) => {
+    routes.clearLayers();
+    let mapped = 0;
+    for (const [lid,line] of visible) {
+      const draft = drafts.get(lid);
+      const features = (draft ? draft.payload.features : line.preview_features || []).filter((f) => f.geometry?.coordinates?.length >= 2);
+      if (!features.length) continue;
+      mapped++;
+      const state = draft ? 'Rascunho' : published.has(lid) ? 'Publicada' : 'Fora da publicação';
+      L.geoJSON({type:'FeatureCollection',features}, {
+        style:{color:colors[line.type] || '#08756c',weight:3,opacity:.9,dashArray:draft?'3 6':published.has(lid)?null:'10 6'},
+        onEachFeature:(f,layer) => {
+          const label = `${line.code} · ${line.name} · ${f.properties.label || f.properties.sentido} · ${state}`;
+          layer.bindTooltip(textNode(label),{sticky:true});
+          const open = () => {
+            const button = draft ? $(`[data-open-draft="${draft.id}"]`) || $(`[data-edit="${lid}"]`) : $(`[data-edit="${lid}"]`);
+            button?.click();
+          };
+          layer.on('click',open);
+          layer.on('add',() => {
+            const path=layer.getElement();
+            if (!path) return;
+            path.dataset.lineId=lid;path.setAttribute('tabindex','0');path.setAttribute('role','button');path.setAttribute('aria-label',label);
+            path.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+          });
+        },
+      }).addTo(routes);
+    }
+    const missing = visible.length-mapped;
+    $('#list-map-status').textContent = visible.length ? `${mapped} de ${visible.length} linhas com traçado no mapa.${missing ? ` ${missing} sem percurso desenhado.` : ''}` : 'Nenhuma linha para os filtros selecionados.';
+    fit();
+  };
 }
 
 function renderCreate(source = null) {

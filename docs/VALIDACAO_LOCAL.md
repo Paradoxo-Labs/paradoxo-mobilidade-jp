@@ -130,3 +130,10 @@ Esta revisão substitui os traçados e indicadores da etapa anterior na proposta
 - Corrigido o cálculo dos dois lados do arraste para evitar nós do restante preservado e da outra conexão, tentar a ordem alternativa e recusar novas revisitas. O parâmetro `avoid_nodes` é opcional: testes conferem a alternativa ao evitar um nó e que uma chamada posterior sem restrição mantém o comportamento original.
 - 32 testes administrativos e 12 do roteador passaram, incluindo alternativa sem repetir pontos, rejeição de retorno adicional sem mutação, manutenção dos retornos existentes e exclusão das duplicatas de junção/fechamento da contagem.
 - Verificação adicional no Chromium: a página de demonstração alterna as imagens reais; uma chamada real de arraste na malha devolveu alternativa sem revisitas adicionais e sem alterar o rascunho.
+
+## Prévia da listagem administrativa — 22/11/2026
+
+- Chromium com cópia do catálogo e respostas administrativas simuladas, sem login ou escrita no banco principal: mapa e listagem iguais após busca, corredor, família, terminal, resultado vazio e limpeza. Conferido rascunho pontilhado e ausência de erros JavaScript.
+- Layouts 1024, 390 e 320 px sem rolagem horizontal. OpenStreetMap permanece padrão, com fundo local quando a fonte online falha.
+- 32 testes administrativos passaram. A alteração acrescenta geometrias à resposta autenticada do catálogo, sem modificar a publicação pública.
+- Docker principal atualizado e saudável; hashes de conta, rascunhos, versões, publicações, infraestrutura e JSON público permaneceram iguais após a atualização.

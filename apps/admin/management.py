@@ -104,7 +104,7 @@ class Management:
         for row in db.execute('SELECT * FROM versions ORDER BY number DESC').fetchall():
             lid = row['line_id']
             if lid not in active and not any(v['id'] == lid for v in inactive):
-                inactive.append({'id': lid, 'version_id': row['id'], 'version': row['number'], **json.loads(row['payload'])['line']})
+                inactive.append({'id': lid, 'version_id': row['id'], 'version': row['number'], **json.loads(row['payload'])['line'], 'preview_features': json.loads(row['payload'])['features']})
         return {'places': workspace['places'], 'places_revision': workspace['revision'], 'places_dirty': workspace['dirty'],
                 'published_places': self.places_in(db), 'line_states': states, 'inactive_lines': inactive}
 

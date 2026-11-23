@@ -940,3 +940,9 @@ dialog::backdrop {
 .line-filter-grid > * {
   min-width: 0;
 }
+
+.catalog-preview { margin: 18px 0; padding: 20px; }
+.catalog-preview h2 { margin: 6px 0; }
+.catalog-preview .actions { flex-wrap: wrap; }
+#list-map { height: 430px; width: 100%; background: #eeeee7; }
+@media (max-width: 760px) { #list-map { height: 330px; } .catalog-preview { padding: 12px; } }

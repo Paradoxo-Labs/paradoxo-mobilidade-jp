@@ -314,7 +314,7 @@ class Store(Management):
             lines=[]
             for lid,v in self.versions_in(db):
                 p=json.loads(v['payload'])
-                lines.append({'id':lid,'version_id':v['id'],'version':v['number'],**p['line'],'draft':drafts.get(lid)})
+                lines.append({'id':lid,'version_id':v['id'],'version':v['number'],**p['line'],'preview_features':p['features'],'draft':drafts.get(lid)})
             return {'lines':lines,'drafts':[self.draft_row(r) for r in db.execute('SELECT * FROM drafts ORDER BY updated DESC')],'release':{'id':release['id'],'number':release['number'],'created':release['created'],'note':release['note']},'places':places,'releases':[dict(r) for r in db.execute('SELECT id,number,created,note FROM releases ORDER BY number DESC LIMIT 30')],'jobs':[dict(r) for r in db.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 10')],**self.management_overview(db)}
 
     def draft_row(self, row):

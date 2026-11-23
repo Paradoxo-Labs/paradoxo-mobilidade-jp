@@ -148,3 +148,7 @@ Se o arraste antigo tiver acumulado várias entradas e saídas na mesma área, r
 O arraste direto agora planeja os dois lados da conexão evitando cruzar o restante preservado da linha ou acrescentar visitas a pontos já percorridos. Quando a primeira combinação não funciona, tenta planejar pelo outro lado. Se não encontrar ligação sem novas revisitas, recusa a prévia e orienta escolher a outra pista ou reconectar um intervalo maior. Retornos já presentes e o fechamento natural de circuitos não são tratados como repetição nova.
 
 Na demonstração isolada da BRS-800/ida, o intervalo 526–845 da revisão copiada caiu de 9,812 km para 1,068 km pela Rodovia Governador Antônio Mariz. O restante da ida e toda a volta ficaram idênticos. Esses índices pertencem àquela cópia; a edição principal não foi aplicada nem publicada automaticamente.
+
+### Prévia do catálogo administrativo
+
+Em **Rede proposta**, o mapa acima da listagem acompanha a busca e todos os filtros. Cada linha usa seu rascunho mais recente, quando houver; caso contrário, usa a versão publicada ou a última versão salva para linhas fora da publicação. Traço contínuo indica publicação, pontilhado indica rascunho e tracejado indica histórico fora da publicação. Linhas sem geometria continuam na listagem e são contabilizadas abaixo do mapa. Clique no traçado para abrir o editor; **Enquadrar linhas** recupera a visão do resultado. A prévia não salva nem publica alterações.
