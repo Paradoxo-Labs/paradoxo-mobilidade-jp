@@ -140,3 +140,11 @@ Testes das regras compartilhadas, usando Node.js em desenvolvimento:
 ```sh
 node --test apps/web/tests/line-filters.test.cjs
 ```
+
+### Recuperar um emaranhado de retornos
+
+Se o arraste antigo tiver acumulado várias entradas e saídas na mesma área, reconecte o intervalo inteiro: **Ferramentas avançadas → início A antes da primeira entrada → fim B depois da última saída → Reconectar A → B pelas ruas**. Confira a prévia antes de aplicar. Escolher apenas uma das pequenas voltas pode deixar as outras fora do intervalo e mantê-las no percurso. Os campos de índice ajudam a escolher a ocorrência certa em passagens sobrepostas.
+
+O arraste direto agora planeja os dois lados da conexão evitando cruzar o restante preservado da linha ou acrescentar visitas a pontos já percorridos. Quando a primeira combinação não funciona, tenta planejar pelo outro lado. Se não encontrar ligação sem novas revisitas, recusa a prévia e orienta escolher a outra pista ou reconectar um intervalo maior. Retornos já presentes e o fechamento natural de circuitos não são tratados como repetição nova.
+
+Na demonstração isolada da BRS-800/ida, o intervalo 526–845 da revisão copiada caiu de 9,812 km para 1,068 km pela Rodovia Governador Antônio Mariz. O restante da ida e toda a volta ficaram idênticos. Esses índices pertencem àquela cópia; a edição principal não foi aplicada nem publicada automaticamente.

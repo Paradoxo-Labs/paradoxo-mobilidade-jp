@@ -98,6 +98,8 @@ class RevisionTests(unittest.TestCase):
         self.assertEqual(graph.route(0, 1), [0, 1])
         graph.edges[0, 2]['length'] = graph.edges[2, 1]['length'] = 50
         self.assertEqual(graph.route(0, 1), [0, 2, 1])
+        self.assertEqual(graph.route(0, 1, avoid_nodes={2}), [0, 1])
+        self.assertEqual(graph.route(0, 1), [0, 2, 1])  # a restrição não altera o grafo
         self.assertEqual(graph.route(0, 1, goals={2}), [0, 2])
         with self.assertRaisesRegex(ValueError, 'caminho dirigido'):
             graph.route(1, 0)

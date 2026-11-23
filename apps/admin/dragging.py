@@ -1,5 +1,6 @@
 """Arraste direto: escolha uma ocorrência do percurso e uma aresta viária real."""
 from bisect import bisect_left, bisect_right
+from collections import Counter
 import math
 from apps.planner import policies
 from apps.planner.revise import distance
@@ -70,6 +71,33 @@ def anchors(points, index, fraction, reach):
     return a,b,closed and a>b
 
 
+def revisit_counts(points):
+    """Revisitas, sem duplicatas de junção nem o fechamento natural do circuito."""
+    path=[]
+    for point in points:
+        key=tuple(round(v,7) for v in point)
+        if not path or path[-1]!=key:path.append(key)
+    if len(path)>1 and path[0]==path[-1]:path.pop()
+    return Counter(path)
+
+
+def route_chain(n, checkpoints, code, forbidden, repeated):
+    path=[checkpoints[0]]
+    for i,end in enumerate(checkpoints[1:],1):
+        blocked=forbidden | (set(path[:-1])-repeated) | (set(checkpoints[i+1:])-repeated)
+        path.extend(n.route(path[-1],end,code,avoid_nodes=blocked)[1:])
+    return path
+
+
+def replace_segment(points, a, b, wrapped, segment):
+    replacement=segment+points[b+1:a+1] if wrapped else points[:a]+segment+points[b+1:]
+    if wrapped:
+        core=replacement[:-1]
+        pivot=core.index(points[0])
+        replacement=core[pivot:]+core[:pivot]+[points[0]]
+    return replacement
+
+
 def preview_drag(router, draft, body):
     if body.get('revision')!=draft['revision']:raise Problem('O rascunho mudou. Atualize antes de arrastar.',409)
     if not router.network:raise Problem('Aguarde o carregamento da malha de ruas.',503)
@@ -103,42 +131,65 @@ def preview_drag(router, draft, body):
         except ValueError as exc:raise Problem('Não foi possível conectar o trecho à malha. O percurso foi mantido.') from exc
         if max(distance(points[a],n.positions[start]),distance(points[b],n.positions[end]))>80:raise Problem('As conexões do trecho estão distantes das ruas. O percurso foi mantido.')
         candidates=[]
+        blocked_revisits=False
+        old_visits=revisit_counts(points)
+        if not hasattr(n,'drag_position_index'):
+            index_by_position={}
+            for node in n.graph:
+                key=tuple(round(v,7) for v in n.positions[node])
+                index_by_position.setdefault(key,set()).add(node)
+            n.drag_position_index=index_by_position
+        repeated=set()
+        for point,count in old_visits.items():
+            if count>1:repeated.update(n.drag_position_index.get(point,()))
+        outside=points[b+1:a] if wrapped else points[:a]+points[b+1:]
+        forbidden=set()
+        for point in outside:
+            key=tuple(round(v,7) for v in point)
+            if old_visits[key]<=1:forbidden.update(n.drag_position_index.get(key,()))
+        forbidden.difference_update({start,end})
+        # Planeje os dois lados em conjunto; atalhos independentes podem voltar sobre o outro lado.
         for u,v in [edge,edge[::-1]]:
             if (u,v) not in n.edges or not allowed(n,(u,v),code):continue
-            try:
-                origin=n.snap(points[0]) if wrapped else None
-                if wrapped and index<a:
-                    before=n.route(start,origin,code)+n.route(origin,u,code)[1:]
-                    after=n.route(v,end,code)
-                elif wrapped:
-                    before=n.route(start,u,code)
-                    after=n.route(v,origin,code)+n.route(origin,end,code)[1:]
-                else:
-                    before=n.route(start,u,code);after=n.route(v,end,code)
-            except ValueError:continue
-            nodes=before+[v]+after[1:]
-            before_positions=[n.positions[node] for node in before]
-            after_positions=[n.positions[node] for node in after]
-            if wrapped:
-                positions=before_positions if index<a else after_positions
-                nodes_with_origin=before if index<a else after
-                positions[nodes_with_origin.index(origin)]=points[0]
-            geometry=[points[a]]+before_positions+[target]+after_positions+[points[b]]
-            cost=length_km(geometry)
-            candidates.append((cost,geometry,nodes))
-        if not candidates:raise Problem('Não há ligação dirigida por essa rua. O percurso anterior foi mantido.')
+            origin=n.snap(points[0]) if wrapped else None
+            before_checkpoints=[start,origin,u] if wrapped and index<a else [start,u]
+            after_checkpoints=[v,origin,end] if wrapped and index>=a else [v,end]
+            for after_first in [False,True]:
+                try:
+                    if after_first:
+                        after=route_chain(n,after_checkpoints,code,forbidden | (set(before_checkpoints)-repeated),repeated)
+                        before=route_chain(n,before_checkpoints,code,forbidden | (set(after)-repeated),repeated)
+                    else:
+                        before=route_chain(n,before_checkpoints,code,forbidden | (set(after_checkpoints)-repeated),repeated)
+                        after=route_chain(n,after_checkpoints,code,forbidden | (set(before)-repeated),repeated)
+                except ValueError:
+                    blocked_revisits=True
+                    continue
+                nodes=before+[v]+after[1:]
+                before_positions=[n.positions[node] for node in before]
+                after_positions=[n.positions[node] for node in after]
+                if wrapped:
+                    positions=before_positions if index<a else after_positions
+                    nodes_with_origin=before if index<a else after
+                    positions[nodes_with_origin.index(origin)]=points[0]
+                geometry=[points[a]]+before_positions+[target]+after_positions+[points[b]]
+                replacement=replace_segment(points,a,b,wrapped,geometry)
+                if any(count>max(1,old_visits[key]) for key,count in revisit_counts(replacement).items()):
+                    blocked_revisits=True
+                    continue
+                cost=length_km(geometry)
+                candidates.append((cost,geometry,nodes))
+                break
+        if not candidates:
+            if blocked_revisits:raise Problem('Não foi possível conectar essa rua sem novas voltas ou retornos. Experimente a outra pista ou use as ferramentas avançadas para reconectar um intervalo maior, antes e depois do emaranhado.',422)
+            raise Problem('Não há ligação dirigida por essa rua. O percurso anterior foi mantido.')
         _,segment,nodes=min(candidates,key=lambda item:item[0])
         compact=[]
         for point in segment:
             if not compact or compact[-1]!=point:compact.append(point)
         segment=compact
         previous=points[a:-1]+points[:b+1] if wrapped else points[a:b+1]
-        replacement=segment+points[b+1:a+1] if wrapped else points[:a]+segment+points[b+1:]
-        if wrapped:
-            # O terminal/início do circuito continua fixo; muda apenas a vizinhança do arraste.
-            core=replacement[:-1]
-            pivot=core.index(points[0])
-            replacement=core[pivot:]+core[:pivot]+[points[0]]
+        replacement=replace_segment(points,a,b,wrapped,segment)
         if len(replacement)>30000:raise Problem('O percurso excederia o limite de coordenadas.')
         for lock in f['properties'].get('locked_sections',[]):
             if not contains_section(replacement,lock['coordinates']):raise Problem('Este arraste alteraria um trecho preservado. Desbloqueie-o nas ferramentas avançadas.',409)

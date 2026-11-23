@@ -3,7 +3,7 @@ from collections import defaultdict
 from types import SimpleNamespace
 import threading
 import unittest
-from apps.admin.dragging import preview_drag, streets_for_drag
+from apps.admin.dragging import preview_drag, streets_for_drag, revisit_counts
 from apps.admin.store import Problem, contains_section
 from apps.planner.revise import Network, distance
 
@@ -60,14 +60,36 @@ class DragTests(unittest.TestCase):
         with self.assertRaises(Problem):preview_drag(self.router,self.draft,self.body)
 
     def test_long_road_segment_is_used_at_projection_not_nearest_junction(self):
-        u,v=17,22
+        u,v=18,21
         self.n.graph[u].append(v);self.n.edges[u,v]={'name':'Rua longa','length':distance(self.n.positions[u],self.n.positions[v]),'observed':set(),'street_count':0,'ref':'','highway':'residential'}
         self.n.graph[v].append(u);self.n.edges[v,u]=self.n.edges[u,v]
         p=[(self.n.positions[u][0]+self.n.positions[v][0])/2,self.n.positions[u][1]]
-        r=preview_drag(self.router,self.draft,{**self.body,'edge':[u,v],'drop_position':p})
+        r=preview_drag(self.router,self.draft,{**self.body,'segment_index':2,'edge':[u,v],'drop_position':p})
         self.assertIn(p,r['geometry']['coordinates'])
         self.assertEqual(r['drag_target'],p)
         self.assertNotIn(p,[self.n.positions[u],self.n.positions[v]])
+        old=revisit_counts(self.points)
+        self.assertTrue(all(count<=max(1,old[key]) for key,count in revisit_counts(r['geometry']['coordinates']).items()))
+
+    def test_forced_road_that_requires_an_extra_loop_is_rejected_without_mutation(self):
+        u,v=17,22
+        edge={'name':'Rua que exige retorno','length':distance(self.n.positions[u],self.n.positions[v]),'observed':set(),'street_count':0,'ref':'','highway':'residential'}
+        self.n.graph[u].append(v);self.n.edges[u,v]=edge
+        self.n.graph[v].append(u);self.n.edges[v,u]=edge
+        target=[(self.n.positions[u][0]+self.n.positions[v][0])/2,self.n.positions[u][1]]
+        before=copy.deepcopy(self.draft)
+        with self.assertRaises(Problem) as error:
+            preview_drag(self.router,self.draft,{**self.body,'edge':[u,v],'drop_position':target})
+        self.assertEqual(error.exception.status,422)
+        self.assertIn('novas voltas',str(error.exception))
+        self.assertEqual(self.draft,before)
+
+    def test_revisit_accounting_preserves_existing_returns_and_ignores_seam_and_join_duplicates(self):
+        a,b,c,d=[self.n.positions[i] for i in [9,10,11,12]]
+        visits=revisit_counts([a,a,b,c,b,d,a,a])
+        self.assertEqual(visits[tuple(round(v,7) for v in a)],1)
+        self.assertEqual(visits[tuple(round(v,7) for v in b)],2)
+        self.assertEqual(visits[tuple(round(v,7) for v in c)],1)
 
     def test_one_way_selected_edge_is_traversed_in_legal_direction(self):
         self.n.graph[20].remove(19);del self.n.edges[20,19]

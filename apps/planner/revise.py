@@ -257,8 +257,9 @@ class Network:
         result = {n for a, b in edges if segment_distance(point, self.positions[a], self.positions[b]) <= nearest + 18 for n in (a, b) if distance(point, self.positions[n]) <= 70}
         return result or {self.snap(point)}
 
-    def route(self, start, end, code=None, goals=None):
+    def route(self, start, end, code=None, goals=None, avoid_nodes=None):
         goals = goals or {end}
+        avoid_nodes = avoid_nodes or set()
         if start in goals:
             return [start]
         costs, previous, queue = {start: 0}, {}, [(0, start)]
@@ -272,6 +273,8 @@ class Network:
                     result.append(previous[result[-1]])
                 return result[::-1]
             for b in self.graph[a]:
+                if b in avoid_nodes and b not in goals:
+                    continue
                 edge = self.edges[a, b]
                 support = max(len(edge['observed']), min(edge['street_count'], 12))
                 midpoint = [(self.positions[a][i] + self.positions[b][i])/2 for i in (0, 1)]

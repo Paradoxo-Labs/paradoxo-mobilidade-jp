@@ -121,3 +121,12 @@ Esta revisão substitui os traçados e indicadores da etapa anterior na proposta
 - Proposta e administração conferidas em 1024, 390 e 320 px sem rolagem horizontal ou exceções JavaScript. Navegação e opções do mapa se acomodam em linhas adicionais nas telas menores.
 - Docker principal atualizado e saudável. Conta, versões, publicações e infraestrutura iguais ao inventário; o JSON público também permaneceu idêntico. A auditoria registrou criação/edição de rascunho pelo usuário após o inventário, preservadas durante a entrega. Nenhuma versão anterior foi restaurada para desfazer essas alterações.
 - Conferência anônima da instância principal passou: combinação Cruz das Armas + família 1xx + Oitizeiro mostra BRS-100, limpeza recupera a lista completa e o módulo compartilhado carrega no painel. Container e segredo temporário de QA removidos.
+
+## Recuperação do emaranhado na BRS-800 — 22/11/2026
+
+- Caso identificado na ida da BRS-800: cópia da revisão 15 do rascunho, com 1.055 coordenadas. Na área da captura enviada pelo usuário, o cadastro inicial tinha 1,56 km e nenhum vértice repetido; a edição tinha 8,92 km e 132 repetições. Essa medida da área é diferente da extensão do intervalo completo escolhido para reparo.
+- Em cópia isolada no Docker, selecionado o intervalo 526–845 e acionada a reconexão direta: 9,812 km → 1,068 km pela Rodovia Governador Antônio Mariz. Chromium confirmou prefixo/sufixo da ida e geometria completa da volta idênticos, ausência de mutação antes de aplicar e publicação de QA intacta. Nenhuma edição de rota foi aplicada no banco principal.
+- Capturas reais antes/seleção/prévia/depois disponíveis na demonstração local da porta 8004, servida por container separado e sem banco administrativo montado. O painel principal permanece na porta 8000.
+- Corrigido o cálculo dos dois lados do arraste para evitar nós do restante preservado e da outra conexão, tentar a ordem alternativa e recusar novas revisitas. O parâmetro `avoid_nodes` é opcional: testes conferem a alternativa ao evitar um nó e que uma chamada posterior sem restrição mantém o comportamento original.
+- 32 testes administrativos e 12 do roteador passaram, incluindo alternativa sem repetir pontos, rejeição de retorno adicional sem mutação, manutenção dos retornos existentes e exclusão das duplicatas de junção/fechamento da contagem.
+- Verificação adicional no Chromium: a página de demonstração alterna as imagens reais; uma chamada real de arraste na malha devolveu alternativa sem revisitas adicionais e sem alterar o rascunho.
